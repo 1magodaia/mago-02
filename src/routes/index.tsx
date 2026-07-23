@@ -56,6 +56,7 @@ function Home() {
   const [center, setCenter] = useState(DEFAULT_CENTER);
   const [locating, setLocating] = useState(false);
   const [geoDenied, setGeoDenied] = useState(false);
+  const [usingGps, setUsingGps] = useState(false);
   const [manualCity, setManualCity] = useState("São Paulo");
   const [category, setCategory] = useState("");
   const [radiusKm, setRadiusKm] = useState(5);
@@ -72,21 +73,17 @@ function Home() {
       (pos) => {
         setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setGeoDenied(false);
+        setUsingGps(true);
         setLocating(false);
       },
       () => {
         setGeoDenied(true);
+        setUsingGps(false);
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 8000 },
     );
   };
-
-  // Auto-request on mount (browser prompts once)
-  useEffect(() => {
-    requestLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const leads: AnalyzedLead[] = useMemo(() => {
     let list = MOCK_LEADS.map(analyzeLead);
@@ -101,7 +98,6 @@ function Home() {
       list = list.filter((l) => (l.instagram_last_post_days ?? 0) > 90);
     if (filter === "no_whats") list = list.filter((l) => !l.has_whatsapp);
 
-    // distance filter
     list = list.filter((l) => {
       if (l.latitude == null || l.longitude == null) return false;
       const d = haversineKm(center, { lat: l.latitude, lng: l.longitude });
@@ -118,22 +114,18 @@ function Home() {
       {/* NAV */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 ring-1 ring-primary/40 neon-violet">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/50 neon-primary">
             <Wand2 className="h-4 w-4 text-primary" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-extrabold tracking-tight">Busca</span>
+            <span className="text-lg font-extrabold tracking-tight text-foreground">Busca</span>
             <span className="text-lg font-extrabold tracking-tight text-primary">Mágica</span>
-            <span className="ml-1 text-[10px] font-semibold text-muted-foreground">v2.0</span>
+            <span className="ml-1 text-[10px] font-semibold text-muted-foreground">v2.1</span>
           </div>
         </div>
-        <button
-          onClick={requestLocation}
-          disabled={locating}
-          className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-60"
-        >
-          <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
-          {locating ? "Localizando..." : "Minha localização"}
+        <button className="flex items-center gap-1.5 rounded-full border border-warn/50 bg-warn/10 px-3 py-1.5 text-xs font-bold text-warn transition-all hover:bg-warn/20">
+          <Coins className="h-3.5 w-3.5" />
+          250 créditos
         </button>
       </nav>
 
