@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   Search,
   Sparkles,
@@ -9,6 +9,7 @@ import {
   Crosshair,
   MapPin,
   AlertCircle,
+  Coins,
 } from "lucide-react";
 import { analyzeLead, type AnalyzedLead } from "@/lib/analyze-lead";
 import { MOCK_LEADS } from "@/lib/mock-leads";
