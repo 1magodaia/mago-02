@@ -13,6 +13,12 @@ const searchSchema = z.object({
   regionText: z.string().max(200).optional(),
 });
 
+export interface PlaceReview {
+  publish_time: string; // ISO
+  rating: number | null;
+  author: string | null;
+}
+
 export interface PlaceResult {
   place_id: string;
   name: string;
@@ -26,6 +32,15 @@ export interface PlaceResult {
   business_status: string | null;
   types: string[];
   google_maps_uri: string | null;
+  latest_review_at: string | null; // ISO — data da avaliação mais recente
+  reviews: PlaceReview[];
+  collected_at: string; // ISO — quando este registro foi coletado do Google
+}
+
+interface GReview {
+  publishTime?: string;
+  rating?: number;
+  authorAttribution?: { displayName?: string };
 }
 
 interface GPlace {
@@ -41,7 +56,9 @@ interface GPlace {
   businessStatus?: string;
   types?: string[];
   googleMapsUri?: string;
+  reviews?: GReview[];
 }
+
 
 async function callGateway(path: string, body: object, fieldMask: string): Promise<Response> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
