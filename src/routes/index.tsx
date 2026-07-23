@@ -246,36 +246,11 @@ function Home() {
         </div>
       </header>
 
-      {/* MAP + LIST */}
+      {/* MAP + LIST — Desktop: lista à esquerda, mapa à direita. Mobile: mapa em cima, lista embaixo. */}
       <main className="mx-auto max-w-7xl px-6 pb-12">
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <div className="glass-panel h-[560px] overflow-hidden rounded-2xl p-1">
-            <ClientOnly
-              fallback={
-                <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">
-                  Carregando mapa...
-                </div>
-              }
-            >
-              <Suspense
-                fallback={
-                  <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">
-                    Carregando mapa...
-                  </div>
-                }
-              >
-                <MapView
-                  center={center}
-                  radiusKm={radiusKm}
-                  leads={leads}
-                  selectedName={selected}
-                  onSelect={setSelected}
-                />
-              </Suspense>
-            </ClientOnly>
-          </div>
-
-          <div className="h-[560px] space-y-3 overflow-y-auto pr-1">
+        <div className="grid gap-4 lg:grid-cols-[1fr_1.4fr]">
+          {/* LIST — order 2 no mobile, 1 no desktop */}
+          <div className="order-2 h-[560px] space-y-3 overflow-y-auto pr-1 lg:order-1">
             {leads.length === 0 ? (
               <div className="glass-panel grid h-full place-items-center rounded-2xl p-8 text-center">
                 <p className="text-sm text-muted-foreground">
@@ -300,12 +275,40 @@ function Home() {
               })
             )}
           </div>
+
+          {/* MAP */}
+          <div className="order-1 h-[380px] overflow-hidden rounded-2xl border border-border bg-black lg:order-2 lg:h-[560px]">
+            <ClientOnly
+              fallback={
+                <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">
+                  Carregando mapa...
+                </div>
+              }
+            >
+              <Suspense
+                fallback={
+                  <div className="grid h-full w-full place-items-center text-sm text-muted-foreground">
+                    Carregando mapa...
+                  </div>
+                }
+              >
+                <MapView
+                  center={center}
+                  radiusKm={radiusKm}
+                  leads={leads}
+                  selectedName={selected}
+                  onSelect={setSelected}
+                />
+              </Suspense>
+            </ClientOnly>
+          </div>
         </div>
       </main>
 
       <footer className="mx-auto max-w-7xl px-6 pb-24 text-center text-xs text-muted-foreground">
-        Busca Mágica · Protocolo CACA v2.0.0 · Geolocalização + auditoria via webhook
+        Busca Mágica · Protocolo CACA v2.1.0 · Busca híbrida + auditoria via webhook
       </footer>
+
 
       <VersionLog />
     </div>
