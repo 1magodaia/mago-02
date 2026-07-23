@@ -162,21 +162,66 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
                 <Flame className="h-2.5 w-2.5" /> Sem site
               </span>
             )}
+            {igStatus === "found" && (
+              <a
+                href={lead.audit!.instagram!}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
+                title="Instagram encontrado no site"
+              >
+                <Instagram className="h-2.5 w-2.5" /> Instagram
+              </a>
+            )}
+            {igStatus === "unverifiable" && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
+                title="Sem site conhecido — não conseguimos confirmar Instagram por fonte pública."
+              >
+                <Instagram className="h-2.5 w-2.5" /> não verificável
+              </span>
+            )}
             {lead.rating != null && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                 <Star className="h-3 w-3 text-warn" fill="currentColor" />
-                {lead.rating.toFixed(1)} ({lead.user_ratings_total ?? 0})
+                <span className="font-semibold text-foreground">{lead.rating.toFixed(1)}</span>
+                <span>({lead.user_ratings_total ?? 0})</span>
+                {lastReviewAgo && (
+                  <span className="text-muted-foreground">· última avaliação {lastReviewAgo}</span>
+                )}
               </span>
             )}
           </div>
           <h3 className="mt-1.5 truncate text-base font-bold text-foreground">{lead.name}</h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">{lead.address}</p>
+          {collectedAgo && (
+            <p className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80">
+              <RefreshCw className="h-2.5 w-2.5" aria-hidden />
+              Dados atualizados {collectedAgo}
+              {refreshErr && <span className="text-warn">· {refreshErr}</span>}
+            </p>
+          )}
         </div>
-        <div className="shrink-0 rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
-          <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <button
+            onClick={runRefresh}
+            disabled={refreshing}
+            title="Atualizar dados deste lead (não conta na cota mensal)"
+            aria-label="Atualizar este lead"
+            className="rounded-md bg-glass p-1.5 text-muted-foreground ring-1 ring-border hover:text-primary hover:ring-primary/40 disabled:opacity-60"
+          >
+            {refreshing
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : <RefreshCw className="h-3 w-3" />}
+          </button>
+          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
+            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+          </div>
         </div>
       </header>
+
 
       {lead.reasons.length > 0 && (
         <ul className="flex flex-wrap gap-1.5">
