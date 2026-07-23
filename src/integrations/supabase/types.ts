@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          address: string | null
+          category: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          has_website: boolean
+          has_whatsapp: boolean
+          id: string
+          instagram_handle: string | null
+          instagram_last_post_days: number | null
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          score_lead: number
+          status: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          has_website?: boolean
+          has_whatsapp?: boolean
+          id?: string
+          instagram_handle?: string | null
+          instagram_last_post_days?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          score_lead?: number
+          status?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          has_website?: boolean
+          has_whatsapp?: boolean
+          id?: string
+          instagram_handle?: string | null
+          instagram_last_post_days?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          score_lead?: number
+          status?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      version_log: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          impact: string | null
+          risk: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          impact?: string | null
+          risk?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          impact?: string | null
+          risk?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
