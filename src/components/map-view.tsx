@@ -13,8 +13,8 @@ L.Icon.Default.mergeOptions({
 });
 
 const STATUS_COLOR = {
-  red: "#00FF41",     // hot lead = verde neon (alta oportunidade)
-  yellow: "#FFD700",  // morno = amarelo ouro
+  red: "#7C4DFF",     // hot lead = verde neon (alta oportunidade)
+  yellow: "#E4A94A",  // morno = amarelo ouro
   green: "#6b7280",   // saudável = cinza (baixa oportunidade)
 } as const;
 
@@ -82,8 +82,8 @@ export default function MapView({
     if (userRef.current) userRef.current.remove();
     userRef.current = L.circleMarker([center.lat, center.lng], {
       radius: 6,
-      color: "#00FF41",
-      fillColor: "#00FF41",
+      color: "#7C4DFF",
+      fillColor: "#7C4DFF",
       fillOpacity: 1,
       weight: 3,
     }).addTo(map);
@@ -91,9 +91,9 @@ export default function MapView({
     if (circleRef.current) circleRef.current.remove();
     circleRef.current = L.circle([center.lat, center.lng], {
       radius: radiusKm * 1000,
-      color: "#00FF41",
+      color: "#7C4DFF",
       weight: 1.5,
-      fillColor: "#00FF41",
+      fillColor: "#7C4DFF",
       fillOpacity: 0.05,
     }).addTo(map);
     map.fitBounds(circleRef.current.getBounds(), { padding: [40, 40] });
