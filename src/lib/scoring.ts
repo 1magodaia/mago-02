@@ -33,6 +33,16 @@ export function scoreLead(place: PlaceResult, audit?: DigitalAudit): ScoredLead 
     reasons.push("Sem nota no Google");
   }
 
+  // Sinal mais confiável de atividade: data da última review pública.
+  if (place.latest_review_at) {
+    const days = Math.floor((Date.now() - Date.parse(place.latest_review_at)) / 86400000);
+    if (Number.isFinite(days) && days > 180) {
+      score += 15;
+      reasons.push(`Sem avaliações novas há ~${days}d`);
+    }
+  }
+
+
   if (audit) {
     if (place.website && !audit.site_reachable) {
       score += 20;
