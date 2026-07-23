@@ -7,7 +7,7 @@ interface LogoProps {
   monochrome?: boolean;
 }
 
-export function LogoIcon({ className = "h-8 w-8" }: LogoProps) {
+export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
   return (
     <img
       src={logoIcon.url}
@@ -30,17 +30,17 @@ export function LogoWordmark({
       <img
         src={logoFull.url}
         alt="Busca Mágica"
-        className={className || "h-10 w-auto"}
+        className={className || "h-24 w-auto"}
         draggable={false}
       />
     );
   }
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <LogoIcon className="h-9 w-9" />
+    <div className={`flex items-center gap-3 ${className}`}>
+      <LogoIcon className="h-12 w-12 sm:h-14 sm:w-14" />
       <div className="flex items-baseline gap-1">
-        <span className="text-lg font-extrabold tracking-tight text-foreground">Busca</span>
-        <span className="text-lg font-extrabold tracking-tight text-primary">Mágica</span>
+        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">Busca</span>
+        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Mágica</span>
       </div>
     </div>
   );
