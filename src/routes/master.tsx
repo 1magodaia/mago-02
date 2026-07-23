@@ -47,12 +47,20 @@ function MasterPanel() {
   const setPlan = useServerFn(setUserPlan);
   const setStatus = useServerFn(setUserStatus);
   const resetPwd = useServerFn(sendPasswordReset);
+  const readSettings = useServerFn(getAppSettings);
+  const writeSettings = useServerFn(updateAppSettings);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+
+  const [supportWa, setSupportWa] = useState("");
+  const [supportMsg, setSupportMsg] = useState("");
+  const [settingsBusy, setSettingsBusy] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (loading) return;
