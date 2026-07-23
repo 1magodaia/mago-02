@@ -132,41 +132,44 @@ function Home() {
       {/* HERO */}
       <header className="mx-auto max-w-7xl px-6 pt-2 pb-6">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
-            <Sparkles className="h-3 w-3" /> Prospecção geolocalizada + auditoria real-time
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <Sparkles className="h-3 w-3" /> Cyber prospecção · auditoria real-time
           </div>
           <h1 className="mt-3 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl">
             Comércios que <span className="text-primary">precisam de você</span> —
             num raio de {radiusKm} km.
           </h1>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-            Localização nativa, mapa interativo e auditoria sob demanda de site,
-            Instagram e WhatsApp.
+            Digite uma cidade ou bairro. Se preferir, use o GPS para buscar ao
+            seu redor. Sem fricção.
           </p>
         </div>
 
         {geoDenied && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/30 bg-warn/10 px-4 py-2.5 text-xs text-warn">
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
-              Permissão de localização negada. Usando busca por cidade manual — os
-              resultados estão centrados em <b>{manualCity}</b>.
+              Permissão de GPS negada — sem stress. Continue buscando por texto,
+              centrado em <b>{manualCity}</b>.
             </span>
           </div>
         )}
 
         {/* CONTROLS */}
-        <div className="glass-panel mt-5 grid gap-3 rounded-2xl p-3 md:grid-cols-[1fr_1fr_auto]">
-          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-primary/60">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+        <div className="glass-panel mt-5 grid gap-3 rounded-2xl p-3 md:grid-cols-[1.4fr_1fr_auto]">
+          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+            <MapPin className="h-4 w-4 text-primary" />
             <input
               value={manualCity}
-              onChange={(e) => setManualCity(e.target.value)}
-              placeholder="Cidade (fallback)"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setManualCity(e.target.value);
+                setUsingGps(false);
+              }}
+              placeholder="Digite uma cidade ou bairro"
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground"
             />
           </label>
-          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-primary/60">
+          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <input
               value={category}
@@ -186,14 +189,31 @@ function Home() {
               onChange={(e) => setRadiusKm(Number(e.target.value))}
               className="w-32 accent-[color:var(--primary)]"
             />
-            <span className="min-w-[3ch] text-sm font-bold tabular-nums text-foreground">
+            <span className="min-w-[3ch] text-sm font-bold tabular-nums text-primary">
               {radiusKm}km
             </span>
           </div>
         </div>
 
-        {/* FILTER CHIPS */}
-        <div className="mt-4 flex flex-wrap gap-2">
+        {/* Location action + filter chips */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <button
+            onClick={requestLocation}
+            disabled={locating}
+            className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold transition-all disabled:opacity-60 ${
+              usingGps
+                ? "border-primary bg-primary/15 text-primary neon-primary"
+                : "border-primary/60 bg-transparent text-primary hover:bg-primary/10"
+            }`}
+          >
+            <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
+            {locating
+              ? "Localizando..."
+              : usingGps
+                ? "Usando GPS"
+                : "Usar minha localização"}
+          </button>
+
           {FILTERS.map((f) => {
             const active = filter === f.key;
             return (
@@ -202,7 +222,7 @@ function Home() {
                 onClick={() => setFilter(f.key)}
                 className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
                   active
-                    ? "bg-primary text-primary-foreground neon-violet"
+                    ? "bg-primary text-primary-foreground neon-primary"
                     : "bg-glass text-muted-foreground ring-1 ring-border hover:text-foreground"
                 }`}
               >
@@ -212,13 +232,15 @@ function Home() {
           })}
           <div className="ml-auto flex items-center gap-3 text-xs">
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-extrabold tabular-nums">{leads.length}</span>
+              <span className="text-lg font-extrabold tabular-nums text-foreground">
+                {leads.length}
+              </span>
               <span className="text-muted-foreground">leads</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-destructive ring-2 ring-destructive/30" />
-              <span className="font-bold text-destructive">{hotCount}</span>
-              <span className="text-muted-foreground">críticos</span>
+              <span className="h-2 w-2 rounded-full bg-primary ring-2 ring-primary/30" />
+              <span className="font-bold text-primary">{hotCount}</span>
+              <span className="text-muted-foreground">quentes</span>
             </div>
           </div>
         </div>
