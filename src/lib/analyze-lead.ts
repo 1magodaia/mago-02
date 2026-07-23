@@ -13,7 +13,12 @@ export interface BusinessData {
   instagram_last_post_days?: number | null;
   has_website?: boolean;
   has_whatsapp?: boolean;
+  latitude?: number;
+  longitude?: number;
 }
+
+export type AuditStatus = "idle" | "loading" | "done";
+
 
 export interface AnalyzedLead extends BusinessData {
   score_lead: number;
