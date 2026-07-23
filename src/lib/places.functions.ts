@@ -203,11 +203,13 @@ export const searchPlaces = createServerFn({ method: "POST" })
         return { results: [], error: `Google Places: ${res.status}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
+      const collectedAt = new Date().toISOString();
       return {
-        results: (json.places ?? []).map(mapPlace),
+        results: (json.places ?? []).map((p) => mapPlace(p, collectedAt)),
         remaining: quota.remaining,
         plan: quota.plan,
       };
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro desconhecido";
       console.error("[places] error", msg);
