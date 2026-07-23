@@ -15,11 +15,11 @@ import { runAudit, generateScript, type AuditResult } from "@/lib/audit-lead";
 
 const STATUS_MAP = {
   red: {
-    label: "Crítico",
-    dot: "bg-destructive",
-    ring: "ring-destructive/40",
-    text: "text-destructive",
-    glow: "shadow-[0_0_30px_-8px_var(--destructive)]",
+    label: "Quente",
+    dot: "bg-primary",
+    ring: "ring-primary/40",
+    text: "text-primary",
+    glow: "shadow-[0_0_30px_-10px_var(--primary)]",
   },
   yellow: {
     label: "Atenção",
@@ -30,9 +30,9 @@ const STATUS_MAP = {
   },
   green: {
     label: "Saudável",
-    dot: "bg-emerald",
-    ring: "ring-emerald/40",
-    text: "text-emerald",
+    dot: "bg-muted-foreground",
+    ring: "ring-muted-foreground/30",
+    text: "text-muted-foreground",
     glow: "",
   },
 } as const;
