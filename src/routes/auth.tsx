@@ -78,7 +78,7 @@ function AuthPage() {
     <div className="grid min-h-screen place-items-center px-4 py-10">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-8 flex justify-center">
-          <LogoWordmark variant="full" className="h-16 w-auto mx-auto" />
+          <LogoWordmark variant="full" className="h-28 sm:h-32 w-auto mx-auto" />
         </Link>
         <div className="glass-panel rounded-2xl p-6 sm:p-8">
           <h1 className="text-2xl font-extrabold tracking-tight">
