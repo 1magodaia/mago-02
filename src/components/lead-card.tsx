@@ -180,7 +180,7 @@ export function LeadCard({ lead, distanceKm, selected, onSelect }: Props) {
           {lead.signals.map((s) => (
             <span
               key={s}
-              className="flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-0.5 text-[11px] font-medium text-destructive ring-1 ring-destructive/20"
+              className="flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-0.5 text-[11px] font-medium text-warn ring-1 ring-warn/30"
             >
               <Sparkles className="h-3 w-3" />
               {s}
