@@ -7,15 +7,18 @@ import {
   ExternalLink,
   Flame,
   Globe,
+  HelpCircle,
   Instagram,
   Loader2,
   MessageCircle,
   Phone,
+  RefreshCw,
   Star,
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
 import { auditWebsite } from "@/lib/audit.functions";
+import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
 import {
   isContacted as chkContacted,
@@ -50,9 +53,28 @@ function toSaved(lead: ScoredLead): SavedLead {
   };
 }
 
+function relTime(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const ms = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(ms) || ms < 0) return null;
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `há ${d}d`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `há ${mo} mês${mo > 1 ? "es" : ""}`;
+  const y = Math.floor(mo / 12);
+  return `há ${y} ano${y > 1 ? "s" : ""}`;
+}
+
 export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshErr, setRefreshErr] = useState<string | null>(null);
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
   const [done, setDone] = useState(() => chkContacted(lead.place_id));
   const [copied, setCopied] = useState<"phone" | "wa" | null>(null);
@@ -68,6 +90,25 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
       console.error(err);
     } finally {
       setAuditing(false);
+    }
+  };
+
+  const runRefresh = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRefreshing(true);
+    setRefreshErr(null);
+    try {
+      const resp = await refreshPlace({ data: { place_id: lead.place_id } });
+      if (resp.error || !resp.place) {
+        setRefreshErr(resp.error ?? "Não foi possível atualizar.");
+        return;
+      }
+      // Preserva a auditoria anterior — refresh só re-lê o Google Places.
+      onUpdate?.(scoreLead(resp.place, lead.audit));
+    } catch (err) {
+      setRefreshErr(err instanceof Error ? err.message : "Falha na atualização.");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -93,6 +134,16 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
   const waLink = lead.audit?.whatsapp_link ?? (lead.phone
     ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
     : null);
+
+  const collectedAgo = relTime(lead.collected_at);
+  const lastReviewAgo = relTime(lead.latest_review_at);
+  // Instagram: sinal só é confiável quando o site foi auditado.
+  const igStatus: "found" | "not_found_on_site" | "unverifiable" = lead.audit?.instagram
+    ? "found"
+    : lead.audit && lead.website
+      ? "not_found_on_site"
+      : "unverifiable";
+
 
   return (
     <article
