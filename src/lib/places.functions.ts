@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 
@@ -107,9 +109,31 @@ async function handle403(response: Response): Promise<never> {
 }
 
 export const searchPlaces = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => searchSchema.parse(input))
-  .handler(async ({ data }): Promise<{ results: PlaceResult[]; error?: string }> => {
+  .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string }> => {
     try {
+      // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users)
+      const { data: quotaRows, error: quotaErr } = await context.supabase.rpc("consume_search_quota", {
+        _user_id: context.userId,
+        _free_limit: FREE_MONTHLY_SEARCH_LIMIT,
+      });
+      if (quotaErr) {
+        console.error("[places] quota error", quotaErr.message);
+        return { results: [], error: "Falha ao validar cota de buscas." };
+      }
+      const quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
+      if (!quota?.allowed) {
+        return {
+          results: [],
+          error: quota?.plan === "free"
+            ? `Limite mensal atingido (${FREE_MONTHLY_SEARCH_LIMIT} buscas). Faça upgrade para Pro.`
+            : "Conta bloqueada. Fale com o suporte.",
+          remaining: 0,
+          plan: quota?.plan,
+        };
+      }
+
       const body: Record<string, unknown> = {
         textQuery: data.regionText ? `${data.query} em ${data.regionText}` : data.query,
         pageSize: 20,
@@ -132,7 +156,11 @@ export const searchPlaces = createServerFn({ method: "POST" })
         return { results: [], error: `Google Places: ${res.status}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
-      return { results: (json.places ?? []).map(mapPlace) };
+      return {
+        results: (json.places ?? []).map(mapPlace),
+        remaining: quota.remaining,
+        plan: quota.plan,
+      };
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro desconhecido";
       console.error("[places] error", msg);
