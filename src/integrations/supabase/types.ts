@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           address: string | null
@@ -77,6 +104,93 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          plan: Database["public"]["Enums"]["user_plan"]
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          plan: Database["public"]["Enums"]["user_plan"]
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          plan?: Database["public"]["Enums"]["user_plan"]
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          last_login_at: string | null
+          month_reset_at: string
+          plan: Database["public"]["Enums"]["user_plan"]
+          search_count_month: number
+          status: Database["public"]["Enums"]["user_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          last_login_at?: string | null
+          month_reset_at?: string
+          plan?: Database["public"]["Enums"]["user_plan"]
+          search_count_month?: number
+          status?: Database["public"]["Enums"]["user_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          month_reset_at?: string
+          plan?: Database["public"]["Enums"]["user_plan"]
+          search_count_month?: number
+          status?: Database["public"]["Enums"]["user_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       version_log: {
         Row: {
           created_at: string
@@ -109,10 +223,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_search_quota: {
+        Args: { _free_limit: number; _user_id: string }
+        Returns: {
+          allowed: boolean
+          plan: Database["public"]["Enums"]["user_plan"]
+          remaining: number
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "master" | "admin" | "user"
+      user_plan: "free" | "pro"
+      user_status: "active" | "blocked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -239,6 +369,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["master", "admin", "user"],
+      user_plan: ["free", "pro"],
+      user_status: ["active", "blocked"],
+    },
   },
 } as const
