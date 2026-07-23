@@ -132,8 +132,8 @@ export default function MapView({
   return (
     <div
       ref={containerRef}
-      className="h-full w-full rounded-2xl"
-      style={{ background: "#0F172A" }}
+      className="h-full w-full"
+      style={{ background: "#000" }}
     />
   );
 }
