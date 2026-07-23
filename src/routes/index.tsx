@@ -1,25 +1,35 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useMemo, useState } from "react";
 import {
   AlertCircle,
   BookmarkCheck,
+  ChevronDown,
   Crosshair,
   Download,
   Filter,
   GitBranch,
+  Info,
+  List,
   Loader2,
+  LogIn,
+  LogOut,
+  Map as MapIcon,
   MapPin,
   Search,
+  Shield,
   Sparkles,
   Star,
-  Wand2,
+  User as UserIcon,
 } from "lucide-react";
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
+import { LogoWordmark } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
+import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 
 const MapView = lazy(() => import("@/components/google-map-view"));
 
@@ -47,7 +57,16 @@ export const Route = createFileRoute("/")({
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
 
+const SUGGESTIONS = [
+  { label: "Salão de beleza · São Paulo", query: "salão de beleza", region: "São Paulo" },
+  { label: "Pet shop · Rio de Janeiro", query: "pet shop", region: "Rio de Janeiro" },
+  { label: "Advogado · Belo Horizonte", query: "advogado", region: "Belo Horizonte" },
+];
+
 function Home() {
+  const nav = useNavigate();
+  const { user, profile, isPro, isMaster, isAdmin, signOut, loading: authLoading, refreshProfile } = useAuth();
+
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState("São Paulo");
   const [radiusKm, setRadiusKm] = useState(5);
@@ -60,11 +79,22 @@ function Home() {
   const [minRating, setMinRating] = useState(0);
   const [minReviews, setMinReviews] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>("score");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
 
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  const requireAuth = (): boolean => {
+    if (!user) {
+      nav({ to: "/auth", search: { redirect: "/" } });
+      return false;
+    }
+    return true;
+  };
 
   const useGps = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -88,46 +118,49 @@ function Home() {
     );
   };
 
-  const runSearch = async () => {
-    if (!query.trim()) {
+  const runSearchWith = async (q: string, r: string) => {
+    if (!requireAuth()) return;
+    if (!q.trim()) {
       setSearchError("Informe uma categoria (ex: padaria, barbearia).");
       return;
     }
     setLoading(true);
     setSearchError(null);
     const cacheKey = JSON.stringify({
-      q: query.trim().toLowerCase(),
-      r: usingGps ? "gps" : region.trim().toLowerCase(),
+      q: q.trim().toLowerCase(),
+      r: usingGps ? "gps" : r.trim().toLowerCase(),
       lat: usingGps ? center.lat.toFixed(3) : null,
       lng: usingGps ? center.lng.toFixed(3) : null,
       rad: radiusKm,
     });
     try {
       let places = cacheGet<PlaceResult[]>(cacheKey);
+      let servedFromCache = !!places;
       if (!places) {
         const resp = await searchPlaces({
           data: {
-            query: query.trim(),
-            regionText: usingGps ? undefined : region.trim(),
+            query: q.trim(),
+            regionText: usingGps ? undefined : r.trim(),
             lat: usingGps ? center.lat : undefined,
             lng: usingGps ? center.lng : undefined,
             radiusKm,
           },
         });
         if (resp.error) setSearchError(resp.error);
+        if (typeof resp.remaining === "number") setRemaining(resp.remaining);
         places = resp.results;
         if (places.length) cacheSet(cacheKey, places);
+        if (!servedFromCache) refreshProfile();
       }
       const scored = places.map((p) => scoreLead(p));
       setRawResults(scored);
-      // se não estiver usando GPS, centraliza no primeiro resultado com coord
       if (!usingGps) {
         const first = places.find((p) => p.lat != null && p.lng != null);
         if (first?.lat && first?.lng) setCenter({ lat: first.lat, lng: first.lng });
       }
       addHistory({
-        query: query.trim(),
-        region: usingGps ? "GPS" : region.trim(),
+        query: q.trim(),
+        region: usingGps ? "GPS" : r.trim(),
         radiusKm,
         used_gps: usingGps,
         count: places.length,
@@ -138,6 +171,15 @@ function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const runSearch = () => runSearchWith(query, region);
+
+  const runSuggestion = (s: { query: string; region: string }) => {
+    setQuery(s.query);
+    setRegion(s.region);
+    setUsingGps(false);
+    runSearchWith(s.query, s.region);
   };
 
   const filtered = useMemo(() => {
@@ -154,7 +196,6 @@ function Home() {
       if (sortBy === "score") return b.opportunity_score - a.opportunity_score;
       if (sortBy === "rating") return (b.rating ?? 0) - (a.rating ?? 0);
       if (sortBy === "name") return a.name.localeCompare(b.name);
-      // distance
       if (a.lat == null || b.lat == null) return 0;
       return (
         haversineKm(center, { lat: a.lat, lng: a.lng! }) -
@@ -171,6 +212,10 @@ function Home() {
   };
 
   const doExport = () => {
+    if (!isPro) {
+      nav({ to: "/planos" });
+      return;
+    }
     exportToCsv(
       filtered.map((l) => ({
         nome: l.name,
@@ -190,94 +235,150 @@ function Home() {
     );
   };
 
+  const searchUsage = profile
+    ? isPro
+      ? "Pro · buscas ilimitadas"
+      : `${profile.search_count_month}/${FREE_MONTHLY_SEARCH_LIMIT} buscas este mês`
+    : null;
+
   return (
     <div className="min-h-screen">
       {/* NAV */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/50 neon-primary">
-            <Wand2 className="h-4 w-4 text-primary" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-lg font-extrabold tracking-tight text-foreground">Busca</span>
-            <span className="text-lg font-extrabold tracking-tight text-primary">Mágica</span>
-            <span className="ml-1 text-[10px] font-semibold text-muted-foreground">v3.0</span>
-          </div>
+        <Link to="/" aria-label="Busca Mágica — início">
+          <LogoWordmark />
         </Link>
         <div className="flex items-center gap-2">
+          {user && (
+            <Link
+              to="/leads"
+              className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
+            >
+              <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
+            </Link>
+          )}
           <Link
-            to="/leads"
+            to="/planos"
             className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
           >
-            <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
+            <Sparkles className="h-3.5 w-3.5 text-warn" /> {isPro ? "Pro" : "Upgrade"}
           </Link>
           <Link
             to="/novidades"
-            className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
           >
             <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
           </Link>
+          {isAdmin && (
+            <Link
+              to="/master"
+              className="flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1.5 text-xs font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/20"
+            >
+              <Shield className="h-3.5 w-3.5" /> {isMaster ? "Master" : "Admin"}
+            </Link>
+          )}
+          {authLoading ? (
+            <span className="grid h-8 w-8 place-items-center">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            </span>
+          ) : user ? (
+            <div className="group relative">
+              <button
+                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
+                aria-label="Menu da conta"
+              >
+                <UserIcon className="h-3.5 w-3.5" />
+                <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
+              </button>
+              <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
+                <div className="px-3 py-2 text-[11px] text-muted-foreground">{user.email}</div>
+                {searchUsage && (
+                  <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
+                )}
+                <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
+                <Link to="/planos" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Planos</Link>
+                <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
+                <button
+                  onClick={() => signOut().then(() => nav({ to: "/" }))}
+                  className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Sair
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110"
+            >
+              <LogIn className="h-3.5 w-3.5" /> Entrar
+            </Link>
+          )}
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-6 sm:px-6">
+      <header className="mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
           </div>
-          <h1 className="mt-3 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl">
+          <h1 className="mt-4 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
             Descubra comércios que <span className="text-primary">precisam de você</span>.
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+          <p className="mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
             Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
             (WHOIS + sitemap) para achar quem está com presença digital fraca.
           </p>
         </div>
 
         {gpsError && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn">
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{gpsError} Continue buscando por texto — nada trava.</span>
           </div>
         )}
 
-        <div className="glass-panel mt-5 grid gap-3 rounded-2xl p-3 md:grid-cols-[1.2fr_1.4fr_auto]">
-          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+        {/* BLOCO PRINCIPAL DE BUSCA */}
+        <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
+          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+            <Filter className="h-4 w-4 text-muted-foreground" aria-hidden />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runSearch()}
               placeholder="Categoria (padaria, pet shop, advogado...)"
+              aria-label="Categoria de comércio"
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </label>
-          <label className={`flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}>
-            <MapPin className="h-4 w-4 text-primary" />
+          <label className={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}>
+            <MapPin className="h-4 w-4 text-primary" aria-hidden />
             <input
               disabled={usingGps}
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runSearch()}
               placeholder="Cidade, bairro ou endereço"
+              aria-label="Região"
               className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
             />
           </label>
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             Buscar
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* AÇÕES RÁPIDAS */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
             onClick={useGps}
             disabled={locating}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all disabled:opacity-60 ${
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
               usingGps
                 ? "border-primary bg-primary/15 text-primary"
                 : "border-primary/60 text-primary hover:bg-primary/10"
@@ -289,73 +390,99 @@ function Home() {
           {usingGps && (
             <button
               onClick={() => setUsingGps(false)}
-              className="rounded-full bg-glass px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
             >
               Voltar para texto
             </button>
           )}
 
-          <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1 text-xs text-muted-foreground ring-1 ring-border">
-            Raio
-            <input
-              type="range"
-              min={1}
-              max={20}
-              value={radiusKm}
-              onChange={(e) => setRadiusKm(Number(e.target.value))}
-              className="w-24 accent-[color:var(--primary)]"
-            />
-            <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
-          </label>
-
-          <select
-            value={siteFilter}
-            onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
-            className="rounded-full bg-glass px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
+          <button
+            onClick={() => setShowAdvanced((s) => !s)}
+            aria-expanded={showAdvanced}
+            aria-controls="filtros-avancados"
+            className="ml-auto flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
           >
-            <option value="any">Site: qualquer</option>
-            <option value="no_site">Sem site</option>
-            <option value="with_site">Com site</option>
-          </select>
+            <Filter className="h-3.5 w-3.5" /> Filtros avançados
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </button>
+        </div>
 
-          <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1 text-xs text-muted-foreground ring-1 ring-border">
-            <Star className="h-3 w-3 text-warn" />
-            ≥
-            <input
-              type="number"
-              min={0}
-              max={5}
-              step={0.5}
-              value={minRating}
-              onChange={(e) => setMinRating(Number(e.target.value))}
-              className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
-            />
-          </label>
-
-          <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1 text-xs text-muted-foreground ring-1 ring-border">
-            Avaliações ≥
-            <input
-              type="number"
-              min={0}
-              step={5}
-              value={minReviews}
-              onChange={(e) => setMinReviews(Number(e.target.value))}
-              className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
-            />
-          </label>
-
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="rounded-full bg-glass px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border"
+        {/* FILTROS AVANÇADOS COLAPSÁVEIS */}
+        {showAdvanced && (
+          <div
+            id="filtros-avancados"
+            className="glass-panel mt-3 flex flex-wrap items-center gap-2 rounded-2xl p-3"
           >
-            <option value="score">Ordenar: Oportunidade</option>
-            <option value="distance">Ordenar: Distância</option>
-            <option value="rating">Ordenar: Avaliação</option>
-            <option value="name">Ordenar: Nome</option>
-          </select>
+            <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              Raio
+              <input
+                type="range"
+                min={1}
+                max={20}
+                value={radiusKm}
+                onChange={(e) => setRadiusKm(Number(e.target.value))}
+                className="w-24 accent-[color:var(--primary)]"
+                aria-label="Raio de busca em quilômetros"
+              />
+              <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
+            </label>
 
-          <div className="ml-auto flex items-center gap-3 text-xs">
+            <select
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
+              aria-label="Filtro de site"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border"
+            >
+              <option value="any">Site: qualquer</option>
+              <option value="no_site">Sem site</option>
+              <option value="with_site">Com site</option>
+            </select>
+
+            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              <Star className="h-3 w-3 text-warn" aria-hidden />
+              ≥
+              <input
+                type="number"
+                min={0}
+                max={5}
+                step={0.5}
+                value={minRating}
+                onChange={(e) => setMinRating(Number(e.target.value))}
+                aria-label="Nota mínima"
+                className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
+              />
+            </label>
+
+            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              Avaliações ≥
+              <input
+                type="number"
+                min={0}
+                step={5}
+                value={minReviews}
+                onChange={(e) => setMinReviews(Number(e.target.value))}
+                aria-label="Número mínimo de avaliações"
+                className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
+              />
+            </label>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              aria-label="Ordenação"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border"
+            >
+              <option value="score">Ordenar: Oportunidade</option>
+              <option value="distance">Ordenar: Distância</option>
+              <option value="rating">Ordenar: Avaliação</option>
+              <option value="name">Ordenar: Nome</option>
+            </select>
+          </div>
+        )}
+
+        {/* BARRA DE RESUMO */}
+        {(rawResults.length > 0 || loading) && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-extrabold tabular-nums text-foreground">{filtered.length}</span>
               <span className="text-muted-foreground">leads</span>
@@ -365,37 +492,93 @@ function Home() {
               <span className="font-bold text-primary">{hotCount}</span>
               <span className="text-muted-foreground">quentes</span>
             </div>
+            {remaining != null && !isPro && (
+              <span className="text-muted-foreground">· {remaining} busca(s) restantes no mês</span>
+            )}
             <button
               onClick={doExport}
               disabled={filtered.length === 0}
-              className="flex items-center gap-1 rounded-full bg-glass px-3 py-1 font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-40"
+              title={!isPro ? "Exportação CSV é do plano Pro" : ""}
+              className="ml-auto flex items-center gap-1 rounded-full bg-glass px-3 py-1.5 font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-40"
             >
-              <Download className="h-3 w-3" /> CSV
+              <Download className="h-3 w-3" /> CSV {!isPro && <span className="text-warn">· Pro</span>}
             </button>
           </div>
-        </div>
+        )}
 
         {searchError && (
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2 text-xs text-destructive">
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2 text-xs text-destructive" role="alert">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{searchError}</span>
+            <span>
+              {searchError}{" "}
+              {searchError.includes("Limite") && (
+                <Link to="/planos" className="font-bold underline">Ver planos</Link>
+              )}
+            </span>
           </div>
         )}
       </header>
 
+      {/* TABS MOBILE */}
+      <div className="mx-auto mb-3 flex max-w-7xl gap-1 px-4 sm:px-6 lg:hidden" role="tablist">
+        <button
+          role="tab"
+          aria-selected={mobileTab === "list"}
+          onClick={() => setMobileTab("list")}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "list" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+        >
+          <List className="h-3.5 w-3.5" /> Lista
+        </button>
+        <button
+          role="tab"
+          aria-selected={mobileTab === "map"}
+          onClick={() => setMobileTab("map")}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "map" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+        >
+          <MapIcon className="h-3.5 w-3.5" /> Mapa
+        </button>
+      </div>
+
       <main className="mx-auto grid max-w-7xl gap-4 px-4 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_1.1fr]">
-        <section className="order-2 space-y-3 lg:order-1">
+        <section
+          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block`}
+          aria-label="Resultados"
+        >
           {loading && (
             <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
               <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
               <p className="mt-2">Consultando Google Places...</p>
             </div>
           )}
-          {!loading && filtered.length === 0 && (
+          {!loading && rawResults.length === 0 && (
+            <div className="glass-panel rounded-2xl p-8 text-center">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
+                <Search className="h-6 w-6 text-primary" />
+              </div>
+              <p className="mt-4 text-sm text-foreground">
+                Faça uma busca acima ou experimente uma sugestão:
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => runSuggestion(s)}
+                    className="rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              {!user && (
+                <p className="mt-5 text-xs text-muted-foreground">
+                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free com {FREE_MONTHLY_SEARCH_LIMIT} buscas/mês.
+                </p>
+              )}
+            </div>
+          )}
+          {!loading && rawResults.length > 0 && filtered.length === 0 && (
             <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-              {rawResults.length === 0
-                ? "Faça uma busca acima para começar."
-                : "Nenhum resultado com esses filtros. Amplie o raio ou remova filtros."}
+              Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
             </div>
           )}
           {filtered.map((lead) => (
@@ -407,14 +590,20 @@ function Home() {
               onUpdate={updateOne}
             />
           ))}
-          <p className="pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            * "Atividade" é uma estimativa baseada na última modificação do <code>sitemap.xml</code>.
-            Dados de site/social são obtidos por leitura pública da página. Nem todo domínio expõe
-            WHOIS/RDAP público — nesse caso exibimos "—".
-          </p>
+          {filtered.length > 0 && (
+            <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
+              <Info className="h-3 w-3" aria-hidden />
+              <span title="Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos '—'. 'Atividade' é uma estimativa baseada na última modificação do sitemap.xml.">
+                Sobre a auditoria (passe o mouse)
+              </span>
+            </p>
+          )}
         </section>
 
-        <section className="glass-panel order-1 h-[70vh] overflow-hidden rounded-2xl lg:sticky lg:top-4 lg:order-2 lg:h-[calc(100vh-8rem)]">
+        <section
+          className={`glass-panel overflow-hidden rounded-2xl ${mobileTab === "map" ? "block h-[70vh]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`}
+          aria-label="Mapa"
+        >
           <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
             <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
               <MapView
