@@ -336,17 +336,6 @@ function Home() {
               </p>
             </div>
           </div>
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-                <span className="text-foreground">Busca</span>{" "}
-                <span className="bg-gradient-to-r from-primary via-primary to-warn bg-clip-text text-transparent">
-                  Mágica
-                </span>
-              </h1>
-              <p className="mt-3 text-lg font-semibold text-warn sm:text-2xl">
-                Encontre seus leads antes da concorrência.
-              </p>
-            </div>
-          </div>
           <p className="mt-5 max-w-xl text-sm text-muted-foreground sm:text-base">
             Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
             (WHOIS + sitemap) para achar quem está com presença digital fraca.
