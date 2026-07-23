@@ -322,14 +322,23 @@ function Home() {
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
           </div>
-          <h1 className="mt-4 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">
-            Descubra comércios que <span className="text-primary">precisam de você</span>.
-          </h1>
+          <div className="mt-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <LogoWordmark variant="full" className="h-20 w-auto sm:h-28" />
+            <div>
+              <h1 className="text-4xl font-extrabold leading-[1] tracking-tight text-foreground sm:text-6xl">
+                Busca <span className="text-primary">Mágica</span>
+              </h1>
+              <p className="mt-2 text-lg font-semibold text-warn sm:text-xl">
+                Encontre seus leads antes da concorrência.
+              </p>
+            </div>
+          </div>
           <p className="mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
             Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
             (WHOIS + sitemap) para achar quem está com presença digital fraca.
           </p>
         </div>
+
 
         {gpsError && (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">

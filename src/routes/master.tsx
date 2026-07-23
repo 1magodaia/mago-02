@@ -7,6 +7,8 @@ import {
   Check,
   KeyRound,
   Loader2,
+  MessageCircle,
+  Save,
   Shield,
   ShieldCheck,
   Users,
@@ -20,6 +22,8 @@ import {
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
+import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+
 
 export const Route = createFileRoute("/master")({
   head: () => ({
@@ -43,12 +47,20 @@ function MasterPanel() {
   const setPlan = useServerFn(setUserPlan);
   const setStatus = useServerFn(setUserStatus);
   const resetPwd = useServerFn(sendPasswordReset);
+  const readSettings = useServerFn(getAppSettings);
+  const writeSettings = useServerFn(updateAppSettings);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+
+  const [supportWa, setSupportWa] = useState("");
+  const [supportMsg, setSupportMsg] = useState("");
+  const [settingsBusy, setSettingsBusy] = useState(false);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (loading) return;
@@ -74,9 +86,36 @@ function MasterPanel() {
   };
 
   useEffect(() => {
-    if (ready) load();
+    if (ready) {
+      load();
+      readSettings()
+        .then((s) => {
+          setSupportWa(s.support_whatsapp ?? "");
+          setSupportMsg(s.support_message ?? "");
+        })
+        .catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
+
+  const saveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({
+        data: { support_whatsapp: supportWa || null, support_message: supportMsg || null },
+      });
+      setSupportWa(r.support_whatsapp ?? "");
+      setSupportMsg(r.support_message ?? "");
+      setNotice("Configurações de suporte atualizadas.");
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
 
   const togglePlan = async (u: AdminUserRow) => {
     setBusy(u.id);
@@ -158,6 +197,75 @@ function MasterPanel() {
           {loadErr}
         </div>
       )}
+
+      {/* SUPORTE / CONTATO — WhatsApp global do app */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#25D366]/15 ring-1 ring-[#25D366]/40">
+            <MessageCircle className="h-4 w-4 text-[#25D366]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Contato do desenvolvedor (WhatsApp)</h2>
+            <p className="text-xs text-muted-foreground">
+              O número salvo aqui aparece no botão flutuante de suporte em todas as telas do app.
+              Use formato internacional só com dígitos (ex: <code>5511999998888</code>).
+            </p>
+          </div>
+        </div>
+        <form onSubmit={saveSettings} className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr_auto]">
+          <label className="block">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">WhatsApp</span>
+            <input
+              type="tel"
+              inputMode="tel"
+              placeholder="5511999998888"
+              value={supportWa}
+              onChange={(e) => setSupportWa(e.target.value)}
+              maxLength={20}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm tabular-nums outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">Mensagem pré-preenchida</span>
+            <input
+              type="text"
+              placeholder="Olá! Preciso de ajuda com o Busca Mágica."
+              value={supportMsg}
+              onChange={(e) => setSupportMsg(e.target.value)}
+              maxLength={280}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={settingsBusy}
+            className="mt-6 inline-flex items-center justify-center gap-2 self-end rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60 sm:mt-0"
+          >
+            {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Salvar
+          </button>
+        </form>
+        {settingsError && (
+          <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {settingsError}
+          </div>
+        )}
+        {supportWa && (
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Preview:{" "}
+            <a
+              href={`https://wa.me/${supportWa.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              wa.me/{supportWa.replace(/\D/g, "")}
+            </a>
+          </p>
+        )}
+      </section>
+
+
 
       <div className="glass-panel mx-auto mt-6 max-w-7xl overflow-x-auto rounded-2xl">
         <table className="w-full text-left text-sm">

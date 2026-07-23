@@ -188,6 +188,26 @@ function AuthPage() {
                 )}
               </label>
             )}
+            {mode === "login" && (
+              <div className="flex items-center justify-between text-xs">
+                <label className="flex items-center gap-2 text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="h-3.5 w-3.5 rounded border-border bg-glass accent-primary"
+                  />
+                  Lembrar de mim
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Esqueci a senha
+                </button>
+              </div>
+            )}
+
             {error && (
               <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
