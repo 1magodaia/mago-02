@@ -15,11 +15,11 @@ import { runAudit, generateScript, type AuditResult } from "@/lib/audit-lead";
 
 const STATUS_MAP = {
   red: {
-    label: "Crítico",
-    dot: "bg-destructive",
-    ring: "ring-destructive/40",
-    text: "text-destructive",
-    glow: "shadow-[0_0_30px_-8px_var(--destructive)]",
+    label: "Quente",
+    dot: "bg-primary",
+    ring: "ring-primary/40",
+    text: "text-primary",
+    glow: "shadow-[0_0_30px_-10px_var(--primary)]",
   },
   yellow: {
     label: "Atenção",
@@ -30,9 +30,9 @@ const STATUS_MAP = {
   },
   green: {
     label: "Saudável",
-    dot: "bg-emerald",
-    ring: "ring-emerald/40",
-    text: "text-emerald",
+    dot: "bg-muted-foreground",
+    ring: "ring-muted-foreground/30",
+    text: "text-muted-foreground",
     glow: "",
   },
 } as const;
@@ -180,7 +180,7 @@ export function LeadCard({ lead, distanceKm, selected, onSelect }: Props) {
           {lead.signals.map((s) => (
             <span
               key={s}
-              className="flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-0.5 text-[11px] font-medium text-destructive ring-1 ring-destructive/20"
+              className="flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-0.5 text-[11px] font-medium text-warn ring-1 ring-warn/30"
             >
               <Sparkles className="h-3 w-3" />
               {s}
