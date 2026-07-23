@@ -317,23 +317,33 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6">
+      <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pt-10">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
           </div>
-          <div className="mt-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <LogoWordmark variant="full" className="h-20 w-auto sm:h-28" />
-            <div>
-              <h1 className="text-4xl font-extrabold leading-[1] tracking-tight text-foreground sm:text-6xl">
-                Busca <span className="text-primary">Mágica</span>
+          <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 sm:gap-6">
+            <img
+              src={new URL("../assets/logo-icon.png.asset.json", import.meta.url).href}
+              alt=""
+              aria-hidden
+              className="hidden h-24 w-24 shrink-0 drop-shadow-[0_8px_24px_rgba(107,70,224,0.45)] sm:block sm:h-32 sm:w-32"
+              onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+            />
+            <LogoWordmark className="sm:hidden" />
+            <div className="min-w-0 col-span-2 sm:col-span-1">
+              <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+                <span className="text-foreground">Busca</span>{" "}
+                <span className="bg-gradient-to-r from-primary via-primary to-warn bg-clip-text text-transparent">
+                  Mágica
+                </span>
               </h1>
-              <p className="mt-2 text-lg font-semibold text-warn sm:text-xl">
+              <p className="mt-3 text-lg font-semibold text-warn sm:text-2xl">
                 Encontre seus leads antes da concorrência.
               </p>
             </div>
           </div>
-          <p className="mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
+          <p className="mt-5 max-w-xl text-sm text-muted-foreground sm:text-base">
             Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
             (WHOIS + sitemap) para achar quem está com presença digital fraca.
           </p>
