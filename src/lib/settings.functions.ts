@@ -57,9 +57,13 @@ export const updateAppSettings = createServerFn({ method: "POST" })
     const set = new Set((roles ?? []).map((r) => r.role as string));
     if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
 
-    const patch: Record<string, unknown> = { updated_by: context.userId, updated_at: new Date().toISOString() };
-    if (data.support_whatsapp !== undefined) patch.support_whatsapp = data.support_whatsapp || null;
-    if (data.support_message !== undefined) patch.support_message = data.support_message || null;
+    const patch = {
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
+      ...(data.support_whatsapp !== undefined ? { support_whatsapp: data.support_whatsapp || null } : {}),
+      ...(data.support_message !== undefined ? { support_message: data.support_message || null } : {}),
+    };
+
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
