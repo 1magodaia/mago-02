@@ -7,6 +7,8 @@ import {
   Check,
   KeyRound,
   Loader2,
+  MessageCircle,
+  Save,
   Shield,
   ShieldCheck,
   Users,
@@ -20,6 +22,8 @@ import {
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
+import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+
 
 export const Route = createFileRoute("/master")({
   head: () => ({
