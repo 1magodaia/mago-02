@@ -27,7 +27,7 @@ import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
-import { LogoWordmark } from "@/components/logo";
+import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 
