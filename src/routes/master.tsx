@@ -86,9 +86,36 @@ function MasterPanel() {
   };
 
   useEffect(() => {
-    if (ready) load();
+    if (ready) {
+      load();
+      readSettings()
+        .then((s) => {
+          setSupportWa(s.support_whatsapp ?? "");
+          setSupportMsg(s.support_message ?? "");
+        })
+        .catch(() => {});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
+
+  const saveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({
+        data: { support_whatsapp: supportWa || null, support_message: supportMsg || null },
+      });
+      setSupportWa(r.support_whatsapp ?? "");
+      setSupportMsg(r.support_message ?? "");
+      setNotice("Configurações de suporte atualizadas.");
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
 
   const togglePlan = async (u: AdminUserRow) => {
     setBusy(u.id);
