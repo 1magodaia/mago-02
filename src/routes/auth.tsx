@@ -35,6 +35,24 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogle = async () => {
+    setError(null);
+    setInfo(null);
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      // if redirected, browser navigates away; otherwise session is set and useEffect redirects
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Falha ao entrar com Google.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && user) nav({ to: (redirect as string) || "/" });
