@@ -82,8 +82,8 @@ export default function MapView({
     if (userRef.current) userRef.current.remove();
     userRef.current = L.circleMarker([center.lat, center.lng], {
       radius: 6,
-      color: "#a78bfa",
-      fillColor: "#a78bfa",
+      color: "#00FF41",
+      fillColor: "#00FF41",
       fillOpacity: 1,
       weight: 3,
     }).addTo(map);
@@ -91,10 +91,10 @@ export default function MapView({
     if (circleRef.current) circleRef.current.remove();
     circleRef.current = L.circle([center.lat, center.lng], {
       radius: radiusKm * 1000,
-      color: "#a78bfa",
+      color: "#00FF41",
       weight: 1.5,
-      fillColor: "#a78bfa",
-      fillOpacity: 0.06,
+      fillColor: "#00FF41",
+      fillOpacity: 0.05,
     }).addTo(map);
     map.fitBounds(circleRef.current.getBounds(), { padding: [40, 40] });
   }, [center.lat, center.lng, radiusKm]);
