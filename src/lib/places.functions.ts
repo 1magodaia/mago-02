@@ -13,6 +13,12 @@ const searchSchema = z.object({
   regionText: z.string().max(200).optional(),
 });
 
+export interface PlaceReview {
+  publish_time: string; // ISO
+  rating: number | null;
+  author: string | null;
+}
+
 export interface PlaceResult {
   place_id: string;
   name: string;
@@ -26,6 +32,15 @@ export interface PlaceResult {
   business_status: string | null;
   types: string[];
   google_maps_uri: string | null;
+  latest_review_at: string | null; // ISO — data da avaliação mais recente
+  reviews: PlaceReview[];
+  collected_at: string; // ISO — quando este registro foi coletado do Google
+}
+
+interface GReview {
+  publishTime?: string;
+  rating?: number;
+  authorAttribution?: { displayName?: string };
 }
 
 interface GPlace {
@@ -41,25 +56,49 @@ interface GPlace {
   businessStatus?: string;
   types?: string[];
   googleMapsUri?: string;
+  reviews?: GReview[];
 }
 
-async function callGateway(path: string, body: object, fieldMask: string): Promise<Response> {
+
+async function callGateway(
+  path: string,
+  body: object | null,
+  fieldMask: string,
+  method: "POST" | "GET" = "POST",
+): Promise<Response> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
   if (!apiKey || !lovableKey) throw new Error("Missing Google Maps connector credentials");
   return fetch(`${GATEWAY}${path}`, {
-    method: "POST",
+    method,
     headers: {
       Authorization: `Bearer ${lovableKey}`,
       "X-Connection-Api-Key": apiKey,
       "Content-Type": "application/json",
       "X-Goog-FieldMask": fieldMask,
     },
-    body: JSON.stringify(body),
+    body: method === "GET" ? undefined : JSON.stringify(body ?? {}),
   });
 }
 
-function mapPlace(p: GPlace): PlaceResult {
+function pickLatestReview(reviews: GReview[] | undefined): {
+  latest: string | null;
+  list: PlaceReview[];
+} {
+  if (!reviews?.length) return { latest: null, list: [] };
+  const list: PlaceReview[] = reviews
+    .filter((r) => r.publishTime)
+    .map((r) => ({
+      publish_time: r.publishTime!,
+      rating: r.rating ?? null,
+      author: r.authorAttribution?.displayName ?? null,
+    }))
+    .sort((a, b) => Date.parse(b.publish_time) - Date.parse(a.publish_time));
+  return { latest: list[0]?.publish_time ?? null, list };
+}
+
+function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
+  const { latest, list } = pickLatestReview(p.reviews);
   return {
     place_id: p.id,
     name: p.displayName?.text ?? "Sem nome",
@@ -73,23 +112,31 @@ function mapPlace(p: GPlace): PlaceResult {
     business_status: p.businessStatus ?? null,
     types: p.types ?? [],
     google_maps_uri: p.googleMapsUri ?? null,
+    latest_review_at: latest,
+    reviews: list,
+    collected_at: collectedAt,
   };
 }
 
-const FIELD_MASK = [
-  "places.id",
-  "places.displayName",
-  "places.formattedAddress",
-  "places.location",
-  "places.internationalPhoneNumber",
-  "places.nationalPhoneNumber",
-  "places.websiteUri",
-  "places.rating",
-  "places.userRatingCount",
-  "places.businessStatus",
-  "places.types",
-  "places.googleMapsUri",
-].join(",");
+const PLACE_FIELDS = [
+  "id",
+  "displayName",
+  "formattedAddress",
+  "location",
+  "internationalPhoneNumber",
+  "nationalPhoneNumber",
+  "websiteUri",
+  "rating",
+  "userRatingCount",
+  "businessStatus",
+  "types",
+  "googleMapsUri",
+  "reviews",
+];
+
+const FIELD_MASK = PLACE_FIELDS.map((f) => `places.${f}`).join(",");
+const DETAILS_FIELD_MASK = PLACE_FIELDS.join(",");
+
 
 async function handle403(response: Response): Promise<never> {
   const details: Array<{ reason?: string }> =
@@ -156,14 +203,54 @@ export const searchPlaces = createServerFn({ method: "POST" })
         return { results: [], error: `Google Places: ${res.status}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
+      const collectedAt = new Date().toISOString();
       return {
-        results: (json.places ?? []).map(mapPlace),
+        results: (json.places ?? []).map((p) => mapPlace(p, collectedAt)),
         remaining: quota.remaining,
         plan: quota.plan,
       };
+
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro desconhecido";
       console.error("[places] error", msg);
       return { results: [], error: msg };
     }
   });
+
+// Refresh a single place — does NOT consume monthly search quota.
+// Rate-limit is intentional: 1 refresh a cada 60s por (usuário+place).
+const refreshCache = new Map<string, number>();
+const REFRESH_MIN_INTERVAL_MS = 60_000;
+
+export const refreshPlace = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ place_id: z.string().min(1).max(200) }).parse(input))
+  .handler(async ({ data, context }): Promise<{ place: PlaceResult | null; error?: string }> => {
+    const key = `${context.userId}:${data.place_id}`;
+    const last = refreshCache.get(key) ?? 0;
+    if (Date.now() - last < REFRESH_MIN_INTERVAL_MS) {
+      return { place: null, error: "Aguarde ~1 min antes de atualizar este lead novamente." };
+    }
+    try {
+      const res = await callGateway(
+        `/places/v1/places/${encodeURIComponent(data.place_id)}?languageCode=pt-BR&regionCode=BR`,
+        null,
+        DETAILS_FIELD_MASK,
+        "GET",
+      );
+      if (res.status === 403) await handle403(res);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`[places refresh] ${res.status} ${text}`);
+        return { place: null, error: `Google Places: ${res.status}` };
+      }
+      refreshCache.set(key, Date.now());
+      const p = (await res.json()) as GPlace;
+      return { place: mapPlace(p, new Date().toISOString()) };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro desconhecido";
+      console.error("[places refresh] error", msg);
+      return { place: null, error: msg };
+    }
+  });
+

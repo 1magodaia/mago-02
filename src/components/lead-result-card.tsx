@@ -7,15 +7,18 @@ import {
   ExternalLink,
   Flame,
   Globe,
+  HelpCircle,
   Instagram,
   Loader2,
   MessageCircle,
   Phone,
+  RefreshCw,
   Star,
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
 import { auditWebsite } from "@/lib/audit.functions";
+import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
 import {
   isContacted as chkContacted,
@@ -50,9 +53,28 @@ function toSaved(lead: ScoredLead): SavedLead {
   };
 }
 
+function relTime(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const ms = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(ms) || ms < 0) return null;
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `há ${d}d`;
+  const mo = Math.floor(d / 30);
+  if (mo < 12) return `há ${mo} mês${mo > 1 ? "es" : ""}`;
+  const y = Math.floor(mo / 12);
+  return `há ${y} ano${y > 1 ? "s" : ""}`;
+}
+
 export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshErr, setRefreshErr] = useState<string | null>(null);
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
   const [done, setDone] = useState(() => chkContacted(lead.place_id));
   const [copied, setCopied] = useState<"phone" | "wa" | null>(null);
@@ -68,6 +90,25 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
       console.error(err);
     } finally {
       setAuditing(false);
+    }
+  };
+
+  const runRefresh = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRefreshing(true);
+    setRefreshErr(null);
+    try {
+      const resp = await refreshPlace({ data: { place_id: lead.place_id } });
+      if (resp.error || !resp.place) {
+        setRefreshErr(resp.error ?? "Não foi possível atualizar.");
+        return;
+      }
+      // Preserva a auditoria anterior — refresh só re-lê o Google Places.
+      onUpdate?.(scoreLead(resp.place, lead.audit));
+    } catch (err) {
+      setRefreshErr(err instanceof Error ? err.message : "Falha na atualização.");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -94,6 +135,16 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
     ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
     : null);
 
+  const collectedAgo = relTime(lead.collected_at);
+  const lastReviewAgo = relTime(lead.latest_review_at);
+  // Instagram: sinal só é confiável quando o site foi auditado.
+  const igStatus: "found" | "not_found_on_site" | "unverifiable" = lead.audit?.instagram
+    ? "found"
+    : lead.audit && lead.website
+      ? "not_found_on_site"
+      : "unverifiable";
+
+
   return (
     <article
       onClick={onSelect}
@@ -111,21 +162,66 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
                 <Flame className="h-2.5 w-2.5" /> Sem site
               </span>
             )}
+            {igStatus === "found" && (
+              <a
+                href={lead.audit!.instagram!}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
+                title="Instagram encontrado no site"
+              >
+                <Instagram className="h-2.5 w-2.5" /> Instagram
+              </a>
+            )}
+            {igStatus === "unverifiable" && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
+                title="Sem site conhecido — não conseguimos confirmar Instagram por fonte pública."
+              >
+                <Instagram className="h-2.5 w-2.5" /> não verificável
+              </span>
+            )}
             {lead.rating != null && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                 <Star className="h-3 w-3 text-warn" fill="currentColor" />
-                {lead.rating.toFixed(1)} ({lead.user_ratings_total ?? 0})
+                <span className="font-semibold text-foreground">{lead.rating.toFixed(1)}</span>
+                <span>({lead.user_ratings_total ?? 0})</span>
+                {lastReviewAgo && (
+                  <span className="text-muted-foreground">· última avaliação {lastReviewAgo}</span>
+                )}
               </span>
             )}
           </div>
           <h3 className="mt-1.5 truncate text-base font-bold text-foreground">{lead.name}</h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">{lead.address}</p>
+          {collectedAgo && (
+            <p className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80">
+              <RefreshCw className="h-2.5 w-2.5" aria-hidden />
+              Dados atualizados {collectedAgo}
+              {refreshErr && <span className="text-warn">· {refreshErr}</span>}
+            </p>
+          )}
         </div>
-        <div className="shrink-0 rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
-          <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <button
+            onClick={runRefresh}
+            disabled={refreshing}
+            title="Atualizar dados deste lead (não conta na cota mensal)"
+            aria-label="Atualizar este lead"
+            className="rounded-md bg-glass p-1.5 text-muted-foreground ring-1 ring-border hover:text-primary hover:ring-primary/40 disabled:opacity-60"
+          >
+            {refreshing
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : <RefreshCw className="h-3 w-3" />}
+          </button>
+          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
+            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+          </div>
         </div>
       </header>
+
 
       {lead.reasons.length > 0 && (
         <ul className="flex flex-wrap gap-1.5">
@@ -153,11 +249,21 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
           </div>
           <div>
             <div className="text-[9px] uppercase text-muted-foreground">Social</div>
-            <div className="flex items-center justify-center gap-1 text-xs">
-              {lead.audit.instagram ? <Instagram className="h-3 w-3 text-primary" /> : <span className="text-muted-foreground">—</span>}
-              {lead.audit.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
+            <div
+              className="flex items-center justify-center gap-1 text-xs"
+              title={
+                lead.audit!.instagram
+                  ? "Instagram detectado no site"
+                  : "Site auditado — nenhum link para Instagram encontrado na página"
+              }
+            >
+              {lead.audit!.instagram
+                ? <Instagram className="h-3 w-3 text-primary" />
+                : <span className="inline-flex items-center gap-0.5 text-muted-foreground"><Instagram className="h-3 w-3" /><HelpCircle className="h-2.5 w-2.5" /></span>}
+              {lead.audit!.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
             </div>
           </div>
+
         </div>
       )}
 
