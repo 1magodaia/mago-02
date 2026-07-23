@@ -249,11 +249,21 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
           </div>
           <div>
             <div className="text-[9px] uppercase text-muted-foreground">Social</div>
-            <div className="flex items-center justify-center gap-1 text-xs">
-              {lead.audit.instagram ? <Instagram className="h-3 w-3 text-primary" /> : <span className="text-muted-foreground">—</span>}
-              {lead.audit.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
+            <div
+              className="flex items-center justify-center gap-1 text-xs"
+              title={
+                lead.audit!.instagram
+                  ? "Instagram detectado no site"
+                  : "Site auditado — nenhum link para Instagram encontrado na página"
+              }
+            >
+              {lead.audit!.instagram
+                ? <Instagram className="h-3 w-3 text-primary" />
+                : <span className="inline-flex items-center gap-0.5 text-muted-foreground"><Instagram className="h-3 w-3" /><HelpCircle className="h-2.5 w-2.5" /></span>}
+              {lead.audit!.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
             </div>
           </div>
+
         </div>
       )}
 
