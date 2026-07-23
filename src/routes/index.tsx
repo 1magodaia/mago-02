@@ -245,8 +245,9 @@ function Home() {
     <div className="min-h-screen">
       {/* NAV */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link to="/" aria-label="Busca Mágica — início">
-          <LogoWordmark />
+        <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
+          <LogoIcon className="h-9 w-9 sm:hidden" />
+          <span className="hidden sm:block"><LogoWordmark /></span>
         </Link>
         <div className="flex items-center gap-2">
           {user && (
@@ -317,30 +318,29 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pt-10">
-        <div className="max-w-3xl">
+      <header className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pt-14">
+        <div className="mx-auto flex max-w-3xl flex-col items-center text-center sm:mx-0 sm:items-start sm:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
           </div>
-          <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 sm:gap-6">
-            <LogoIcon className="h-20 w-20 shrink-0 drop-shadow-[0_8px_24px_rgba(107,70,224,0.45)] sm:h-32 sm:w-32" />
-            <div className="min-w-0">
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-                <span className="text-foreground">Busca</span>{" "}
-                <span className="bg-gradient-to-r from-primary via-primary to-warn bg-clip-text text-transparent">
-                  Mágica
-                </span>
-              </h1>
-              <p className="mt-2 text-base font-semibold text-warn sm:mt-3 sm:text-2xl">
-                Encontre seus leads antes da concorrência.
-              </p>
-            </div>
-          </div>
-          <p className="mt-5 max-w-xl text-sm text-muted-foreground sm:text-base">
+
+          <LogoIcon className="mt-8 h-32 w-32 shrink-0 drop-shadow-[0_10px_30px_rgba(107,70,224,0.55)] sm:h-44 sm:w-44" />
+
+          <h1 className="mt-6 text-5xl font-black leading-[1.02] tracking-tight sm:text-7xl">
+            <span className="text-white">Busca</span>{" "}
+            <span className="text-warn">Mágica</span>
+          </h1>
+
+          <p className="mt-4 max-w-xl text-lg font-medium text-muted-foreground sm:text-xl">
+            Encontre seus leads antes da concorrência.
+          </p>
+
+          <p className="mt-6 max-w-xl text-sm text-muted-foreground/80 sm:text-base">
             Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
             (WHOIS + sitemap) para achar quem está com presença digital fraca.
           </p>
         </div>
+
 
 
         {gpsError && (
