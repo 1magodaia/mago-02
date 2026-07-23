@@ -44,31 +44,31 @@
 
 :root {
   --radius: 0.9rem;
-  /* Cyber-Marketing: Preto absoluto + Verde Matrix + Amarelo Ouro */
-  --background: oklch(0 0 0);                    /* #000 */
-  --foreground: oklch(1 0 0);                    /* #FFF */
-  --card: oklch(0.14 0 0 / 0.85);                /* #111 alpha */
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.1 0 0);
-  --popover-foreground: oklch(1 0 0);
-  --primary: oklch(0.87 0.29 142);               /* ~#00FF41 Verde Neon */
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.18 0 0);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.16 0 0);
-  --muted-foreground: oklch(0.72 0 0);           /* ~#A1A1AA */
-  --accent: oklch(0.87 0.29 142);
-  --accent-foreground: oklch(0.12 0 0);
+  /* Brand: extraído da logo Busca Mágica — Roxo real + Dourado + Fundo noite */
+  --background: oklch(0.11 0.03 275);            /* ~#0A0B1F noite profunda */
+  --foreground: oklch(0.98 0.005 275);           /* branco leve */
+  --card: oklch(0.16 0.035 278 / 0.9);           /* painel roxo-escuro */
+  --card-foreground: oklch(0.98 0.005 275);
+  --popover: oklch(0.13 0.035 278);
+  --popover-foreground: oklch(0.98 0.005 275);
+  --primary: oklch(0.58 0.22 285);               /* ~#6B46E0 Roxo Mágico */
+  --primary-foreground: oklch(0.99 0.005 275);
+  --secondary: oklch(0.22 0.04 280);
+  --secondary-foreground: oklch(0.98 0.005 275);
+  --muted: oklch(0.2 0.03 280);
+  --muted-foreground: oklch(0.72 0.02 280);
+  --accent: oklch(0.58 0.22 285);
+  --accent-foreground: oklch(0.99 0.005 275);
   --destructive: oklch(0.65 0.24 25);
   --destructive-foreground: oklch(1 0 0);
-  --emerald: oklch(0.87 0.29 142);               /* alias verde neon */
-  --emerald-foreground: oklch(0.12 0 0);
-  --warn: oklch(0.87 0.18 92);                   /* ~#FFD700 Ouro */
-  --warn-foreground: oklch(0.15 0 0);
-  --border: oklch(1 0 0 / 0.08);
+  --emerald: oklch(0.72 0.16 158);               /* saúde/OK — verde suave */
+  --emerald-foreground: oklch(0.12 0.02 275);
+  --warn: oklch(0.8 0.14 75);                    /* ~#E4A94A Dourado da logo */
+  --warn-foreground: oklch(0.18 0.03 275);
+  --border: oklch(1 0 0 / 0.09);
   --input: oklch(1 0 0 / 0.1);
-  --ring: oklch(0.87 0.29 142);
-  --glass: oklch(1 0 0 / 0.035);
+  --ring: oklch(0.58 0.22 285);
+  --glass: oklch(1 0 0 / 0.04);
 }
 
 @layer base {

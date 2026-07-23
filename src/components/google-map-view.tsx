@@ -57,8 +57,8 @@ const DARK_STYLE: google.maps.MapTypeStyle[] = [
 ];
 
 const STATUS_COLOR: Record<ScoredLead["status"], string> = {
-  hot: "#00FF41",
-  warm: "#FFD700",
+  hot: "#7C4DFF",
+  warm: "#E4A94A",
   cold: "#6b7280",
 };
 
@@ -110,7 +110,7 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 7,
-        fillColor: "#00FF41",
+        fillColor: "#7C4DFF",
         fillOpacity: 1,
         strokeColor: "#000",
         strokeWeight: 2,
@@ -121,10 +121,10 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
       map,
       center,
       radius: radiusKm * 1000,
-      strokeColor: "#00FF41",
+      strokeColor: "#7C4DFF",
       strokeOpacity: 0.8,
       strokeWeight: 1.5,
-      fillColor: "#00FF41",
+      fillColor: "#7C4DFF",
       fillOpacity: 0.05,
     });
     const bounds = circleRef.current.getBounds();
