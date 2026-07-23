@@ -13,15 +13,15 @@ L.Icon.Default.mergeOptions({
 });
 
 const STATUS_COLOR = {
-  red: "#ef4444",
-  yellow: "#f59e0b",
-  green: "#10b981",
+  red: "#00FF41",     // hot lead = verde neon (alta oportunidade)
+  yellow: "#FFD700",  // morno = amarelo ouro
+  green: "#6b7280",   // saudável = cinza (baixa oportunidade)
 } as const;
 
 function pinIcon(color: string) {
   return L.divIcon({
     className: "",
-    html: `<span style="display:block;width:18px;height:18px;border-radius:50%;background:${color};box-shadow:0 0 0 4px ${color}33,0 0 12px ${color};border:2px solid #0F172A"></span>`,
+    html: `<span style="display:block;width:18px;height:18px;border-radius:50%;background:${color};box-shadow:0 0 0 4px ${color}33,0 0 14px ${color};border:2px solid #000"></span>`,
     iconSize: [18, 18],
     iconAnchor: [9, 9],
   });
