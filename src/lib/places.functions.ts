@@ -216,3 +216,41 @@ export const searchPlaces = createServerFn({ method: "POST" })
       return { results: [], error: msg };
     }
   });
+
+// Refresh a single place — does NOT consume monthly search quota.
+// Rate-limit is intentional: 1 refresh a cada 60s por (usuário+place).
+const refreshCache = new Map<string, number>();
+const REFRESH_MIN_INTERVAL_MS = 60_000;
+
+export const refreshPlace = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ place_id: z.string().min(1).max(200) }).parse(input))
+  .handler(async ({ data, context }): Promise<{ place: PlaceResult | null; error?: string }> => {
+    const key = `${context.userId}:${data.place_id}`;
+    const last = refreshCache.get(key) ?? 0;
+    if (Date.now() - last < REFRESH_MIN_INTERVAL_MS) {
+      return { place: null, error: "Aguarde ~1 min antes de atualizar este lead novamente." };
+    }
+    try {
+      const res = await callGateway(
+        `/places/v1/places/${encodeURIComponent(data.place_id)}?languageCode=pt-BR&regionCode=BR`,
+        null,
+        DETAILS_FIELD_MASK,
+        "GET",
+      );
+      if (res.status === 403) await handle403(res);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`[places refresh] ${res.status} ${text}`);
+        return { place: null, error: `Google Places: ${res.status}` };
+      }
+      refreshCache.set(key, Date.now());
+      const p = (await res.json()) as GPlace;
+      return { place: mapPlace(p, new Date().toISOString()) };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro desconhecido";
+      console.error("[places refresh] error", msg);
+      return { place: null, error: msg };
+    }
+  });
+
