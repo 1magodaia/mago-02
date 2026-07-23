@@ -60,23 +60,45 @@ interface GPlace {
 }
 
 
-async function callGateway(path: string, body: object, fieldMask: string): Promise<Response> {
+async function callGateway(
+  path: string,
+  body: object | null,
+  fieldMask: string,
+  method: "POST" | "GET" = "POST",
+): Promise<Response> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
   if (!apiKey || !lovableKey) throw new Error("Missing Google Maps connector credentials");
   return fetch(`${GATEWAY}${path}`, {
-    method: "POST",
+    method,
     headers: {
       Authorization: `Bearer ${lovableKey}`,
       "X-Connection-Api-Key": apiKey,
       "Content-Type": "application/json",
       "X-Goog-FieldMask": fieldMask,
     },
-    body: JSON.stringify(body),
+    body: method === "GET" ? undefined : JSON.stringify(body ?? {}),
   });
 }
 
-function mapPlace(p: GPlace): PlaceResult {
+function pickLatestReview(reviews: GReview[] | undefined): {
+  latest: string | null;
+  list: PlaceReview[];
+} {
+  if (!reviews?.length) return { latest: null, list: [] };
+  const list: PlaceReview[] = reviews
+    .filter((r) => r.publishTime)
+    .map((r) => ({
+      publish_time: r.publishTime!,
+      rating: r.rating ?? null,
+      author: r.authorAttribution?.displayName ?? null,
+    }))
+    .sort((a, b) => Date.parse(b.publish_time) - Date.parse(a.publish_time));
+  return { latest: list[0]?.publish_time ?? null, list };
+}
+
+function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
+  const { latest, list } = pickLatestReview(p.reviews);
   return {
     place_id: p.id,
     name: p.displayName?.text ?? "Sem nome",
@@ -90,23 +112,31 @@ function mapPlace(p: GPlace): PlaceResult {
     business_status: p.businessStatus ?? null,
     types: p.types ?? [],
     google_maps_uri: p.googleMapsUri ?? null,
+    latest_review_at: latest,
+    reviews: list,
+    collected_at: collectedAt,
   };
 }
 
-const FIELD_MASK = [
-  "places.id",
-  "places.displayName",
-  "places.formattedAddress",
-  "places.location",
-  "places.internationalPhoneNumber",
-  "places.nationalPhoneNumber",
-  "places.websiteUri",
-  "places.rating",
-  "places.userRatingCount",
-  "places.businessStatus",
-  "places.types",
-  "places.googleMapsUri",
-].join(",");
+const PLACE_FIELDS = [
+  "id",
+  "displayName",
+  "formattedAddress",
+  "location",
+  "internationalPhoneNumber",
+  "nationalPhoneNumber",
+  "websiteUri",
+  "rating",
+  "userRatingCount",
+  "businessStatus",
+  "types",
+  "googleMapsUri",
+  "reviews",
+];
+
+const FIELD_MASK = PLACE_FIELDS.map((f) => `places.${f}`).join(",");
+const DETAILS_FIELD_MASK = PLACE_FIELDS.join(",");
+
 
 async function handle403(response: Response): Promise<never> {
   const details: Array<{ reason?: string }> =
