@@ -1027,7 +1027,8 @@ function Home() {
         </section>
 
         <section
-          className={`glass-panel overflow-hidden rounded-2xl ${mobileTab === "map" ? "block h-[70svh] max-h-[70dvh]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`}
+          className={`glass-panel overflow-hidden rounded-2xl ${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`}
+          style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
         >
           <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
