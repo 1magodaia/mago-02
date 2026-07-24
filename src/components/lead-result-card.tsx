@@ -169,6 +169,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const waLink = lead.audit?.whatsapp_link ?? (lead.phone
     ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
     : null);
+  // Fonte do WhatsApp: "site" = link real encontrado no HTML; "phone" = derivado do telefone (presunção).
+  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
+  const waVerified = waSource === "site";
 
   const collectedAgo = relTime(lead.collected_at);
   const lastReviewAgo = relTime(lead.latest_review_at);
