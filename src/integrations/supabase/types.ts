@@ -89,6 +89,9 @@ export type Database = {
           ai_selection_mode: string
           citations_daily_limit: number
           citations_enabled: boolean
+          hero_fit: string
+          hero_height_desktop: number
+          hero_height_mobile: number
           hero_image_url: string | null
           id: number
           support_message: string | null
@@ -101,6 +104,9 @@ export type Database = {
           ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
+          hero_fit?: string
+          hero_height_desktop?: number
+          hero_height_mobile?: number
           hero_image_url?: string | null
           id?: number
           support_message?: string | null
@@ -113,6 +119,9 @@ export type Database = {
           ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
+          hero_fit?: string
+          hero_height_desktop?: number
+          hero_height_mobile?: number
           hero_image_url?: string | null
           id?: number
           support_message?: string | null
@@ -412,6 +421,9 @@ export type Database = {
         Row: {
           citations_daily_limit: number | null
           citations_enabled: boolean | null
+          hero_fit: string | null
+          hero_height_desktop: number | null
+          hero_height_mobile: number | null
           hero_image_url: string | null
           id: number | null
           support_message: string | null
@@ -421,6 +433,9 @@ export type Database = {
         Insert: {
           citations_daily_limit?: number | null
           citations_enabled?: boolean | null
+          hero_fit?: string | null
+          hero_height_desktop?: number | null
+          hero_height_mobile?: number | null
           hero_image_url?: string | null
           id?: number | null
           support_message?: string | null
@@ -430,6 +445,9 @@ export type Database = {
         Update: {
           citations_daily_limit?: number | null
           citations_enabled?: boolean | null
+          hero_fit?: string | null
+          hero_height_desktop?: number | null
+          hero_height_mobile?: number | null
           hero_image_url?: string | null
           id?: number | null
           support_message?: string | null
