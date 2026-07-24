@@ -367,6 +367,39 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_change_log: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          id: string
+          new_message: string | null
+          new_whatsapp: string | null
+          old_message: string | null
+          old_whatsapp: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_message?: string | null
+          new_whatsapp?: string | null
+          old_message?: string | null
+          old_whatsapp?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          id?: string
+          new_message?: string | null
+          new_whatsapp?: string | null
+          old_message?: string | null
+          old_whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
