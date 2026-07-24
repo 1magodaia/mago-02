@@ -1007,7 +1007,9 @@ function Home() {
                   onSelect={() => setSelected(lead.place_id)}
                   onUpdate={updateOne}
                   citationsAvailable={citationsAvailable}
+                  highlight={highlightTerms}
                 />
+
               </div>
             );
           })}
