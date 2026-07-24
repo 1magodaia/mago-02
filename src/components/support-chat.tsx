@@ -116,7 +116,8 @@ export function SupportChat() {
     <>
       {open && (
         <div
-          className="fixed inset-x-3 bottom-[8.5rem] z-[999] flex max-h-[65vh] w-auto flex-col overflow-hidden rounded-2xl border border-primary/40 bg-popover shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-24 sm:h-[560px] sm:max-h-[calc(100vh-8rem)] sm:w-[360px]"
+          className="fixed inset-x-3 z-[999] flex max-h-[65vh] w-auto flex-col overflow-hidden rounded-2xl border border-primary/40 bg-popover shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-24 sm:h-[560px] sm:max-h-[calc(100vh-8rem)] sm:w-[360px]"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 8.5rem)" }}
           role="dialog"
           aria-label="Chat de suporte"
         >
