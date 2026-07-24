@@ -33,7 +33,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
     return {
       profile: (profile as Profile | null) ?? null,
       roles: (roles ?? []).map((r) => r.role as string),
-      freeLimit: FREE_MONTHLY_SEARCH_LIMIT,
+      freeLimit: FREE_LIFETIME_SEARCH_LIMIT,
     };
   });
 
