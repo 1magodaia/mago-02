@@ -932,94 +932,92 @@ function Home() {
         )}
       </header>
 
-      {/* TABS MOBILE */}
-      <div className="mx-auto mb-3 flex max-w-7xl gap-1 px-4 sm:px-6 lg:hidden" role="tablist">
-        <button
-          role="tab"
-          aria-selected={mobileTab === "list"}
-          onClick={() => setMobileTab("list")}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "list" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
-        >
-          <List className="h-3.5 w-3.5" /> Lista
-        </button>
-        <button
-          role="tab"
-          aria-selected={mobileTab === "map"}
-          onClick={() => setMobileTab("map")}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "map" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
-        >
-          <MapIcon className="h-3.5 w-3.5" /> Mapa
-        </button>
-      </div>
+      {/* TABS MOBILE — só aparecem quando há resultado, para não competir com o mapa vazio */}
+      {rawResults.length > 0 && (
+        <div className="mx-auto mb-3 flex max-w-7xl gap-1 px-4 sm:px-6 lg:hidden" role="tablist">
+          <button
+            role="tab"
+            aria-selected={mobileTab === "list"}
+            onClick={() => setMobileTab("list")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "list" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+          >
+            <List className="h-3.5 w-3.5" /> Lista ({filtered.length})
+          </button>
+          <button
+            role="tab"
+            aria-selected={mobileTab === "map"}
+            onClick={() => setMobileTab("map")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "map" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+          >
+            <MapIcon className="h-3.5 w-3.5" /> Mapa
+          </button>
+        </div>
+      )}
 
-      <main className="mx-auto grid max-w-7xl gap-4 px-4 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_1.1fr]">
-        <section
-          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
-          aria-label="Resultados"
-        >
-          {loading && (
-            <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-              <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-              <p className="mt-2">Consultando Google Places...</p>
-            </div>
-          )}
-          {!loading && rawResults.length === 0 && (
-            <div className="glass-panel rounded-2xl p-6 text-center">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
-                <Search className="h-5 w-5 text-primary" />
+      <main
+        className={`mx-auto grid max-w-7xl gap-4 px-4 pb-16 sm:px-6 ${
+          rawResults.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_1.1fr]" : "lg:grid-cols-1"
+        }`}
+      >
+        {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
+        {rawResults.length > 0 && (
+          <section
+            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
+            aria-label="Resultados"
+          >
+            {loading && (
+              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+                <p className="mt-2">Consultando Google Places...</p>
               </div>
-              <p className="mt-3 text-sm text-foreground">
-                Digite uma categoria e uma região acima para começar.
+            )}
+            {!loading && filtered.length === 0 && (
+              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              </div>
+            )}
+            {filtered.map((lead) => {
+              const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+              return (
+                <div key={lead.place_id} className="space-y-1">
+                  {sport && (
+                    <div className="flex">
+                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                        <span>{sport.emoji}</span>
+                        <span>{sport.label}</span>
+                      </span>
+                    </div>
+                  )}
+                  <LeadResultCard
+                    lead={lead}
+                    selected={selected === lead.place_id}
+                    onSelect={() => setSelected(lead.place_id)}
+                    onUpdate={updateOne}
+                    citationsAvailable={citationsAvailable}
+                    highlight={highlightTerms}
+                  />
+
+                </div>
+              );
+            })}
+            {filtered.length > 0 && (
+              <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
+                <Info className="h-3 w-3" aria-hidden />
+                <span title="Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos '—'. 'Atividade' é uma estimativa baseada na última modificação do sitemap.xml.">
+                  Sobre a auditoria (passe o mouse)
+                </span>
               </p>
-              {!user && (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free ganha {FREE_LIFETIME_SEARCH_LIMIT} busca de cortesia.
-                </p>
-              )}
-            </div>
-          )}
+            )}
+          </section>
+        )}
 
-          {!loading && rawResults.length > 0 && filtered.length === 0 && (
-            <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-              Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
-            </div>
-          )}
-          {filtered.map((lead) => {
-            const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
-            return (
-              <div key={lead.place_id} className="space-y-1">
-                {sport && (
-                  <div className="flex">
-                    <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
-                      <span>{sport.emoji}</span>
-                      <span>{sport.label}</span>
-                    </span>
-                  </div>
-                )}
-                <LeadResultCard
-                  lead={lead}
-                  selected={selected === lead.place_id}
-                  onSelect={() => setSelected(lead.place_id)}
-                  onUpdate={updateOne}
-                  citationsAvailable={citationsAvailable}
-                  highlight={highlightTerms}
-                />
-
-              </div>
-            );
-          })}
-          {filtered.length > 0 && (
-            <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
-              <Info className="h-3 w-3" aria-hidden />
-              <span title="Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos '—'. 'Atividade' é uma estimativa baseada na última modificação do sitemap.xml.">
-                Sobre a auditoria (passe o mouse)
-              </span>
-            </p>
-          )}
-        </section>
-
+        {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
         <section
-          className={`glass-panel overflow-hidden rounded-2xl ${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`}
+          className={`glass-panel relative overflow-hidden rounded-2xl ${
+            rawResults.length > 0
+              ? `${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
+              : "block h-[65svh] max-h-[calc(100dvh-10rem)] lg:h-[calc(100vh-14rem)]"
+          }`}
           style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
         >
@@ -1035,6 +1033,26 @@ function Home() {
               />
             </Suspense>
           </ClientOnly>
+
+          {/* Overlay: instrução de pin quando o mapa está vazio */}
+          {rawResults.length === 0 && !loading && (
+            <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2 rounded-full bg-background/85 px-4 py-2 text-[11px] font-semibold text-foreground shadow-elevated ring-1 ring-border backdrop-blur-md sm:text-xs">
+              <MapPin className="mr-1.5 inline h-3.5 w-3.5 text-primary" />
+              Toque no mapa para escolher o centro, ou digite acima e clique em <span className="text-primary">Buscar</span>.
+            </div>
+          )}
+
+          {/* Botão flutuante "Buscar aqui" — aparece quando um pin foi fixado manualmente */}
+          {pinned && (
+            <button
+              onClick={runSearch}
+              disabled={loading}
+              className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-elevated ring-2 ring-primary/40 transition hover:brightness-110 disabled:opacity-60"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              Buscar aqui
+            </button>
+          )}
         </section>
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
