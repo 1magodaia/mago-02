@@ -309,10 +309,12 @@ function Home() {
       const sMap: Record<string, string> = {};
       let lastRemaining: number | null = null;
       let firstError: string | null = null;
+      let quotaHit = false;
       for (const item of responses) {
         if (!item) continue;
         const { qi, r } = item;
         if (r.error && !firstError) firstError = r.error;
+        if ((r as { quotaExhausted?: boolean }).quotaExhausted) quotaHit = true;
         if (typeof r.remaining === "number") lastRemaining = r.remaining;
         for (const p of r.results) {
           if (seen.has(p.place_id)) continue;
@@ -322,6 +324,7 @@ function Home() {
         }
       }
       if (firstError && merged.length === 0) setSearchError(firstError);
+      if (quotaHit) setQuotaBlocked(true);
       if (lastRemaining != null) setRemaining(lastRemaining);
       setSportsMap(sMap);
       setRawResults(merged.map((p) => scoreLead(p)));
