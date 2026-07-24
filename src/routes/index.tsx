@@ -100,6 +100,43 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-solicita GPS ao montar (opt-in): reaproveita coordenadas em cache
+  // e só dispara o prompt do browser se o usuário ainda não negou explicitamente.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const pref = localStorage.getItem("bm.geoPref"); // "granted" | "denied" | null
+    try {
+      const cachedRaw = localStorage.getItem("bm.geoCoords");
+      if (cachedRaw) {
+        const c = JSON.parse(cachedRaw) as { lat?: number; lng?: number };
+        if (typeof c.lat === "number" && typeof c.lng === "number") {
+          setCenter({ lat: c.lat, lng: c.lng });
+          if (pref === "granted") setUsingGps(true);
+        }
+      }
+    } catch { /* ignore */ }
+    if (pref === "denied" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setCenter(coords);
+        setUsingGps(true);
+        setGpsError(null);
+        try {
+          localStorage.setItem("bm.geoPref", "granted");
+          localStorage.setItem("bm.geoCoords", JSON.stringify({ ...coords, ts: Date.now() }));
+        } catch { /* quota */ }
+      },
+      (err) => {
+        if (err.code === 1 /* PERMISSION_DENIED */) {
+          try { localStorage.setItem("bm.geoPref", "denied"); } catch { /* ignore */ }
+        }
+        setGpsError(err.message || null);
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  }, []);
+
   const requireAuth = (): boolean => {
     if (!user) {
       nav({ to: "/auth", search: { redirect: "/" } });
@@ -116,19 +153,28 @@ function Home() {
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setCenter(coords);
         setUsingGps(true);
         setGpsError(null);
         setLocating(false);
+        try {
+          localStorage.setItem("bm.geoPref", "granted");
+          localStorage.setItem("bm.geoCoords", JSON.stringify({ ...coords, ts: Date.now() }));
+        } catch { /* ignore */ }
       },
       (err) => {
         setGpsError(err.message || "Permissão negada.");
         setUsingGps(false);
         setLocating(false);
+        if (err.code === 1) {
+          try { localStorage.setItem("bm.geoPref", "denied"); } catch { /* ignore */ }
+        }
       },
       { enableHighAccuracy: true, timeout: 8000 },
     );
   };
+
 
   const runSearchWith = async (q: string, r: string) => {
     if (!requireAuth()) return;
