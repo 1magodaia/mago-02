@@ -280,8 +280,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           </div>
         );
       })()}
-
-
+      <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
 
 
       {lead.reasons.length > 0 && (
