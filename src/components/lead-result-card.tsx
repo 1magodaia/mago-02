@@ -372,9 +372,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-[11px] font-semibold text-primary-foreground hover:brightness-110"
+            title={waVerified
+              ? "Link de WhatsApp encontrado no site oficial"
+              : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
+            className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
           >
-            <MessageCircle className="h-3 w-3" /> Whats
+            <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
           </a>
         )}
       </div>
