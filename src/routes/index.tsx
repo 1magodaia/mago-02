@@ -105,11 +105,8 @@ export const Route = createFileRoute("/")({
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
 
-const SUGGESTIONS = [
-  { label: "Salão de beleza · São Paulo", query: "salão de beleza", region: "São Paulo" },
-  { label: "Pet shop · Rio de Janeiro", query: "pet shop", region: "Rio de Janeiro" },
-  { label: "Advogado · Belo Horizonte", query: "advogado", region: "Belo Horizonte" },
-];
+
+
 
 
 function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onClose: () => void }) {
