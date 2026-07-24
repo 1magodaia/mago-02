@@ -743,29 +743,29 @@ function Home() {
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
         <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
-          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
-            <Filter className="h-4 w-4 text-muted-foreground" aria-hidden />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Categoria (padaria, pet shop, advogado...)"
-              aria-label="Categoria de comércio"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-          </label>
-          <label className={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}>
-            <MapPin className="h-4 w-4 text-primary" aria-hidden />
-            <input
-              disabled={usingGps}
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Cidade, bairro ou endereço"
-              aria-label="Região"
-              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            />
-          </label>
+          <SmartAutocomplete
+            value={query}
+            onChange={setQuery}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Categoria (padaria, pet shop, advogado...)"
+            aria-label="Categoria de comércio"
+            staticList={CATEGORY_SUGGESTIONS}
+            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+          />
+          <SmartAutocomplete
+            value={region}
+            onChange={setRegion}
+            onSelect={onSelectRegion}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Cidade, bairro ou endereço"
+            aria-label="Região"
+            asyncSource={regionSource}
+            disabled={usingGps}
+            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+          />
+
           <button
             onClick={runSearch}
             disabled={loading}
