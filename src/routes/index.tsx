@@ -377,6 +377,10 @@ function Home() {
           localStorage.setItem("bm.geoPref", "granted");
           localStorage.setItem("bm.geoCoords", JSON.stringify({ ...coords, ts: Date.now() }));
         } catch { /* ignore */ }
+        // Preenche o endereço automaticamente via reverse geocoding
+        reverseGeocodeFn({ data: coords })
+          .then((r) => { if (r.address) setRegion(r.address); })
+          .catch(() => { /* silencioso: coordenadas já bastam */ });
       },
       (err) => {
         setGpsError(err.message || "Permissão negada.");
@@ -388,6 +392,7 @@ function Home() {
       },
       { enableHighAccuracy: true, timeout: 8000 },
     );
+
   };
 
 
