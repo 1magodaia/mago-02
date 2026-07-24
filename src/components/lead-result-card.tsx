@@ -601,14 +601,10 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
-        <button
-          type="button"
-          aria-label="Origem dos dados de CNPJ"
-          title="Dados públicos consultados na BrasilAPI (Receita Federal) a partir do CNPJ localizado no site. A data de abertura e a situação cadastral referem-se à empresa como pessoa jurídica — não representam necessariamente o tempo de operação neste endereço específico."
-          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <HelpCircle className="h-3 w-3" />
-        </button>
+        <HelpTip
+          title="CNPJ / Razão social"
+          text="Dado oficial da Receita Federal, encontrado no site do comércio. Pode, em raros casos, pertencer à agência que fez o site em vez do comércio em si — vale conferir se tiver dúvida."
+        />
         <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${
           isAtiva ? "bg-emerald-500/10 text-emerald-300 ring-emerald-400/30" : "bg-red-500/15 text-red-300 ring-red-400/40"
         }`}>{situacao}</span>
