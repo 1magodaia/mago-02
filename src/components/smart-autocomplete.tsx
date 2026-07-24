@@ -253,7 +253,11 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
       onKeyDown?.(e);
     };
 
+    const hasQuery = value.trim().length >= minChars;
     const showList = autocomplete && open && items.length > 0;
+    const showLoading = autocomplete && open && hasQuery && loading && items.length === 0;
+    const showEmpty = autocomplete && open && hasQuery && !loading && searched && items.length === 0;
+    const showPanel = showList || showLoading || showEmpty;
 
     return (
       <div ref={rootRef} className="relative w-full">
@@ -291,41 +295,67 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
             className={className}
           />
         </label>
-        {showList && (
-          <ul
-            id={listId}
-            role="listbox"
-            className="absolute z-[1000] mt-1 max-h-72 w-full overflow-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
+        {showPanel && (
+          <div
+            className="absolute z-[1000] mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
           >
-            {items.map((it, idx) => (
-              <li
-                key={it.id}
-                id={`${listId}-opt-${idx}`}
-                role="option"
-                aria-selected={idx === highlight}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  commit(it);
-                }}
-                onMouseEnter={() => setHighlight(idx)}
-                className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm ${
-                  idx === highlight
-                    ? "bg-primary/15 text-primary-foreground"
-                    : "hover:bg-muted/40"
-                }`}
+            {showLoading && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground"
               >
-                <div className="truncate font-medium">{it.label}</div>
-                {it.secondary && (
-                  <div className="truncate text-xs text-muted-foreground">{it.secondary}</div>
-                )}
-              </li>
-            ))}
-          </ul>
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-primary/40 border-t-primary" aria-hidden />
+                Carregando sugestões...
+              </div>
+            )}
+            {showEmpty && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="px-4 py-3 text-sm text-muted-foreground"
+              >
+                Nenhum resultado encontrado para "{value.trim()}".
+              </div>
+            )}
+            {showList && (
+              <ul
+                id={listId}
+                role="listbox"
+                className="max-h-72 overflow-auto"
+              >
+                {items.map((it, idx) => (
+                  <li
+                    key={it.id}
+                    id={`${listId}-opt-${idx}`}
+                    role="option"
+                    aria-selected={idx === highlight}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      commit(it);
+                    }}
+                    onMouseEnter={() => setHighlight(idx)}
+                    className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm ${
+                      idx === highlight
+                        ? "bg-primary/15 text-primary-foreground"
+                        : "hover:bg-muted/40"
+                    }`}
+                  >
+                    <div className="truncate font-medium">{it.label}</div>
+                    {it.secondary && (
+                      <div className="truncate text-xs text-muted-foreground">{it.secondary}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
     );
   },
 );
+
 
 function mergeUnique(a: SuggestionItem[], b: SuggestionItem[], max: number): SuggestionItem[] {
   const seen = new Set<string>();
