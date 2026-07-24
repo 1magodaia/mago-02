@@ -21,6 +21,7 @@ export interface DigitalAudit {
   facebook: string | null;
   whatsapp_link: string | null;
   whatsapp_source: "site" | "phone" | null; // "site" = link real no HTML; "phone" = derivado do telefone (presumido)
+  email: string | null;
   sitemap_lastmod: string | null;
   domain_registered_at: string | null;
   domain_expires_at: string | null;
@@ -29,6 +30,7 @@ export interface DigitalAudit {
   audited_at: string;
   note: string;
 }
+
 
 const FETCH_TIMEOUT_MS = 5000;
 const MAX_HTML_BYTES = 300_000;
