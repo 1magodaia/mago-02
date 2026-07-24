@@ -1175,9 +1175,9 @@ function AiKeysPanel() {
     setWizBusy(true);
     try {
       const res = await wizard({ data: {
-        provider: "nvidia",
+        provider: wiz.provider,
         api_key: key,
-        model: wiz.model?.trim() || PROVIDER_MODELS.nvidia?.default || null,
+        model: wiz.model?.trim() || PROVIDER_MODELS[wiz.provider]?.default || null,
       }});
       setWizResult(res);
       setWiz({ ...wiz, api_key: "" });
@@ -1188,6 +1188,7 @@ function AiKeysPanel() {
       setWizBusy(false);
     }
   }
+
 
 
 
@@ -1294,23 +1295,38 @@ function AiKeysPanel() {
         <form onSubmit={runWizard} className="mb-4 rounded-xl bg-primary/5 p-4 ring-1 ring-primary/30">
           <div className="mb-3 flex items-center gap-2">
             <Wand2 className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-extrabold">Configurar IA NVIDIA</h3>
+            <h3 className="text-sm font-extrabold">Configurar IA</h3>
             <span className="ml-auto rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
-              pronto em 2 passos
+              3 passos
             </span>
           </div>
           <p className="mb-3 text-[11px] text-muted-foreground">
-            Cole a chave exatamente como veio do site (<b>build.nvidia.com</b>) e escolha um modelo. O app assume o resto — nome e rótulo já são fixos.
+            Escolha o provedor, cole a chave exatamente como veio do site oficial e selecione um modelo. O app assume o resto.
           </p>
-          <div className="grid gap-2 sm:grid-cols-[1fr_260px_auto]">
+          <div className="grid gap-2 sm:grid-cols-[180px_1fr_240px_auto]">
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">1 · Chave da API</label>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">1 · Provedor</label>
+              <select
+                value={wiz.provider}
+                onChange={(e) => {
+                  const next = e.target.value as AiProviderKey["provider"];
+                  setWiz({ ...wiz, provider: next, model: PROVIDER_MODELS[next]?.default ?? "" });
+                }}
+                className="w-full rounded-md bg-background px-2 py-2 text-xs font-bold ring-1 ring-border [color-scheme:dark]"
+              >
+                {(Object.keys(PROVIDER_LABEL) as AiProviderKey["provider"][]).map((p) => (
+                  <option key={p} className="bg-background text-foreground" value={p}>{PROVIDER_LABEL[p]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">2 · Chave da API</label>
               <div className="flex items-center gap-1">
                 <input
                   type={wiz.show ? "text" : "password"}
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder="nvapi-..."
+                  placeholder={wiz.provider === "nvidia" ? "nvapi-..." : wiz.provider === "openai" ? "sk-..." : "cole a chave aqui"}
                   value={wiz.api_key}
                   onChange={(e) => setWiz({ ...wiz, api_key: e.target.value })}
                   className="w-full rounded-md bg-background px-2 py-2 text-sm font-mono ring-1 ring-border"
@@ -1326,13 +1342,13 @@ function AiKeysPanel() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">2 · Modelo</label>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">3 · Modelo</label>
               <select
-                value={wiz.model || (PROVIDER_MODELS.nvidia?.default ?? "")}
+                value={wiz.model || (PROVIDER_MODELS[wiz.provider]?.default ?? "")}
                 onChange={(e) => setWiz({ ...wiz, model: e.target.value })}
                 className="w-full rounded-md bg-background px-2 py-2 text-xs font-mono ring-1 ring-border [color-scheme:dark]"
               >
-                {(PROVIDER_MODELS.nvidia?.options ?? []).map((m) => (
+                {(PROVIDER_MODELS[wiz.provider]?.options ?? []).map((m) => (
                   <option key={m} className="bg-background text-foreground" value={m}>{m}</option>
                 ))}
               </select>
@@ -1347,6 +1363,7 @@ function AiKeysPanel() {
               </button>
             </div>
           </div>
+
 
 
           {wizErr && (
