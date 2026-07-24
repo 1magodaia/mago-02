@@ -19,6 +19,7 @@ import {
   Search,
   Shield,
   MessageCircle,
+  X,
   Star,
   User as UserIcon,
 } from "lucide-react";
