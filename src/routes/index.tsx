@@ -258,6 +258,7 @@ function Home() {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setCenter(coords);
         setUsingGps(true);
+        setPinned(false);
         setGpsError(null);
         setLocating(false);
         try {
