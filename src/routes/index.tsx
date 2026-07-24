@@ -91,8 +91,14 @@ function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [showTutorialBadge, setShowTutorialBadge] = useState(false);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
+
+  useEffect(() => {
+    setShowTutorialBadge(!hasSeenTutorial());
+  }, []);
 
   useEffect(() => {
     readSettings()
