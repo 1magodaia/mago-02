@@ -121,15 +121,24 @@ function formatCnpj(digits: string): string {
 
 function extractCnpjFromHtml(html: string): string | null {
   CNPJ_RE.lastIndex = 0;
+  const candidates: string[] = [];
   const seen = new Set<string>();
   let match: RegExpExecArray | null;
   while ((match = CNPJ_RE.exec(html)) !== null) {
     const digits = match[1].replace(/\D/g, "");
-    if (seen.has(digits)) continue;
+    if (seen.has(digits) || !isValidCnpj(digits)) continue;
     seen.add(digits);
-    if (isValidCnpj(digits)) return digits;
+    candidates.push(digits);
   }
-  return null;
+  if (candidates.length === 0) return null;
+  // Preferir CNPJ próximo às palavras "CNPJ", "razão social", "empresa" (janela de 80 caracteres antes)
+  const preferred = candidates.find((d) => {
+    const idx = html.indexOf(d) >= 0 ? html.indexOf(d) : html.indexOf(formatCnpj(d));
+    if (idx < 0) return false;
+    const window = html.slice(Math.max(0, idx - 80), idx).toLowerCase();
+    return /cnpj|raz[aã]o\s+social|inscri[cç][aã]o/.test(window);
+  });
+  return preferred ?? candidates[0];
 }
 
 async function fetchCnpjInfo(digits: string): Promise<CnpjInfo | null> {
