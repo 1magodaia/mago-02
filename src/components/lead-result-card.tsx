@@ -196,15 +196,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
   const waVerified = waSource === "site";
 
-  const collectedAgo = relTime(lead.collected_at);
-  const lastReviewAgo = relTime(lead.latest_review_at);
-  // Instagram: sinal só é confiável quando o site foi auditado.
-  const igStatus: "found" | "not_found_on_site" | "unverifiable" = lead.audit?.instagram
-    ? "found"
-    : lead.audit && lead.website
-      ? "not_found_on_site"
-      : "unverifiable";
-
+  // Classifica a URL do "website" do Google Places — pode ser site real,
+  // Instagram ou Facebook. Isso evita rotular Instagram como "site".
+  const linkKind = classifyLink(lead.website);
+  const hasRealSite = linkKind === "site" || linkKind === "other";
+  // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
+  const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? lead.website : null);
+  const fbUrl = linkKind === "facebook" ? lead.website : null;
 
   const permanentlyClosed = lead.business_status === "CLOSED_PERMANENTLY";
 
@@ -220,7 +218,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
-            {lead.website ? (
+            {hasRealSite ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site confirmado no Google Places">
                 <CheckCircle2 className="h-2.5 w-2.5" /> Com site
               </span>
@@ -229,19 +227,19 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 <Flame className="h-2.5 w-2.5" /> Sem site
               </span>
             )}
-            {igStatus === "found" && (
+            {igUrl && (
               <a
-                href={lead.audit!.instagram!}
+                href={igUrl}
                 target="_blank"
                 rel="noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
-                title="Instagram encontrado no site"
+                title="Instagram do comércio"
               >
-                <CheckCircle2 className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> Instagram
+                <Instagram className="h-2.5 w-2.5" /> Instagram
               </a>
             )}
-            {igStatus === "not_found_on_site" && (
+            {!igUrl && lead.audit && hasRealSite && (
               <span
                 className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-warn ring-1 ring-warn/30"
                 title="Site auditado — nenhum link para Instagram encontrado."
