@@ -32,6 +32,7 @@ import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { TutorialModal, TutorialBadge, hasSeenTutorial, markTutorialSeen, resetTutorial } from "@/components/tutorial-modal";
 
 const MapView = lazy(() => import("@/components/google-map-view"));
 
