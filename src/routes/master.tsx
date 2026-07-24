@@ -74,6 +74,15 @@ function MasterPanel() {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
   const [waLog, setWaLog] = useState<WhatsappChangeLogEntry[]>([]);
+  const [waLogTotal, setWaLogTotal] = useState(0);
+  const [waLogPage, setWaLogPage] = useState(1);
+  const [waLogPageSize] = useState(10);
+  const [waLogAuthor, setWaLogAuthor] = useState("");
+  const [waLogFrom, setWaLogFrom] = useState("");
+  const [waLogTo, setWaLogTo] = useState("");
+  const [waLogBusy, setWaLogBusy] = useState(false);
+  const [waLogExporting, setWaLogExporting] = useState(false);
+  const [reason, setReason] = useState("");
 
 
 
