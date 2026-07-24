@@ -41,7 +41,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
               alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
               className="block h-full w-full transition-opacity duration-300"
               style={{
-                objectFit: fit,
+                objectFit: "contain",
                 objectPosition: "center",
                 opacity: ready ? 1 : 0,
               }}
