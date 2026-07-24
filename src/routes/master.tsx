@@ -453,3 +453,197 @@ function CostTile({ label, calls, cents, sub }: { label: string; calls?: number;
     </div>
   );
 }
+
+// ============================================================================
+// v5.4.3 Part G — Multi-provider AI key registry (failover cadastro)
+// ============================================================================
+import {
+  listAiProviderKeys,
+  upsertAiProviderKey,
+  deleteAiProviderKey,
+  testAiProviderKey,
+  type AiProviderKey,
+} from "@/lib/ai-keys.functions";
+import { Plus, Trash2, PlayCircle, KeySquare } from "lucide-react";
+
+const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
+  active:       "bg-emerald-500/15 text-emerald-300 ring-emerald-400/40",
+  untested:     "bg-white/5 text-muted-foreground ring-border",
+  rate_limited: "bg-amber-500/15 text-amber-200 ring-amber-400/40",
+  error:        "bg-red-500/15 text-red-300 ring-red-400/40",
+  disabled:     "bg-white/5 text-muted-foreground/60 ring-border",
+};
+const STATUS_LABEL: Record<AiProviderKey["status"], string> = {
+  active: "Ativa",
+  untested: "Não testada",
+  rate_limited: "Limite atingido",
+  error: "Com erro",
+  disabled: "Desativada",
+};
+
+function AiKeysPanel() {
+  const list = useServerFn(listAiProviderKeys);
+  const upsert = useServerFn(upsertAiProviderKey);
+  const del = useServerFn(deleteAiProviderKey);
+  const test = useServerFn(testAiProviderKey);
+  const [rows, setRows] = useState<AiProviderKey[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [form, setForm] = useState({ provider: "openai" as AiProviderKey["provider"], label: "", secret_name: "", priority: 100 });
+  const [loading, setLoading] = useState(true);
+
+  async function reload() {
+    setErr(null);
+    try { setRows(await list()); }
+    catch (e: any) { setErr(String(e?.message ?? e)); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { reload(); /* eslint-disable-next-line */ }, []);
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.label || !form.secret_name) return;
+    setBusy("new");
+    try { await upsert({ data: form }); setForm({ ...form, label: "", secret_name: "" }); await reload(); }
+    catch (e: any) { setErr(String(e?.message ?? e)); }
+    finally { setBusy(null); }
+  }
+
+  return (
+    <section className="mx-auto mt-6 max-w-7xl px-4 sm:px-6">
+      <div className="glass-panel rounded-2xl p-4 sm:p-6">
+        <header className="mb-4 flex flex-wrap items-center gap-2">
+          <KeySquare className="h-5 w-5 text-primary" />
+          <h2 className="text-base font-extrabold text-foreground">Chaves de IA com failover</h2>
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30">
+            v5.4.3 · Parte G
+          </span>
+        </header>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Cadastre múltiplas chaves por provedor (OpenAI, Gemini, Groq, Lovable). A ordem de <b>prioridade</b> define
+          o failover: a menor prioridade é tentada primeiro; se retornar erro ou limite, a próxima ativa entra em ação.
+          Os valores das chaves ficam no cofre de secrets — aqui só ficam o nome do secret, prioridade e status.
+        </p>
+
+        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[140px_1fr_1fr_90px_auto]">
+          <select
+            value={form.provider}
+            onChange={(e) => setForm({ ...form, provider: e.target.value as any })}
+            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
+          >
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Gemini</option>
+            <option value="groq">Groq</option>
+            <option value="lovable">Lovable AI</option>
+          </select>
+          <input
+            placeholder="Rótulo (ex: OpenAI principal)"
+            value={form.label}
+            onChange={(e) => setForm({ ...form, label: e.target.value })}
+            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
+          />
+          <input
+            placeholder="Nome do secret (ex: OPENAI_API_KEY_1)"
+            value={form.secret_name}
+            onChange={(e) => setForm({ ...form, secret_name: e.target.value.toUpperCase() })}
+            className="rounded-md bg-background px-2 py-1.5 text-sm font-mono ring-1 ring-border"
+          />
+          <input
+            type="number"
+            min={1}
+            max={999}
+            value={form.priority}
+            onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
+            className="rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
+          />
+          <button
+            disabled={busy === "new"}
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110 disabled:opacity-50"
+          >
+            <Plus className="h-3.5 w-3.5" /> Cadastrar
+          </button>
+        </form>
+        <p className="mb-3 text-[11px] text-muted-foreground">
+          Depois de cadastrar, salve o valor da chave em <b>Configurações → Secrets</b> com exatamente o mesmo nome. Use <b>“Testar”</b> para validar.
+        </p>
+
+        {err && <div className="mb-3 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
+
+        <div className="overflow-x-auto rounded-xl ring-1 ring-border">
+          <table className="w-full text-xs">
+            <thead className="bg-glass text-[10px] uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left">Provedor</th>
+                <th className="px-3 py-2 text-left">Rótulo</th>
+                <th className="px-3 py-2 text-left">Secret</th>
+                <th className="px-3 py-2 text-center">Prioridade</th>
+                <th className="px-3 py-2 text-left">Status</th>
+                <th className="px-3 py-2 text-left">Último teste</th>
+                <th className="px-3 py-2 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && (
+                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>
+              )}
+              {!loading && rows.length === 0 && (
+                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
+                  Nenhuma chave cadastrada. Adicione ao menos <b>duas</b> para ativar o failover.
+                </td></tr>
+              )}
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="px-3 py-2 font-bold uppercase text-primary">{r.provider}</td>
+                  <td className="px-3 py-2">{r.label}</td>
+                  <td className="px-3 py-2 font-mono text-[11px]">
+                    {r.secret_name}{" "}
+                    {!r.secret_present && (
+                      <span className="ml-1 rounded bg-red-500/15 px-1 py-0.5 text-[9px] font-bold text-red-300 ring-1 ring-red-400/40">
+                        secret vazio
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-center tabular-nums">{r.priority}</td>
+                  <td className="px-3 py-2">
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${STATUS_STYLES[r.status]}`}>
+                      {STATUS_LABEL[r.status]}
+                    </span>
+                    {r.last_error && (
+                      <div className="mt-0.5 text-[10px] text-red-300/80">{r.last_error}</div>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-[11px] text-muted-foreground">
+                    {r.last_tested_at ? new Date(r.last_tested_at).toLocaleString("pt-BR") : "—"}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={async () => { setBusy(r.id); try { await test({ data: { id: r.id } }); await reload(); } finally { setBusy(null); } }}
+                        disabled={busy === r.id}
+                        className="inline-flex items-center gap-1 rounded-full bg-glass px-2.5 py-1 text-[11px] font-semibold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
+                      >
+                        {busy === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <PlayCircle className="h-3 w-3" />} Testar
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Remover a chave “${r.label}”?`)) return;
+                          setBusy(r.id);
+                          try { await del({ data: { id: r.id } }); await reload(); }
+                          finally { setBusy(null); }
+                        }}
+                        disabled={busy === r.id}
+                        className="inline-flex items-center gap-1 rounded-full bg-glass px-2.5 py-1 text-[11px] font-semibold text-red-300 ring-1 ring-red-400/30 hover:bg-red-500/10 disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3 w-3" /> Remover
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
