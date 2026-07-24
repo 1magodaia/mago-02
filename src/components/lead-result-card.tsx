@@ -382,9 +382,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {lead.audit ? "Reauditar" : "Auditar"}
           </button>
         )}
-        {lead.website && (
+        {resolvedHref && (
           <a
-            href={lead.website}
+            href={resolvedHref}
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
