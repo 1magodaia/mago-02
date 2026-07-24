@@ -31,7 +31,7 @@ function Novidades() {
     queryKey: ["version_log_all"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("version_log")
+        .from("public_version_log")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
