@@ -550,5 +550,82 @@ export async function getNextAvailableAiKey(): Promise<{ id: string; provider: P
   }
 
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Assistente "poucos cliques": salva a chave inline + roda o probe atômico.
+// ---------------------------------------------------------------------------
+const WizardSchema = z.object({
+  id: z.string().uuid().optional(),
+  provider: z.enum(PROVIDERS),
+  label: z.string().trim().min(1).max(60).optional(),
+  api_key: z.string().trim().min(4).max(4000),
+  model: z.string().trim().max(120).optional().nullable(),
+  priority: z.number().int().min(1).max(999).optional(),
+});
+
+export interface WizardResult {
+  id: string;
+  status: "active" | "rate_limited" | "error";
+  message: string;
+  provider: Provider;
+  model: string | null;
+  tested_at: string;
+}
+
+export const saveAndTestProvider = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => WizardSchema.parse(d))
+  .handler(async ({ data, context }): Promise<WizardResult> => {
+    await ensurePrivileged(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const label = data.label?.trim() || `${PROVIDER_LABEL[data.provider]} principal`;
+    const model = data.model?.trim() || PROVIDER_MODELS[data.provider]?.default || null;
+    const priority = data.priority ?? 10;
+
+    const row: any = {
+      provider: data.provider,
+      label,
+      model,
+      priority,
+      secret_value: data.api_key.trim(),
+      status: "untested",
+    };
+
+    let id: string | null = data.id ?? null;
+    if (id) {
+      const { error } = await supabaseAdmin.from("ai_provider_keys").update(row).eq("id", id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { data: ins, error } = await supabaseAdmin
+        .from("ai_provider_keys")
+        .insert(row)
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      id = ins!.id as string;
+    }
+
+    const probe = await probeProvider(data.provider, data.api_key.trim(), model);
+    const tested_at = new Date().toISOString();
+    await supabaseAdmin
+      .from("ai_provider_keys")
+      .update({
+        status: probe.status,
+        last_error: probe.status === "active" ? null : probe.message,
+        last_tested_at: tested_at,
+      })
+      .eq("id", id!);
+
+    return {
+      id: id!,
+      status: probe.status,
+      message: probe.message,
+      provider: data.provider,
+      model,
+      tested_at,
+    };
+  });
+
 
 }
