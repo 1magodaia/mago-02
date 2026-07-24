@@ -29,7 +29,15 @@ interface VersionEntry {
 }
 
 function Novidades() {
+  const { isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !isAdmin) navigate({ to: "/", replace: true });
+  }, [authLoading, isAdmin, navigate]);
+
   const { data, isLoading, error } = useQuery({
+    enabled: isAdmin,
     queryKey: ["version_log_all"],
     queryFn: async () => {
       const { data, error } = await supabase
