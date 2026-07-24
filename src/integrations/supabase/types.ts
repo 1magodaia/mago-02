@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_provider_keys: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          last_error: string | null
+          last_tested_at: string | null
+          last_used_at: string | null
+          priority: number
+          provider: string
+          secret_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          last_used_at?: string | null
+          priority?: number
+          provider: string
+          secret_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          last_used_at?: string | null
+          priority?: number
+          provider?: string
+          secret_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           citations_daily_limit: number
