@@ -70,7 +70,12 @@ function MasterPanel() {
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [citationsLimit, setCitationsLimit] = useState(20);
   const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroHeightDesktop, setHeroHeightDesktop] = useState(320);
+  const [heroHeightMobile, setHeroHeightMobile] = useState(200);
+  const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
+  const [heroPreviewStatus, setHeroPreviewStatus] = useState<"idle" | "loading" | "ok" | "invalid" | "error">("idle");
   const [heroBusy, setHeroBusy] = useState(false);
+
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
