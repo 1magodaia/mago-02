@@ -9,8 +9,12 @@ export interface AppSettings {
   citations_enabled: boolean;
   citations_daily_limit: number;
   hero_image_url: string | null;
+  hero_height_desktop: number;
+  hero_height_mobile: number;
+  hero_fit: "cover" | "contain";
   updated_at: string | null;
 }
+
 
 
 
