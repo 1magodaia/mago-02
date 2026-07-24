@@ -16,7 +16,7 @@ export function VersionLog() {
 
   useEffect(() => {
     supabase
-      .from("version_log")
+      .from("public_version_log")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(3)
