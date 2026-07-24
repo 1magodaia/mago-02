@@ -128,6 +128,7 @@ function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
     latest_review_at: latest,
     reviews: list,
     collected_at: collectedAt,
+    price_level: mapPriceLevel(p.priceLevel),
   };
 }
 
