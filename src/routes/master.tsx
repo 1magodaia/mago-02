@@ -938,7 +938,13 @@ function MasterPanel() {
               <Shield className="h-4 w-4 text-warn" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Busca de citações web (IA)</h2>
+              <h2 className="text-lg font-bold inline-flex items-center gap-1.5">
+                Busca de citações web (IA)
+                <HelpTip
+                  title="Kill switch de citações web"
+                  text="Desligado por padrão de propósito, para você validar o custo real antes de liberar para os usuários. Master e admin conseguem testar mesmo com ele desligado."
+                />
+              </h2>
               <p className="max-w-xl text-xs text-muted-foreground">
                 Kill switch global. Nasce <strong>desligado</strong>. Ative apenas depois de validar o custo real
                 por busca com dados abaixo. Admin e master ignoram o interruptor para testes.
