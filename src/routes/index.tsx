@@ -18,10 +18,11 @@ import {
   MapPin,
   Search,
   Shield,
-  
+  MessageCircle,
   Star,
   User as UserIcon,
 } from "lucide-react";
+
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
