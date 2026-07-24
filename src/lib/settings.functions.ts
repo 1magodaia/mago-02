@@ -9,8 +9,12 @@ export interface AppSettings {
   citations_enabled: boolean;
   citations_daily_limit: number;
   hero_image_url: string | null;
+  hero_height_desktop: number;
+  hero_height_mobile: number;
+  hero_fit: "cover" | "contain";
   updated_at: string | null;
 }
+
 
 
 
@@ -30,19 +34,24 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("public_app_settings")
-    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
     .eq("id", 1)
     .maybeSingle();
+  const d = data as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string }) | null;
   return {
-    support_whatsapp: data?.support_whatsapp ?? null,
-    support_message: data?.support_message ?? null,
-    citations_enabled: data?.citations_enabled ?? false,
-    citations_daily_limit: data?.citations_daily_limit ?? 20,
-    hero_image_url: (data as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
-    updated_at: (data as { updated_at?: string | null } | null)?.updated_at ?? null,
+    support_whatsapp: d?.support_whatsapp ?? null,
+    support_message: d?.support_message ?? null,
+    citations_enabled: d?.citations_enabled ?? false,
+    citations_daily_limit: d?.citations_daily_limit ?? 20,
+    hero_image_url: d?.hero_image_url ?? null,
+    hero_height_desktop: d?.hero_height_desktop ?? 320,
+    hero_height_mobile: d?.hero_height_mobile ?? 200,
+    hero_fit: (d?.hero_fit === "contain" ? "contain" : "cover"),
+    updated_at: d?.updated_at ?? null,
   };
 
 });
+
 
 const inputSchema = z.object({
   support_whatsapp: z
@@ -67,8 +76,12 @@ const inputSchema = z.object({
     })
     .nullable()
     .optional(),
+  hero_height_desktop: z.number().int().min(120).max(720).optional(),
+  hero_height_mobile: z.number().int().min(100).max(480).optional(),
+  hero_fit: z.enum(["cover", "contain"]).optional(),
   reason: z.string().trim().max(500).nullable().optional(),
 });
+
 
 
 export const updateAppSettings = createServerFn({ method: "POST" })
@@ -93,13 +106,16 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       ...(data.citations_enabled !== undefined ? { citations_enabled: data.citations_enabled } : {}),
       ...(data.citations_daily_limit !== undefined ? { citations_daily_limit: data.citations_daily_limit } : {}),
       ...(data.hero_image_url !== undefined ? { hero_image_url: data.hero_image_url || null } : {}),
+      ...(data.hero_height_desktop !== undefined ? { hero_height_desktop: data.hero_height_desktop } : {}),
+      ...(data.hero_height_mobile !== undefined ? { hero_height_mobile: data.hero_height_mobile } : {}),
+      ...(data.hero_fit !== undefined ? { hero_fit: data.hero_fit } : {}),
     };
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
       .single();
     if (error) throw new Error(error.message);
 
@@ -122,15 +138,19 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       });
     }
 
-
+    const r = row as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string }) | null;
     return {
-      support_whatsapp: row?.support_whatsapp ?? null,
-      support_message: row?.support_message ?? null,
-      citations_enabled: row?.citations_enabled ?? false,
-      citations_daily_limit: row?.citations_daily_limit ?? 20,
-      hero_image_url: (row as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
-      updated_at: (row as { updated_at?: string | null } | null)?.updated_at ?? null,
+      support_whatsapp: r?.support_whatsapp ?? null,
+      support_message: r?.support_message ?? null,
+      citations_enabled: r?.citations_enabled ?? false,
+      citations_daily_limit: r?.citations_daily_limit ?? 20,
+      hero_image_url: r?.hero_image_url ?? null,
+      hero_height_desktop: r?.hero_height_desktop ?? 320,
+      hero_height_mobile: r?.hero_height_mobile ?? 200,
+      hero_fit: (r?.hero_fit === "contain" ? "contain" : "cover"),
+      updated_at: r?.updated_at ?? null,
     };
+
 
   });
 
