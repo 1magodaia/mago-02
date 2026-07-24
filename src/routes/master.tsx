@@ -292,6 +292,7 @@ function MasterPanel() {
 
   const downloadWaCsv = async () => {
     setWaLogExporting(true);
+    const tid = toast.loading("Gerando CSV...");
     try {
       const { csv } = await exportWaCsv({
         data: { author: waLogAuthor, from: waLogFrom, to: waLogTo },
@@ -300,17 +301,22 @@ function MasterPanel() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      const filename = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success("CSV exportado.", { id: tid, description: filename });
     } catch (err) {
-      setSettingsError(err instanceof Error ? err.message : "Erro ao exportar CSV.");
+      const msg = err instanceof Error ? err.message : "Erro ao exportar CSV.";
+      setSettingsError(msg);
+      toast.error("Falha ao exportar CSV.", { id: tid, description: msg });
     } finally {
       setWaLogExporting(false);
     }
   };
+
 
 
 
