@@ -20,6 +20,7 @@ export interface DigitalAudit {
   instagram: string | null;
   facebook: string | null;
   whatsapp_link: string | null;
+  whatsapp_source: "site" | "phone" | null; // "site" = link real no HTML; "phone" = derivado do telefone (presumido)
   sitemap_lastmod: string | null;
   domain_registered_at: string | null;
   domain_expires_at: string | null;
