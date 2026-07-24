@@ -18,7 +18,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   listUsers,
   sendPasswordReset,
-  setUserPlan,
+  grantProAccess,
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
@@ -45,7 +45,7 @@ function MasterPanel() {
   const { loading, user, isAdmin, isMaster } = useAuth();
   const nav = useNavigate();
   const list = useServerFn(listUsers);
-  const setPlan = useServerFn(setUserPlan);
+  const grantAccess = useServerFn(grantProAccess);
   const setStatus = useServerFn(setUserStatus);
   const resetPwd = useServerFn(sendPasswordReset);
   const readSettings = useServerFn(getAppSettings);
@@ -147,11 +147,16 @@ function MasterPanel() {
   };
 
 
-  const togglePlan = async (u: AdminUserRow) => {
+  const grant = async (u: AdminUserRow, payload: Parameters<typeof grantAccess>[0]["data"]) => {
     setBusy(u.id);
     try {
-      await setPlan({ data: { userId: u.id, plan: u.plan === "pro" ? "free" : "pro" } });
-      setNotice(`Plano de ${u.email} atualizado.`);
+      await grantAccess({ data: payload });
+      const nice = payload.mode === "free"
+        ? `${u.email} voltou para Free.`
+        : payload.mode === "date"
+          ? `${u.email} é Pro até ${new Date(payload.valid_until!).toLocaleDateString("pt-BR")}.`
+          : `${u.email} é Pro com ${payload.searches_granted} buscas.`;
+      setNotice(nice);
       await load();
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "Erro.");
