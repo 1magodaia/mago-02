@@ -1289,7 +1289,120 @@ function AiKeysPanel() {
           </button>
         </div>
 
-        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[160px_1fr_1fr_1fr_90px_auto]">
+        {/* ============== ASSISTENTE (poucos cliques) ============== */}
+        <form onSubmit={runWizard} className="mb-4 rounded-xl bg-primary/5 p-4 ring-1 ring-primary/30">
+          <div className="mb-3 flex items-center gap-2">
+            <Wand2 className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-extrabold">Assistente de configuração</h3>
+            <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground">3 passos · ~30s</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[180px_1fr_1fr_auto]">
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">1 · Provedor</label>
+              <select
+                value={wiz.provider}
+                onChange={(e) => {
+                  const next = e.target.value as AiProviderKey["provider"];
+                  setWiz({ ...wiz, provider: next, model: PROVIDER_MODELS[next]?.default ?? "" });
+                }}
+                className="w-full rounded-md bg-background px-2 py-2 text-sm ring-1 ring-border [color-scheme:dark]"
+              >
+                {PROVIDERS.map((p) => (
+                  <option key={p} className="bg-background text-foreground" value={p}>{PROVIDER_LABEL[p]}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">2 · Chave da API</label>
+              <div className="flex items-center gap-1">
+                <input
+                  type={wiz.show ? "text" : "password"}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="Cole aqui a API key (ex: nvapi-... / sk-...)"
+                  value={wiz.api_key}
+                  onChange={(e) => setWiz({ ...wiz, api_key: e.target.value })}
+                  className="w-full rounded-md bg-background px-2 py-2 text-sm font-mono ring-1 ring-border"
+                />
+                <button
+                  type="button"
+                  onClick={() => setWiz({ ...wiz, show: !wiz.show })}
+                  className="rounded-md bg-glass p-2 ring-1 ring-border hover:bg-white/5"
+                  title={wiz.show ? "Ocultar" : "Mostrar"}
+                >
+                  {wiz.show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-muted-foreground">3 · Modelo</label>
+              <input
+                list={`wiz-models-${wiz.provider}`}
+                placeholder={PROVIDER_MODELS[wiz.provider]?.default ?? "modelo do provedor"}
+                value={wiz.model}
+                onChange={(e) => setWiz({ ...wiz, model: e.target.value })}
+                className="w-full rounded-md bg-background px-2 py-2 text-xs font-mono ring-1 ring-border"
+              />
+              <datalist id={`wiz-models-${wiz.provider}`}>
+                {(PROVIDER_MODELS[wiz.provider]?.options ?? []).map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
+            </div>
+            <div className="flex items-end">
+              <button
+                disabled={wizBusy}
+                className="inline-flex h-[38px] items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-extrabold text-primary-foreground shadow-lg shadow-primary/30 hover:brightness-110 disabled:opacity-50"
+              >
+                <PlayCircle className="h-4 w-4" />
+                {wizBusy ? "Testando…" : "Salvar e testar"}
+              </button>
+            </div>
+          </div>
+
+          {wizErr && (
+            <div className="mt-3 flex items-start gap-2 rounded-md bg-red-500/10 p-2 text-xs text-red-300 ring-1 ring-red-500/40">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span className="break-words">{wizErr}</span>
+            </div>
+          )}
+
+          {wizResult && (
+            <div
+              className={`mt-3 rounded-md p-3 text-xs ring-1 ${
+                wizResult.status === "active"
+                  ? "bg-emerald-500/10 text-emerald-200 ring-emerald-500/40"
+                  : wizResult.status === "rate_limited"
+                  ? "bg-amber-500/10 text-amber-200 ring-amber-500/40"
+                  : "bg-red-500/10 text-red-200 ring-red-500/40"
+              }`}
+            >
+              <div className="mb-1 flex items-center gap-2 text-sm font-bold">
+                {wizResult.status === "active" ? (
+                  <><CheckCircle2 className="h-4 w-4" /> Conexão OK</>
+                ) : wizResult.status === "rate_limited" ? (
+                  <><AlertTriangle className="h-4 w-4" /> Chave válida, mas com limite atingido</>
+                ) : (
+                  <><AlertTriangle className="h-4 w-4" /> Falhou — veja o motivo abaixo</>
+                )}
+              </div>
+              <div className="grid gap-0.5 text-[11px] font-mono opacity-90">
+                <span>Provedor: <b>{PROVIDER_LABEL[wizResult.provider]}</b></span>
+                <span>Modelo: <b>{wizResult.model ?? "(padrão)"}</b></span>
+                <span className="break-all">Mensagem: {wizResult.message}</span>
+                <span>Testado em: {new Date(wizResult.tested_at).toLocaleString("pt-BR")}</span>
+              </div>
+            </div>
+          )}
+        </form>
+
+        {/* ============== FORM AVANÇADO (rótulo + secret + prioridade) ============== */}
+        <details className="mb-4 rounded-xl bg-glass p-3 ring-1 ring-border">
+          <summary className="cursor-pointer text-xs font-bold text-muted-foreground">
+            Cadastro avançado (usar secret do ambiente, rótulo e prioridade)
+          </summary>
+        <form onSubmit={add} className="mt-3 grid gap-2 sm:grid-cols-[160px_1fr_1fr_1fr_90px_auto]">
+
           <select
             value={form.provider}
             onChange={(e) => {
