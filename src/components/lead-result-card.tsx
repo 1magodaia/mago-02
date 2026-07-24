@@ -317,6 +317,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       )}
 
       {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
+      {lead.audit && <EmailBlock email={lead.audit.email} />}
+
 
       {lead.audit && (
         <div className="grid grid-cols-3 gap-2 rounded-xl bg-glass p-2.5 ring-1 ring-border text-center">
@@ -592,8 +594,42 @@ function BusinessStatusBadge({ status }: { status: string | null }) {
   return null;
 }
 
+
+function EmailBlock({ email }: { email: string | null }) {
+  if (!email) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum e-mail de contato localizado no site.">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+        E-mail: não localizado
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 rounded-lg bg-glass px-2.5 py-1.5 text-[11px] ring-1 ring-border">
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+      <a
+        href={`mailto:${email}`}
+        onClick={(e) => e.stopPropagation()}
+        className="truncate font-mono font-semibold text-foreground hover:text-primary hover:underline"
+      >
+        {email}
+      </a>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(email).catch(() => {}); }}
+        className="ml-auto rounded p-1 text-muted-foreground hover:text-primary"
+        title="Copiar e-mail"
+        aria-label="Copiar e-mail"
+      >
+        <Copy className="h-3 w-3" />
+      </button>
+    </div>
+  );
+}
+
 function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | null }) {
   if (!info) {
+
     return (
       <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum CNPJ localizado no site do comércio. Não estimamos esse valor a partir do nome.">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />

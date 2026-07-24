@@ -21,6 +21,7 @@ export interface DigitalAudit {
   facebook: string | null;
   whatsapp_link: string | null;
   whatsapp_source: "site" | "phone" | null; // "site" = link real no HTML; "phone" = derivado do telefone (presumido)
+  email: string | null;
   sitemap_lastmod: string | null;
   domain_registered_at: string | null;
   domain_expires_at: string | null;
@@ -29,6 +30,7 @@ export interface DigitalAudit {
   audited_at: string;
   note: string;
 }
+
 
 const FETCH_TIMEOUT_MS = 5000;
 const MAX_HTML_BYTES = 300_000;
@@ -97,6 +99,36 @@ function extractSocials(html: string): {
     whatsapp: wa ? wa[0] : null,
   };
 }
+
+const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+const EMAIL_BLOCKED_DOMAINS = /(sentry\.io|wixpress\.com|example\.com|godaddy|domain\.com|whois|noreply|no-reply|donotreply|mailer-daemon)/i;
+const EMAIL_BLOCKED_EXT = /\.(png|jpg|jpeg|gif|webp|svg|css|js|woff2?|ttf|ico)$/i;
+
+/** Extrai o primeiro e-mail plausível do HTML (rodapé/contato). */
+function extractEmail(html: string): string | null {
+  // Prioriza mailto:
+  const mailto = html.match(/mailto:([^"'?\s>]+)/i);
+  if (mailto) {
+    const e = mailto[1].trim().toLowerCase();
+    if (!EMAIL_BLOCKED_DOMAINS.test(e) && !EMAIL_BLOCKED_EXT.test(e)) return e;
+  }
+  EMAIL_RE.lastIndex = 0;
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = EMAIL_RE.exec(html)) !== null) {
+    const e = m[0].toLowerCase();
+    if (seen.has(e)) continue;
+    seen.add(e);
+    if (EMAIL_BLOCKED_DOMAINS.test(e)) continue;
+    if (EMAIL_BLOCKED_EXT.test(e)) continue;
+    // Ignora textos como "image@2x.png" que já casam com o regex
+    if (/@\d/.test(e)) continue;
+    return e;
+  }
+  return null;
+}
+
+
 
 // Regex conservador: pega XX.XXX.XXX/XXXX-XX ou 14 dígitos "colados".
 const CNPJ_RE = /\b(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})\b/g;
@@ -231,10 +263,12 @@ export const auditWebsite = createServerFn({ method: "POST" })
         instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
         whatsapp_source: normalizeWhatsAppFromPhone(data.phone) ? "phone" : null,
+        email: null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         audited_at: now, note: "URL inválida.",
       };
+
     }
 
     // Caso especial: o "site" cadastrado no Google Places é, na verdade, um perfil
@@ -250,11 +284,13 @@ export const auditWebsite = createServerFn({ method: "POST" })
         facebook: directSocial.facebook,
         whatsapp_link: waFromPhone,
         whatsapp_source: waFromPhone ? "phone" : null,
+        email: null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         audited_at: now,
         note: `sem site próprio — perfil ${directSocial.instagram ? "Instagram" : "Facebook"} usado como site no Google`,
       };
+
     }
 
     const origin = `${url.protocol}//${url.host}`;
@@ -267,20 +303,30 @@ export const auditWebsite = createServerFn({ method: "POST" })
 
     let socials = { instagram: null as string | null, facebook: null as string | null, whatsapp: null as string | null };
     let cnpjDigits: string | null = null;
+    let email: string | null = null;
     if (pageRes.reachable && pageRes.html) {
       socials = extractSocials(pageRes.html);
       cnpjDigits = extractCnpjFromHtml(pageRes.html);
-      // Fallback: se homepage não tem CNPJ, tenta uma página institucional comum.
-      if (!cnpjDigits) {
+      email = extractEmail(pageRes.html);
+      // Fallback: se homepage não tem CNPJ ou e-mail, tenta uma página institucional comum.
+      if (!cnpjDigits || !email) {
         for (const path of ["/sobre", "/sobre-nos", "/institucional", "/contato", "/termos", "/politica-de-privacidade"]) {
           const alt = await fetchAndExtract(`${origin}${path}`);
           if (alt.reachable && alt.html) {
-            const found = extractCnpjFromHtml(alt.html);
-            if (found) { cnpjDigits = found; break; }
+            if (!cnpjDigits) {
+              const found = extractCnpjFromHtml(alt.html);
+              if (found) cnpjDigits = found;
+            }
+            if (!email) {
+              const foundEmail = extractEmail(alt.html);
+              if (foundEmail) email = foundEmail;
+            }
+            if (cnpjDigits && email) break;
           }
         }
       }
     }
+
 
     const cnpj_info = cnpjDigits ? await fetchCnpjInfo(cnpjDigits) : null;
 
@@ -311,6 +357,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       facebook: socials.facebook,
       whatsapp_link,
       whatsapp_source,
+      email,
       sitemap_lastmod: sitemapLastMod,
       domain_registered_at: rdap.registered,
       domain_expires_at: rdap.expires,
@@ -319,4 +366,5 @@ export const auditWebsite = createServerFn({ method: "POST" })
       audited_at: now,
       note: notes.length ? notes.join(" · ") : "dados obtidos com sucesso",
     };
+
   });

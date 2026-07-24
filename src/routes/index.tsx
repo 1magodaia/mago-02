@@ -105,11 +105,8 @@ export const Route = createFileRoute("/")({
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
 
-const SUGGESTIONS = [
-  { label: "Salão de beleza · São Paulo", query: "salão de beleza", region: "São Paulo" },
-  { label: "Pet shop · Rio de Janeiro", query: "pet shop", region: "Rio de Janeiro" },
-  { label: "Advogado · Belo Horizonte", query: "advogado", region: "Belo Horizonte" },
-];
+
+
 
 
 function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onClose: () => void }) {
@@ -522,12 +519,7 @@ function Home() {
     return runSearchWith(query, region);
   };
 
-  const runSuggestion = (s: { query: string; region: string }) => {
-    setQuery(s.query);
-    setRegion(s.region);
-    setUsingGps(false);
-    runSearchWith(s.query, s.region);
-  };
+
 
   const highlightTerms = useMemo(() => toTerms(query), [query]);
 
@@ -614,7 +606,10 @@ function Home() {
       "WhatsApp Fonte": l.audit?.whatsapp_source === "site"
         ? "verificado no site"
         : (l.audit?.whatsapp_source === "phone" || (!l.audit && l.phone)) ? "presumido do telefone" : "",
+      "E-mail": l.audit?.email ?? "",
+      "E-mail Fonte": l.audit?.email ? "extraído do site" : (l.audit ? "não localizado" : "site não auditado"),
       "Website": l.website ?? "",
+
       "Google Maps Link": l.google_maps_uri ?? (l.lat != null && l.lng != null ? `https://maps.google.com/?q=${l.lat},${l.lng}` : ""),
       "Instagram": l.audit?.instagram ?? "",
       "Facebook": l.audit?.facebook ?? "",
@@ -969,31 +964,21 @@ function Home() {
             </div>
           )}
           {!loading && rawResults.length === 0 && (
-            <div className="glass-panel rounded-2xl p-8 text-center">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
-                <Search className="h-6 w-6 text-primary" />
+            <div className="glass-panel rounded-2xl p-6 text-center">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
+                <Search className="h-5 w-5 text-primary" />
               </div>
-              <p className="mt-4 text-sm text-foreground">
-                Faça uma busca acima ou experimente uma sugestão:
+              <p className="mt-3 text-sm text-foreground">
+                Digite uma categoria e uma região acima para começar.
               </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s.label}
-                    onClick={() => runSuggestion(s)}
-                    className="rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
               {!user && (
-                <p className="mt-5 text-xs text-muted-foreground">
+                <p className="mt-3 text-xs text-muted-foreground">
                   <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free ganha {FREE_LIFETIME_SEARCH_LIMIT} busca de cortesia.
                 </p>
               )}
             </div>
           )}
+
           {!loading && rawResults.length > 0 && filtered.length === 0 && (
             <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
               Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
