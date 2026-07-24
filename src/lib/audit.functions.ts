@@ -284,11 +284,13 @@ export const auditWebsite = createServerFn({ method: "POST" })
         facebook: directSocial.facebook,
         whatsapp_link: waFromPhone,
         whatsapp_source: waFromPhone ? "phone" : null,
+        email: null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         audited_at: now,
         note: `sem site próprio — perfil ${directSocial.instagram ? "Instagram" : "Facebook"} usado como site no Google`,
       };
+
     }
 
     const origin = `${url.protocol}//${url.host}`;
