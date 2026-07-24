@@ -146,6 +146,7 @@ const PLACE_FIELDS = [
   "types",
   "googleMapsUri",
   "reviews",
+  "priceLevel",
 ];
 
 const FIELD_MASK = PLACE_FIELDS.map((f) => `places.${f}`).join(",");
