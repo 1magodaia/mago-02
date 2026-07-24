@@ -18,10 +18,11 @@ import {
   MapPin,
   Search,
   Shield,
-  
+  MessageCircle,
   Star,
   User as UserIcon,
 } from "lucide-react";
+
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
@@ -100,6 +101,8 @@ function Home() {
   const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [showTutorialBadge, setShowTutorialBadge] = useState(false);
+  const [supportWa, setSupportWa] = useState<string | null>(null);
+  const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -113,10 +116,13 @@ function Home() {
       .then((s) => {
         setCitationsEnabled(!!s.citations_enabled);
         if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+        setSupportWa(s.support_whatsapp);
+        setSupportUpdatedAt(s.updated_at);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
 
   // Auto-solicita GPS ao montar (opt-in): reaproveita coordenadas em cache
@@ -514,6 +520,43 @@ function Home() {
             decoding="async"
           />
         </div>
+
+        {(() => {
+          const digits = (supportWa ?? "").replace(/\D/g, "");
+          const active = /^\d{10,15}$/.test(digits);
+          const updated = supportUpdatedAt
+            ? new Date(supportUpdatedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+            : null;
+          return (
+            <div
+              className={
+                "mt-4 flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs " +
+                (active
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                  : "border-muted/40 bg-muted/10 text-muted-foreground")
+              }
+              role="status"
+              aria-live="polite"
+            >
+              <span
+                className={
+                  "inline-block h-2 w-2 rounded-full " +
+                  (active ? "bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" : "bg-muted-foreground/60")
+                }
+                aria-hidden
+              />
+              <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+              <span className="font-semibold">
+                Suporte WhatsApp: {active ? "ativo" : "não configurado"}
+              </span>
+              {updated && (
+                <span className="text-muted-foreground">· atualizado em {updated}</span>
+              )}
+            </div>
+          );
+        })()}
+
+
 
 
 
