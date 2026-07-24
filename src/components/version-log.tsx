@@ -23,7 +23,7 @@ export function VersionLog() {
       .then(({ data }) => {
         if (data) {
           setEntries(data as VersionEntry[]);
-          if (data[0]) setLatest(data[0].version);
+          if (data[0]?.version) setLatest(data[0].version);
         }
       });
   }, []);
