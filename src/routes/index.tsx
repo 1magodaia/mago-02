@@ -131,6 +131,7 @@ function Home() {
   
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [quotaBlocked, setQuotaBlocked] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [citationsEnabled, setCitationsEnabled] = useState(false);
