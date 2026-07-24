@@ -1175,9 +1175,9 @@ function AiKeysPanel() {
     setWizBusy(true);
     try {
       const res = await wizard({ data: {
-        provider: "nvidia",
+        provider: wiz.provider,
         api_key: key,
-        model: wiz.model?.trim() || PROVIDER_MODELS.nvidia?.default || null,
+        model: wiz.model?.trim() || PROVIDER_MODELS[wiz.provider]?.default || null,
       }});
       setWizResult(res);
       setWiz({ ...wiz, api_key: "" });
@@ -1188,6 +1188,7 @@ function AiKeysPanel() {
       setWizBusy(false);
     }
   }
+
 
 
 
