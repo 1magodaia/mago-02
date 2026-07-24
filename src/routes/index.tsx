@@ -39,6 +39,36 @@ import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
+import { HeroBanner } from "@/components/hero-banner";
+
+const HERO_CACHE_KEY = "bm.heroSettings.v1";
+type HeroCache = {
+  url: string;
+  hd: number;
+  hm: number;
+  fit: "cover" | "contain";
+};
+function readHeroCache(): HeroCache | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(HERO_CACHE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Partial<HeroCache>;
+    if (typeof p.url !== "string") return null;
+    return {
+      url: p.url,
+      hd: typeof p.hd === "number" ? p.hd : 320,
+      hm: typeof p.hm === "number" ? p.hm : 200,
+      fit: p.fit === "contain" ? "contain" : "cover",
+    };
+  } catch {
+    return null;
+  }
+}
+function writeHeroCache(c: HeroCache) {
+  if (typeof window === "undefined") return;
+  try { sessionStorage.setItem(HERO_CACHE_KEY, JSON.stringify(c)); } catch { /* quota */ }
+}
 
 
 
