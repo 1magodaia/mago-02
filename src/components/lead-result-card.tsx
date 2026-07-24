@@ -157,7 +157,11 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
               <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
-            {!lead.website && (
+            {lead.website ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site confirmado no Google Places">
+                <CheckCircle2 className="h-2.5 w-2.5" /> Com site
+              </span>
+            ) : (
               <span className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40">
                 <Flame className="h-2.5 w-2.5" /> Sem site
               </span>
@@ -171,15 +175,23 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
                 className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
                 title="Instagram encontrado no site"
               >
-                <Instagram className="h-2.5 w-2.5" /> Instagram
+                <CheckCircle2 className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> Instagram
               </a>
+            )}
+            {igStatus === "not_found_on_site" && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-warn ring-1 ring-warn/30"
+                title="Site auditado — nenhum link para Instagram encontrado."
+              >
+                <Instagram className="h-2.5 w-2.5" /> sem IG no site
+              </span>
             )}
             {igStatus === "unverifiable" && (
               <span
                 className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
                 title="Sem site conhecido — não conseguimos confirmar Instagram por fonte pública."
               >
-                <Instagram className="h-2.5 w-2.5" /> não verificável
+                <HelpCircle className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> não verificável
               </span>
             )}
             {lead.rating != null && (
