@@ -153,6 +153,23 @@ function MasterPanel() {
     }
   };
 
+  const saveHero = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHeroBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({ data: { hero_image_url: heroImageUrl.trim() || null } });
+      setHeroImageUrl(r.hero_image_url ?? "");
+      setNotice("Imagem do hero atualizada.");
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao salvar imagem.");
+    } finally {
+      setHeroBusy(false);
+    }
+  };
+
+
+
 
   type GrantPayload =
     | { userId: string; mode: "free"; reason?: string }
