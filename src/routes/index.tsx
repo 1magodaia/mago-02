@@ -535,40 +535,6 @@ function Home() {
           />
         </div>
 
-        {(() => {
-          const digits = (supportWa ?? "").replace(/\D/g, "");
-          const active = /^\d{10,15}$/.test(digits);
-          const updated = supportUpdatedAt
-            ? new Date(supportUpdatedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
-            : null;
-          return (
-            <div
-              className={
-                "mt-4 flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs " +
-                (active
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-muted/40 bg-muted/10 text-muted-foreground")
-              }
-              role="status"
-              aria-live="polite"
-            >
-              <span
-                className={
-                  "inline-block h-2 w-2 rounded-full " +
-                  (active ? "bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" : "bg-muted-foreground/60")
-                }
-                aria-hidden
-              />
-              <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-              <span className="font-semibold">
-                Suporte WhatsApp: {active ? "ativo" : "não configurado"}
-              </span>
-              {updated && (
-                <span className="text-muted-foreground">· atualizado em {updated}</span>
-              )}
-            </div>
-          );
-        })()}
 
 
 
