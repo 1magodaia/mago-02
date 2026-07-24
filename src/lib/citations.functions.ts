@@ -41,7 +41,8 @@ export const lookupCitations = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
 
     // 1) Kill switch + daily limit + pro gate
-    const { data: settings } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: settings } = await supabaseAdmin
       .from("app_settings")
       .select("citations_enabled, citations_daily_limit")
       .eq("id", 1)
@@ -154,7 +155,6 @@ Comércio: ${query}`;
     const elapsedMs = Date.now() - t0;
 
     // 5) Persistir cache + custo (service role para bypass de RLS write)
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("citation_lookups").insert({
       user_id: userId,
       place_id: data.place_id,

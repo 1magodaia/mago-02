@@ -6,8 +6,6 @@ interface VersionEntry {
   id: string;
   version: string;
   description: string;
-  impact: string | null;
-  risk: string | null;
   created_at: string;
 }
 
@@ -18,14 +16,14 @@ export function VersionLog() {
 
   useEffect(() => {
     supabase
-      .from("version_log")
+      .from("public_version_log")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(3)
       .then(({ data }) => {
         if (data) {
           setEntries(data as VersionEntry[]);
-          if (data[0]) setLatest(data[0].version);
+          if (data[0]?.version) setLatest(data[0].version);
         }
       });
   }, []);
@@ -75,16 +73,6 @@ export function VersionLog() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-foreground">{e.description}</p>
-                  {e.impact && (
-                    <p className="mt-2 text-xs text-emerald">
-                      <span className="font-semibold">Impacto:</span> {e.impact}
-                    </p>
-                  )}
-                  {e.risk && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-semibold">Risco:</span> {e.risk}
-                    </p>
-                  )}
                 </li>
               ))}
               {entries.length === 0 && (

@@ -29,7 +29,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
     },
   });
   const { data } = await supabase
-    .from("app_settings")
+    .from("public_app_settings")
     .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
     .eq("id", 1)
     .maybeSingle();

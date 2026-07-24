@@ -27,7 +27,7 @@ import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
-import { supabase } from "@/integrations/supabase/client";
+
 
 import { useServerFn } from "@tanstack/react-start";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
@@ -127,17 +127,10 @@ function Home() {
         .catch(() => {});
     };
     load();
-    const channel = supabase
-      .channel("app_settings:home")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "app_settings", filter: "id=eq.1" },
-        () => load(),
-      )
-      .subscribe();
+    const iv = setInterval(load, 60_000);
     return () => {
       alive = false;
-      supabase.removeChannel(channel);
+      clearInterval(iv);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
