@@ -1,0 +1,27 @@
+{
+  "name": "Busca Mágica",
+  "short_name": "Busca Mágica",
+  "description": "Prospecção de comércios locais com auditoria digital e score de oportunidade.",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0A0B1F",
+  "background_color": "#0A0B1F",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
