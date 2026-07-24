@@ -1144,6 +1144,8 @@ function AiKeysPanel() {
   const del = useServerFn(deleteAiProviderKey);
   const test = useServerFn(testAiProviderKey);
   const testAll = useServerFn(testAllAiProviderKeys);
+  const wizard = useServerFn(saveAndTestProvider);
+
   const getSel = useServerFn(getAiSelection);
   const setSel = useServerFn(setAiSelection);
   const [rows, setRows] = useState<AiProviderKey[]>([]);
