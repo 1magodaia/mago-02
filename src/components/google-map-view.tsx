@@ -126,13 +126,15 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
       draggable: true,
       cursor: "grab",
       title: "Arraste para ajustar o centro da busca",
+      animation: google.maps.Animation.DROP,
+      zIndex: 9999,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,
+        scale: 10,
         fillColor: "#7C4DFF",
         fillOpacity: 1,
-        strokeColor: "#000",
-        strokeWeight: 2,
+        strokeColor: "#fff",
+        strokeWeight: 3,
       },
     });
     userMarkerRef.current.addListener("dragend", (e: google.maps.MapMouseEvent) => {
