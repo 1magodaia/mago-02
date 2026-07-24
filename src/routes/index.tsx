@@ -520,11 +520,6 @@ function Home() {
   };
 
 
-    setQuery(s.query);
-    setRegion(s.region);
-    setUsingGps(false);
-    runSearchWith(s.query, s.region);
-  };
 
   const highlightTerms = useMemo(() => toTerms(query), [query]);
 
