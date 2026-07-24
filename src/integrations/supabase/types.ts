@@ -85,6 +85,8 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          ai_manual_key_id: string | null
+          ai_selection_mode: string
           citations_daily_limit: number
           citations_enabled: boolean
           id: number
@@ -94,6 +96,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          ai_manual_key_id?: string | null
+          ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
           id?: number
@@ -103,6 +107,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          ai_manual_key_id?: string | null
+          ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
           id?: number
@@ -111,7 +117,15 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_ai_manual_key_id_fkey"
+            columns: ["ai_manual_key_id"]
+            isOneToOne: false
+            referencedRelation: "ai_provider_keys"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       citation_lookups: {
         Row: {
