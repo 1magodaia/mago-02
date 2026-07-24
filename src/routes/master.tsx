@@ -1189,15 +1189,6 @@ function AiKeysPanel() {
     }
   }
 
-      setWizResult(res);
-      setWiz({ ...wiz, api_key: "" });
-      await reload();
-    } catch (e: any) {
-      setWizErr(String(e?.message ?? e));
-    } finally {
-      setWizBusy(false);
-    }
-  }
 
 
   async function reload() {
