@@ -711,6 +711,13 @@ function MasterPanel() {
             Salvar
           </button>
         </form>
+        <ul className="mt-3 space-y-1 rounded-xl bg-glass/60 p-3 text-[11px] text-muted-foreground ring-1 ring-border">
+          <li><strong className="text-foreground">Proporção recomendada:</strong> 16:9 (banner horizontal), ex.: 1920×1080 px.</li>
+          <li><strong className="text-foreground">Largura ideal:</strong> 1600–1920 px · <strong className="text-foreground">altura</strong> 600–1080 px.</li>
+          <li><strong className="text-foreground">Peso máximo:</strong> ~500 KB · formatos <strong className="text-foreground">.webp</strong>, .jpg ou .png.</li>
+          <li><strong className="text-foreground">URL:</strong> https pública (CDN, Imgur, R2, etc.). A imagem ocupa toda a largura do topo.</li>
+        </ul>
+
         {heroImageUrl && (
           <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-border">
             <img src={heroImageUrl} alt="Preview do hero" className="block h-auto w-full" />
