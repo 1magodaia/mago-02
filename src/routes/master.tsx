@@ -649,3 +649,110 @@ function AiKeysPanel() {
     </section>
   );
 }
+
+type GrantPayload =
+  | { userId: string; mode: "free"; reason?: string }
+  | { userId: string; mode: "date"; valid_until: string; reason?: string }
+  | { userId: string; mode: "searches"; searches_granted: number; reason?: string };
+
+function PlanCell({ u }: { u: AdminUserRow }) {
+  const mode = (u as unknown as { pro_access_mode?: "none" | "date" | "searches" }).pro_access_mode ?? "none";
+  const until = (u as unknown as { pro_valid_until?: string | null }).pro_valid_until ?? null;
+  const remaining = (u as unknown as { pro_searches_remaining?: number | null }).pro_searches_remaining ?? null;
+  const isPro = u.plan === "pro";
+  return (
+    <div className="flex flex-col gap-1">
+      <span className={`inline-block w-fit rounded-full px-2 py-0.5 text-xs font-bold ${isPro ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+        {u.plan.toUpperCase()}
+      </span>
+      {isPro && mode === "date" && until && (
+        <span className="text-[10px] text-muted-foreground">até {new Date(until).toLocaleDateString("pt-BR")}</span>
+      )}
+      {isPro && mode === "searches" && remaining != null && (
+        <span className="text-[10px] text-muted-foreground">{remaining} buscas restantes</span>
+      )}
+    </div>
+  );
+}
+
+function GrantMenu({ u, busy, onGrant }: { u: AdminUserRow; busy: boolean; onGrant: (p: GrantPayload) => void }) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"date" | "searches">("date");
+  const defaultDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const [validUntil, setValidUntil] = useState(defaultDate);
+  const [searches, setSearches] = useState(100);
+  const isPro = u.plan === "pro";
+
+  if (!open) {
+    return (
+      <div className="inline-flex gap-1.5">
+        <button
+          onClick={() => setOpen(true)}
+          disabled={busy}
+          className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/25 disabled:opacity-50"
+        >
+          {isPro ? "Ajustar Pro" : "Conceder Pro"}
+        </button>
+        {isPro && (
+          <button
+            onClick={() => onGrant({ userId: u.id, mode: "free" })}
+            disabled={busy}
+            className="rounded-full bg-glass px-3 py-1 text-xs font-semibold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
+          >
+            Voltar Free
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-panel flex flex-wrap items-center gap-1.5 rounded-xl p-2 text-xs">
+      <select
+        value={mode}
+        onChange={(e) => setMode(e.target.value as "date" | "searches")}
+        className="rounded bg-glass px-2 py-1 ring-1 ring-border"
+      >
+        <option value="date">Por data</option>
+        <option value="searches">Por buscas</option>
+      </select>
+      {mode === "date" ? (
+        <input
+          type="date"
+          value={validUntil}
+          onChange={(e) => setValidUntil(e.target.value)}
+          className="rounded bg-glass px-2 py-1 ring-1 ring-border"
+        />
+      ) : (
+        <input
+          type="number"
+          min={1}
+          value={searches}
+          onChange={(e) => setSearches(Number(e.target.value))}
+          className="w-20 rounded bg-glass px-2 py-1 ring-1 ring-border"
+        />
+      )}
+      <button
+        onClick={() => {
+          onGrant(
+            mode === "date"
+              ? { userId: u.id, mode: "date", valid_until: new Date(validUntil).toISOString() }
+              : { userId: u.id, mode: "searches", searches_granted: searches },
+          );
+          setOpen(false);
+        }}
+        disabled={busy}
+        className="rounded-full bg-primary px-3 py-1 font-bold text-primary-foreground hover:brightness-110 disabled:opacity-50"
+      >
+        Aplicar
+      </button>
+      <button
+        onClick={() => setOpen(false)}
+        className="rounded-full bg-glass px-3 py-1 ring-1 ring-border hover:bg-white/5"
+      >
+        Cancelar
+      </button>
+    </div>
+  );
+}
+
