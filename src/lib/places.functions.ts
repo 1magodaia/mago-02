@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 
