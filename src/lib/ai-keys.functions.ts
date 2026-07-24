@@ -390,7 +390,7 @@ export const testAiProviderKey = createServerFn({ method: "POST" })
       return { status: "error", message: `Secret '${row.secret_name}' vazio` };
     }
 
-    const probe = await probeProvider(row.provider as Provider, key);
+    const probe = await probeProvider(row.provider as Provider, key, (row as any).model);
     await supabaseAdmin
       .from("ai_provider_keys")
       .update({
