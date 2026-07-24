@@ -543,8 +543,12 @@ function MasterPanel() {
             />
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-[11px] font-semibold uppercase text-muted-foreground">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
               Motivo da alteração <span className="text-muted-foreground/70">(opcional, aparece no histórico)</span>
+              <HelpTip
+                title="Motivo da alteração"
+                text="Fica registrado no histórico — ajuda a lembrar por que uma configuração foi trocada, útil se precisar reverter depois."
+              />
             </span>
             <input
               type="text"
