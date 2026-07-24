@@ -83,6 +83,9 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
 
+  const onMapClickRef = useRef(onMapClick);
+  useEffect(() => { onMapClickRef.current = onMapClick; }, [onMapClick]);
+
   useEffect(() => {
     let cancelled = false;
     loadMapsApi()
@@ -95,8 +98,14 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
           zoomControl: true,
           styles: DARK_STYLE,
           backgroundColor: "#000",
+          clickableIcons: false,
         });
         infoRef.current = new google.maps.InfoWindow();
+        mapRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
+          const ll = e.latLng;
+          if (!ll || !onMapClickRef.current) return;
+          onMapClickRef.current({ lat: ll.lat(), lng: ll.lng() });
+        });
       })
       .catch((err) => console.error("[map] load", err));
     return () => { cancelled = true; };
