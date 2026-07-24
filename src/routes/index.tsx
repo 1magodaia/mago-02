@@ -496,9 +496,9 @@ function Home() {
           </div>
         )}
 
-        {/* BARRA DE RESUMO */}
+        {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}
         {(rawResults.length > 0 || loading) && (
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-extrabold tabular-nums text-foreground">{filtered.length}</span>
               <span className="text-muted-foreground">leads</span>
@@ -514,10 +514,11 @@ function Home() {
             <button
               onClick={doExport}
               disabled={filtered.length === 0}
-              title={!isPro ? "Exportação CSV é do plano Pro" : ""}
-              className="ml-auto flex items-center gap-1 rounded-full bg-glass px-3 py-1.5 font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-40"
+              title={!isPro ? "Exportação CSV é do plano Pro" : "Baixar todos os leads filtrados em CSV"}
+              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-elevated hover:brightness-110 disabled:opacity-40"
             >
-              <Download className="h-3 w-3" /> CSV {!isPro && <span className="text-warn">· Pro</span>}
+              <Download className="h-3.5 w-3.5" /> Baixar lista (CSV)
+              {!isPro && <span className="ml-1 rounded-full bg-warn/25 px-1.5 py-0.5 text-[9px] text-warn">Pro</span>}
             </button>
           </div>
         )}
