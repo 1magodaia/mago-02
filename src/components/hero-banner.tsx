@@ -31,57 +31,18 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
     <section
       className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-primary/25 via-background to-accent/20 ring-1 ring-border shadow-elevated"
       style={{
-        // Altura responsiva controlada pelo painel master.
         ["--hero-h-mobile" as string]: `${heightMobile}px`,
         ["--hero-h-desktop" as string]: `${heightDesktop}px`,
       }}
     >
-      {/* Camada de imagem — apenas ilustração, sem texto pintado */}
-      <div className="absolute inset-0 -z-10">
-        {url && !error ? (
-          <>
-            <img
-              src={url}
-              alt=""
-              aria-hidden="true"
-              className="h-full w-full transition-opacity duration-500"
-              style={{
-                objectFit: fit,
-                objectPosition: "center right",
-                opacity: ready ? 1 : 0,
-              }}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              onLoad={() => {
-                LOADED_URLS.add(url);
-                setReady(true);
-              }}
-              onError={() => setError(true)}
-            />
-            {!ready && (
-              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/20 via-background to-accent/20" />
-            )}
-          </>
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-primary/25 via-background to-accent/20" />
-        )}
-        {/* Vinheta para garantir contraste do texto sobre qualquer imagem */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/10 sm:from-background/90 sm:via-background/55 sm:to-transparent"
-        />
-      </div>
+      <style>{`
+        .bm-hero-grid { min-height: var(--hero-h-mobile); }
+        @media (min-width: 640px){ .bm-hero-grid{ min-height: var(--hero-h-desktop); } }
+      `}</style>
 
-      {/* Camada de conteúdo — texto real, indexável, editável */}
-      <div
-        className="relative flex flex-col justify-center px-5 py-8 sm:px-10 sm:py-12"
-        style={{
-          minHeight: "var(--hero-h-mobile)",
-        }}
-      >
-        <style>{`@media (min-width: 640px){ .bm-hero-inner{ min-height: var(--hero-h-desktop); } }`}</style>
-        <div className="bm-hero-inner flex flex-col justify-center">
+      <div className="bm-hero-grid grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,45%)]">
+        {/* Coluna de texto — nunca sobreposta à arte */}
+        <div className="relative z-10 flex flex-col justify-center px-5 py-8 sm:px-10 sm:py-12">
           <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-accent ring-1 ring-accent/30">
             <Sparkles className="h-3 w-3" />
             Prospecção inteligente
@@ -98,6 +59,43 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
             Encontre comércios que precisam de você <strong className="text-foreground">antes</strong> da concorrência.
             Auditoria digital em segundos: site, WhatsApp, Instagram, CNPJ e faixa de preço — tudo verificado.
           </p>
+        </div>
+
+        {/* Coluna de imagem — arte inteira, sem corte no rosto */}
+        <div className="relative min-h-[220px] sm:min-h-0">
+          {url && !error ? (
+            <>
+              <img
+                src={url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full transition-opacity duration-500"
+                style={{
+                  objectFit: "contain",
+                  objectPosition: "center",
+                  opacity: ready ? 1 : 0,
+                }}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                onLoad={() => {
+                  LOADED_URLS.add(url);
+                  setReady(true);
+                }}
+                onError={() => setError(true)}
+              />
+              {!ready && (
+                <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/20 via-background to-accent/20" />
+              )}
+            </>
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-primary/25 via-background to-accent/20" />
+          )}
+          {/* Fade suave só na borda esquerda em desktop — nunca cobre o mago */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 hidden w-16 bg-gradient-to-r from-background to-transparent sm:block"
+          />
         </div>
       </div>
     </section>
