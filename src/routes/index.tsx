@@ -451,6 +451,15 @@ function Home() {
           </div>
         )}
 
+        {showTutorialBadge && (
+          <div className="mt-4">
+            <TutorialBadge
+              onStart={() => { setTutorialOpen(true); setShowTutorialBadge(false); }}
+              onSkip={() => { markTutorialSeen(); setShowTutorialBadge(false); }}
+            />
+          </div>
+        )}
+
         {/* BLOCO PRINCIPAL DE BUSCA */}
         <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
           <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
