@@ -539,6 +539,10 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
       <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/20 shrink-0`}>
         <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
         {m.label}
+        <HelpTip
+          title="Como lemos o score"
+          text="Verde = comércio sem presença digital, mais fácil de converter. Amarelo = tem algo, mas incompleto. Laranja = já tem bastante presença digital, oportunidade menor."
+        />
       </span>
       <p className={`text-[11px] leading-snug ${m.text}`}>
         <span className="font-semibold">Sugestão:</span> {suggestion}
