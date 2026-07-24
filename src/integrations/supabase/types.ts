@@ -49,6 +49,7 @@ export type Database = {
           last_error: string | null
           last_tested_at: string | null
           last_used_at: string | null
+          model: string | null
           priority: number
           provider: string
           secret_name: string
@@ -62,6 +63,7 @@ export type Database = {
           last_error?: string | null
           last_tested_at?: string | null
           last_used_at?: string | null
+          model?: string | null
           priority?: number
           provider: string
           secret_name: string
@@ -75,6 +77,7 @@ export type Database = {
           last_error?: string | null
           last_tested_at?: string | null
           last_used_at?: string | null
+          model?: string | null
           priority?: number
           provider?: string
           secret_name?: string
