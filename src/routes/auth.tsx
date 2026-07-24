@@ -37,13 +37,26 @@ function AuthPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  // Same-origin relative path guard for post-login redirects (e.g. MCP consent URL).
+  const safeRedirect =
+    typeof redirect === "string" && redirect.startsWith("/") && !redirect.startsWith("//")
+      ? redirect
+      : null;
+
   const handleGoogle = async () => {
     setError(null);
     setInfo(null);
     setGoogleLoading(true);
     try {
+      // Stash the intended destination so we can consume it after the session hydrates,
+      // regardless of whether Google returns via popup (web_message) or full-page redirect.
+      if (safeRedirect && typeof window !== "undefined") {
+        try { sessionStorage.setItem("bm.postLoginRedirect", safeRedirect); } catch { /* quota */ }
+      }
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        // Return to /auth so the useEffect below can pick up the stashed redirect
+        // and forward the user to the original destination (e.g. /.lovable/oauth/consent).
+        redirect_uri: `${window.location.origin}/auth`,
       });
       if (result.error) throw result.error;
       // if redirected, browser navigates away; otherwise session is set and useEffect redirects
@@ -55,8 +68,25 @@ function AuthPage() {
   };
 
   useEffect(() => {
-    if (!loading && user) nav({ to: (redirect as string) || "/" });
-  }, [user, loading, nav, redirect]);
+    if (!loading && user) {
+      let stashed: string | null = null;
+      if (typeof window !== "undefined") {
+        try {
+          stashed = sessionStorage.getItem("bm.postLoginRedirect");
+          if (stashed) sessionStorage.removeItem("bm.postLoginRedirect");
+        } catch { /* ignore */ }
+      }
+      const target = stashed && stashed.startsWith("/") && !stashed.startsWith("//")
+        ? stashed
+        : safeRedirect;
+      if (target) {
+        // Use full navigation to preserve query strings (authorization_id etc.).
+        window.location.assign(target);
+      } else {
+        nav({ to: "/" });
+      }
+    }
+  }, [user, loading, nav, safeRedirect]);
 
   const handle = async (e: React.FormEvent) => {
     e.preventDefault();
