@@ -433,6 +433,8 @@ function MasterPanel() {
         </table>
       </div>
 
+      <AiKeysPanel />
+
       <p className="mx-auto mt-4 max-w-7xl text-xs text-muted-foreground">
         Rota oculta. Acesso restrito a papéis <code>master</code> e <code>admin</code>. Todas as ações são registradas em <code>admin_audit_log</code>.
       </p>
