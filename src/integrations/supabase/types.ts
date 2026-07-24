@@ -377,6 +377,7 @@ export type Database = {
           new_whatsapp: string | null
           old_message: string | null
           old_whatsapp: string | null
+          reason: string | null
         }
         Insert: {
           changed_by?: string | null
@@ -387,6 +388,7 @@ export type Database = {
           new_whatsapp?: string | null
           old_message?: string | null
           old_whatsapp?: string | null
+          reason?: string | null
         }
         Update: {
           changed_by?: string | null
@@ -397,6 +399,7 @@ export type Database = {
           new_whatsapp?: string | null
           old_message?: string | null
           old_whatsapp?: string | null
+          reason?: string | null
         }
         Relationships: []
       }

@@ -5,10 +5,12 @@ import {
   ArrowLeft,
   Ban,
   Check,
+  Download,
   Image as ImageIcon,
   KeyRound,
   Loader2,
   MessageCircle,
+  RotateCcw,
   Save,
   Shield,
   ShieldCheck,
@@ -24,7 +26,7 @@ import {
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
-import { getAppSettings, updateAppSettings, listWhatsappChangeLog, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
+import { getAppSettings, updateAppSettings, listWhatsappChangeLog, exportWhatsappChangeLogCsv, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
@@ -54,6 +56,7 @@ function MasterPanel() {
   const writeSettings = useServerFn(updateAppSettings);
   const readCostStats = useServerFn(getCitationCostStats);
   const readWaLog = useServerFn(listWhatsappChangeLog);
+  const exportWaCsv = useServerFn(exportWhatsappChangeLogCsv);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -71,6 +74,15 @@ function MasterPanel() {
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
   const [waLog, setWaLog] = useState<WhatsappChangeLogEntry[]>([]);
+  const [waLogTotal, setWaLogTotal] = useState(0);
+  const [waLogPage, setWaLogPage] = useState(1);
+  const [waLogPageSize] = useState(10);
+  const [waLogAuthor, setWaLogAuthor] = useState("");
+  const [waLogFrom, setWaLogFrom] = useState("");
+  const [waLogTo, setWaLogTo] = useState("");
+  const [waLogBusy, setWaLogBusy] = useState(false);
+  const [waLogExporting, setWaLogExporting] = useState(false);
+  const [reason, setReason] = useState("");
 
 
 
@@ -97,6 +109,27 @@ function MasterPanel() {
     }
   };
 
+  const loadWaLog = async (opts?: { page?: number; author?: string; from?: string; to?: string }) => {
+    setWaLogBusy(true);
+    try {
+      const r = await readWaLog({
+        data: {
+          author: opts?.author ?? waLogAuthor,
+          from: opts?.from ?? waLogFrom,
+          to: opts?.to ?? waLogTo,
+          page: opts?.page ?? waLogPage,
+          pageSize: waLogPageSize,
+        },
+      });
+      setWaLog(r.entries);
+      setWaLogTotal(r.total);
+    } catch {
+      // ignore
+    } finally {
+      setWaLogBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (ready) {
       load();
@@ -110,11 +143,12 @@ function MasterPanel() {
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
-      readWaLog().then(setWaLog).catch(() => {});
+      loadWaLog({ page: 1 });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
+
 
   // Normaliza para dígitos (aceita "+" apenas no início) e formata visualmente como +DDI (DD) NNNNN-NNNN
   const normalizeWa = (raw: string): string => {
@@ -145,6 +179,7 @@ function MasterPanel() {
           support_message: supportMsg || null,
           citations_enabled: citationsEnabled,
           citations_daily_limit: citationsLimit,
+          reason: reason.trim() || null,
         },
       });
       setSupportWa(r.support_whatsapp ?? "");
@@ -152,7 +187,9 @@ function MasterPanel() {
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
       setNotice("Configurações atualizadas.");
-      readWaLog().then(setWaLog).catch(() => {});
+      setReason("");
+      setWaLogPage(1);
+      loadWaLog({ page: 1 });
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
     } finally {
@@ -190,6 +227,75 @@ function MasterPanel() {
       setHeroBusy(false);
     }
   };
+
+  const revertWaEntry = async (entry: WhatsappChangeLogEntry) => {
+    const target = entry.old_whatsapp ?? "";
+    const targetMsg = entry.old_message ?? "";
+    const label = target ? target : "(vazio)";
+    if (!window.confirm(`Reverter WhatsApp para "${label}"?`)) return;
+    setSettingsBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({
+        data: {
+          support_whatsapp: target || null,
+          support_message: targetMsg || null,
+          reason: `Revert de ${new Date(entry.created_at).toLocaleString("pt-BR")} (por ${entry.changed_by_email ?? "—"})`,
+        },
+      });
+      setSupportWa(r.support_whatsapp ?? "");
+      setSupportMsg(r.support_message ?? "");
+      setNotice("Configuração revertida.");
+      setWaLogPage(1);
+      loadWaLog({ page: 1 });
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao reverter.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
+  const applyWaFilters = () => {
+    setWaLogPage(1);
+    loadWaLog({ page: 1 });
+  };
+
+  const clearWaFilters = () => {
+    setWaLogAuthor("");
+    setWaLogFrom("");
+    setWaLogTo("");
+    setWaLogPage(1);
+    loadWaLog({ page: 1, author: "", from: "", to: "" });
+  };
+
+  const changeWaPage = (next: number) => {
+    setWaLogPage(next);
+    loadWaLog({ page: next });
+  };
+
+  const downloadWaCsv = async () => {
+    setWaLogExporting(true);
+    try {
+      const { csv } = await exportWaCsv({
+        data: { author: waLogAuthor, from: waLogFrom, to: waLogTo },
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao exportar CSV.");
+    } finally {
+      setWaLogExporting(false);
+    }
+  };
+
+
 
 
 
@@ -299,7 +405,7 @@ function MasterPanel() {
             </p>
           </div>
         </div>
-        <form onSubmit={saveSettings} className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr_auto]">
+        <form onSubmit={saveSettings} className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="text-[11px] font-semibold uppercase text-muted-foreground">WhatsApp</span>
             <input
@@ -339,15 +445,31 @@ function MasterPanel() {
               className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
             />
           </label>
-          <button
-            type="submit"
-            disabled={settingsBusy || !waValid}
-            className="mt-6 inline-flex items-center justify-center gap-2 self-end rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60 sm:mt-0"
-          >
-            {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Salvar
-          </button>
+          <label className="block sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">
+              Motivo da alteração <span className="text-muted-foreground/70">(opcional, aparece no histórico)</span>
+            </span>
+            <input
+              type="text"
+              placeholder="Ex.: troca de plantonista, número antigo saiu, etc."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              maxLength={500}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <div className="sm:col-span-2 flex justify-end">
+            <button
+              type="submit"
+              disabled={settingsBusy || !waValid}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+            >
+              {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Salvar
+            </button>
+          </div>
         </form>
+
         {settingsError && (
           <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
             {settingsError}
@@ -370,21 +492,71 @@ function MasterPanel() {
 
       {/* HISTÓRICO DE ALTERAÇÕES — WhatsApp de suporte */}
       <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
-        <div className="flex items-start gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/40">
-            <MessageCircle className="h-4 w-4 text-primary" />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/40">
+              <MessageCircle className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Histórico de alterações do WhatsApp</h2>
+              <p className="text-xs text-muted-foreground">
+                Filtre por autor e período. Reverta para um estado anterior ou exporte para auditar com o time.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold">Histórico de alterações do WhatsApp</h2>
-            <p className="text-xs text-muted-foreground">
-              Últimas 50 mudanças do número ou da mensagem pré-preenchida, com autor e data.
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={downloadWaCsv}
+            disabled={waLogExporting}
+            className="inline-flex items-center gap-2 rounded-xl bg-glass px-3 py-2 text-xs font-semibold ring-1 ring-border hover:bg-primary/10 disabled:opacity-60"
+          >
+            {waLogExporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            Exportar CSV
+          </button>
         </div>
-        <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-border">
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_160px_160px_auto_auto]">
+          <input
+            type="text"
+            placeholder="Autor (e-mail contém...)"
+            value={waLogAuthor}
+            onChange={(e) => setWaLogAuthor(e.target.value)}
+            className="rounded-xl bg-glass px-3 py-2 text-xs outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+          />
+          <input
+            type="date"
+            value={waLogFrom}
+            onChange={(e) => setWaLogFrom(e.target.value)}
+            className="rounded-xl bg-glass px-3 py-2 text-xs outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+          />
+          <input
+            type="date"
+            value={waLogTo}
+            onChange={(e) => setWaLogTo(e.target.value)}
+            className="rounded-xl bg-glass px-3 py-2 text-xs outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+          />
+          <button
+            type="button"
+            onClick={applyWaFilters}
+            disabled={waLogBusy}
+            className="rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+          >
+            Filtrar
+          </button>
+          <button
+            type="button"
+            onClick={clearWaFilters}
+            disabled={waLogBusy}
+            className="rounded-xl bg-glass px-3 py-2 text-xs font-semibold ring-1 ring-border hover:bg-primary/10 disabled:opacity-60"
+          >
+            Limpar
+          </button>
+        </div>
+
+        <div className="mt-4 overflow-x-auto rounded-xl ring-1 ring-border">
           {waLog.length === 0 ? (
             <div className="px-4 py-6 text-center text-xs text-muted-foreground">
-              Nenhuma alteração registrada ainda.
+              {waLogBusy ? "Carregando..." : "Nenhuma alteração encontrada para o filtro atual."}
             </div>
           ) : (
             <table className="w-full text-xs">
@@ -394,15 +566,20 @@ function MasterPanel() {
                   <th className="px-3 py-2 text-left">Quem</th>
                   <th className="px-3 py-2 text-left">WhatsApp (antes → depois)</th>
                   <th className="px-3 py-2 text-left">Mensagem (antes → depois)</th>
+                  <th className="px-3 py-2 text-left">Motivo</th>
+                  <th className="px-3 py-2 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {waLog.map((e) => {
                   const waChanged = (e.old_whatsapp ?? "") !== (e.new_whatsapp ?? "");
                   const msgChanged = (e.old_message ?? "") !== (e.new_message ?? "");
+                  const canRevert =
+                    (e.old_whatsapp ?? "") !== (supportWa.replace(/\D/g, "") || "") ||
+                    (e.old_message ?? "") !== (supportMsg ?? "");
                   return (
-                    <tr key={e.id} className="border-t border-border/50">
-                      <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                    <tr key={e.id} className="border-t border-border/50 align-top">
+                      <td className="px-3 py-2 tabular-nums text-muted-foreground whitespace-nowrap">
                         {new Date(e.created_at).toLocaleString("pt-BR")}
                       </td>
                       <td className="px-3 py-2">{e.changed_by_email ?? "—"}</td>
@@ -428,6 +605,19 @@ function MasterPanel() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
+                      <td className="px-3 py-2 text-muted-foreground">{e.reason ?? "—"}</td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => revertWaEntry(e)}
+                          disabled={settingsBusy || !canRevert}
+                          title={canRevert ? "Reverter para o estado anterior a esta alteração" : "Estado atual já corresponde ao 'antes' deste registro"}
+                          className="inline-flex items-center gap-1 rounded-lg bg-glass px-2 py-1 text-[11px] font-semibold ring-1 ring-border hover:bg-primary/10 disabled:opacity-40"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Reverter
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -435,7 +625,34 @@ function MasterPanel() {
             </table>
           )}
         </div>
+
+        {waLogTotal > waLogPageSize && (
+          <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>
+              Página {waLogPage} de {Math.max(1, Math.ceil(waLogTotal / waLogPageSize))} · {waLogTotal} registros
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => changeWaPage(Math.max(1, waLogPage - 1))}
+                disabled={waLogPage <= 1 || waLogBusy}
+                className="rounded-lg bg-glass px-2 py-1 ring-1 ring-border hover:bg-primary/10 disabled:opacity-40"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                onClick={() => changeWaPage(waLogPage + 1)}
+                disabled={waLogPage >= Math.ceil(waLogTotal / waLogPageSize) || waLogBusy}
+                className="rounded-lg bg-glass px-2 py-1 ring-1 ring-border hover:bg-primary/10 disabled:opacity-40"
+              >
+                Próxima
+              </button>
+            </div>
+          </div>
+        )}
       </section>
+
 
 
 

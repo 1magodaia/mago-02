@@ -67,6 +67,7 @@ const inputSchema = z.object({
     })
     .nullable()
     .optional(),
+  reason: z.string().trim().max(500).nullable().optional(),
 });
 
 
@@ -117,8 +118,10 @@ export const updateAppSettings = createServerFn({ method: "POST" })
         new_whatsapp: newWa,
         old_message: oldMsg,
         new_message: newMsg,
+        reason: data.reason ? data.reason : null,
       });
     }
+
 
     return {
       support_whatsapp: row?.support_whatsapp ?? null,
@@ -138,22 +141,100 @@ export interface WhatsappChangeLogEntry {
   new_whatsapp: string | null;
   old_message: string | null;
   new_message: string | null;
+  reason: string | null;
   created_at: string;
 }
 
-export const listWhatsappChangeLog = createServerFn({ method: "GET" })
+const logQuerySchema = z.object({
+  author: z.string().trim().max(320).optional().default(""),
+  from: z.string().trim().max(40).optional().default(""),
+  to: z.string().trim().max(40).optional().default(""),
+  page: z.number().int().min(1).max(10000).optional().default(1),
+  pageSize: z.number().int().min(1).max(100).optional().default(10),
+});
+
+export interface WhatsappChangeLogPage {
+  entries: WhatsappChangeLogEntry[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertAdmin(supabase: any, userId: string) {
+  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const set = new Set(((roles ?? []) as { role: string }[]).map((r) => r.role));
+  if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
+}
+
+
+
+export const listWhatsappChangeLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<WhatsappChangeLogEntry[]> => {
-    const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
-    const set = new Set((roles ?? []).map((r) => r.role as string));
-    if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
-    const { data, error } = await context.supabase
+  .inputValidator((raw: unknown) => logQuerySchema.parse(raw ?? {}))
+  .handler(async ({ data, context }): Promise<WhatsappChangeLogPage> => {
+    await assertAdmin(context.supabase, context.userId);
+    let q = context.supabase
       .from("whatsapp_change_log")
-      .select("id, changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .select("id, changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, reason, created_at", { count: "exact" })
+      .order("created_at", { ascending: false });
+    if (data.author) q = q.ilike("changed_by_email", `%${data.author}%`);
+    if (data.from) q = q.gte("created_at", new Date(data.from).toISOString());
+    if (data.to) {
+      const d = new Date(data.to);
+      d.setHours(23, 59, 59, 999);
+      q = q.lte("created_at", d.toISOString());
+    }
+    const from = (data.page - 1) * data.pageSize;
+    const to = from + data.pageSize - 1;
+    const { data: rows, error, count } = await q.range(from, to);
     if (error) throw new Error(error.message);
-    return (data ?? []) as WhatsappChangeLogEntry[];
+    return {
+      entries: (rows ?? []) as WhatsappChangeLogEntry[],
+      total: count ?? 0,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   });
+
+export const exportWhatsappChangeLogCsv = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => logQuerySchema.omit({ page: true, pageSize: true }).parse(raw ?? {}))
+  .handler(async ({ data, context }): Promise<{ csv: string }> => {
+    await assertAdmin(context.supabase, context.userId);
+    let q = context.supabase
+      .from("whatsapp_change_log")
+      .select("changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, reason, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (data.author) q = q.ilike("changed_by_email", `%${data.author}%`);
+    if (data.from) q = q.gte("created_at", new Date(data.from).toISOString());
+    if (data.to) {
+      const d = new Date(data.to);
+      d.setHours(23, 59, 59, 999);
+      q = q.lte("created_at", d.toISOString());
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const esc = (v: string | null | undefined) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = ["Data", "Autor", "WhatsApp anterior", "WhatsApp novo", "Mensagem anterior", "Mensagem nova", "Motivo"];
+    const lines = [header.join(",")];
+    for (const r of rows ?? []) {
+      lines.push([
+        esc(new Date(r.created_at).toLocaleString("pt-BR")),
+        esc(r.changed_by_email),
+        esc(r.old_whatsapp),
+        esc(r.new_whatsapp),
+        esc(r.old_message),
+        esc(r.new_message),
+        esc(r.reason),
+      ].join(","));
+    }
+    return { csv: lines.join("\n") };
+  });
+
 
 
