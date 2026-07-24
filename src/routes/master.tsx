@@ -31,6 +31,38 @@ import { getAppSettings, updateAppSettings, listWhatsappChangeLog, exportWhatsap
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
+function HeroPlaceholder({ tone }: { tone: "empty" | "warn" | "error" }) {
+  const label =
+    tone === "error"
+      ? "Não foi possível carregar essa imagem."
+      : tone === "warn"
+      ? "URL inválida — use https://..."
+      : "Sem banner configurado.";
+  const hint =
+    tone === "error"
+      ? "Verifique o link ou tente outra URL."
+      : tone === "warn"
+      ? "Cole uma URL http(s) pública."
+      : "Cole uma URL acima para pré-visualizar.";
+  const ring =
+    tone === "error"
+      ? "ring-destructive/40"
+      : tone === "warn"
+      ? "ring-warn/40"
+      : "ring-border";
+  return (
+    <div className={`grid h-full w-full place-items-center bg-gradient-to-br from-primary/10 via-background to-accent/10 ring-1 ${ring}`}>
+      <div className="flex items-center gap-3 px-4 text-center">
+        <ImageIcon className="h-6 w-6 text-primary" />
+        <div>
+          <div className="text-xs font-bold">{label}</div>
+          <div className="text-[10px] text-muted-foreground">{hint}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/master")({
   head: () => ({
     meta: [
