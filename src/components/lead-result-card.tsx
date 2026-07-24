@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
+import { HelpTip } from "@/components/help-tip";
 import { auditWebsite } from "@/lib/audit.functions";
 import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
