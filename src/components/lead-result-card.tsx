@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Bookmark,
   BookmarkCheck,
@@ -13,6 +14,7 @@ import {
   MessageCircle,
   Phone,
   RefreshCw,
+  Search,
   Star,
   Zap,
 } from "lucide-react";
@@ -20,6 +22,7 @@ import type { ScoredLead } from "@/lib/scoring";
 import { auditWebsite } from "@/lib/audit.functions";
 import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
+import { lookupCitations, type CitationItem } from "@/lib/citations.functions";
 import {
   isContacted as chkContacted,
   isFavorite as chkFav,
