@@ -136,11 +136,11 @@ function Home() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
-  const [heroHeightDesktop, setHeroHeightDesktop] = useState<number>(320);
-  const [heroHeightMobile, setHeroHeightMobile] = useState<number>(200);
-  const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
-  const [heroError, setHeroError] = useState(false);
+  const _initHero = typeof window !== "undefined" ? readHeroCache() : null;
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(_initHero?.url ?? heroDefault.url);
+  const [heroHeightDesktop, setHeroHeightDesktop] = useState<number>(_initHero?.hd ?? 320);
+  const [heroHeightMobile, setHeroHeightMobile] = useState<number>(_initHero?.hm ?? 200);
+  const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -152,11 +152,15 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
-          setHeroImageUrl(s.hero_image_url ?? "");
-          setHeroError(false);
-          setHeroHeightDesktop(s.hero_height_desktop ?? 320);
-          setHeroHeightMobile(s.hero_height_mobile ?? 200);
-          setHeroFit(s.hero_fit ?? "cover");
+          const nextUrl = s.hero_image_url ?? "";
+          const nextHd = s.hero_height_desktop ?? 320;
+          const nextHm = s.hero_height_mobile ?? 200;
+          const nextFit: "cover" | "contain" = s.hero_fit ?? "cover";
+          setHeroImageUrl((prev) => (prev === nextUrl ? prev : nextUrl));
+          setHeroHeightDesktop((prev) => (prev === nextHd ? prev : nextHd));
+          setHeroHeightMobile((prev) => (prev === nextHm ? prev : nextHm));
+          setHeroFit((prev) => (prev === nextFit ? prev : nextFit));
+          writeHeroCache({ url: nextUrl, hd: nextHd, hm: nextHm, fit: nextFit });
 
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
