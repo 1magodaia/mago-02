@@ -106,6 +106,51 @@ const SUGGESTIONS = [
   { label: "Advogado · Belo Horizonte", query: "advogado", region: "Belo Horizonte" },
 ];
 
+
+function FreeQuotaBlock({ supportWa }: { supportWa: string | null }) {
+  const digits = (supportWa ?? "").replace(/\D/g, "");
+  const msg = encodeURIComponent(
+    "Olá! Já usei minha busca gratuita no Busca Mágica e quero liberar acesso completo.",
+  );
+  const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
+  return (
+    <div
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="quota-block-title"
+      aria-describedby="quota-block-desc"
+      className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
+    >
+      <div className="glass-panel w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl">
+        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
+          <Search className="h-7 w-7 text-primary" aria-hidden />
+        </div>
+        <h2 id="quota-block-title" className="text-lg font-extrabold text-foreground">
+          Você já usou sua busca gratuita
+        </h2>
+        <p id="quota-block-desc" className="mt-2 text-sm text-muted-foreground">
+          Fale com a gente para liberar acesso completo e continuar prospectando comércios.
+        </p>
+        {waHref ? (
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Falar no WhatsApp
+          </a>
+        ) : (
+          <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
+            Contato de suporte ainda não configurado. Fale com o administrador.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Home() {
   const nav = useNavigate();
   const { user, profile, isPro, isMaster, isAdmin, signOut, loading: authLoading, refreshProfile } = useAuth();
