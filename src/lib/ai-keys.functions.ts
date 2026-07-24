@@ -376,6 +376,25 @@ async function probeProvider(
 
 
 /**
+ * Retorna o valor da chave para uma linha — prioriza o inline `secret_value`
+ * (salvo pelo assistente do painel) e cai no secret de ambiente quando existir.
+ */
+function resolveKeyValue(row: any): string | null {
+  if (typeof row?.secret_value === "string" && row.secret_value.length > 0) return row.secret_value;
+  const name = row?.secret_name;
+  if (typeof name === "string" && name.length > 0) {
+    const v = process.env[name];
+    if (typeof v === "string" && v.length > 0) return v;
+  }
+  return null;
+}
+
+function missingKeyMessage(row: any): string {
+  if (row?.secret_name) return `Secret '${row.secret_name}' vazio e nenhuma chave salva no assistente.`;
+  return "Nenhuma chave salva para este provedor — use o assistente para colar a chave.";
+}
+
+/**
  * Testa uma chave chamando o endpoint mais leve do provedor (list models quando existe).
  * Marca status = active | rate_limited | error com mensagem.
  */
@@ -392,17 +411,14 @@ export const testAiProviderKey = createServerFn({ method: "POST" })
       .single();
     if (error || !row) throw new Error(error?.message ?? "Chave não encontrada");
 
-    const key = process.env[row.secret_name];
+    const key = resolveKeyValue(row);
     if (!key) {
+      const msg = missingKeyMessage(row);
       await supabaseAdmin
         .from("ai_provider_keys")
-        .update({
-          status: "error",
-          last_error: `Secret '${row.secret_name}' não configurado`,
-          last_tested_at: new Date().toISOString(),
-        })
+        .update({ status: "error", last_error: msg, last_tested_at: new Date().toISOString() })
         .eq("id", data.id);
-      return { status: "error", message: `Secret '${row.secret_name}' vazio` };
+      return { status: "error" as const, message: msg };
     }
 
     const probe = await probeProvider(row.provider as Provider, key, (row as any).model);
@@ -425,14 +441,14 @@ export const testAllAiProviderKeys = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await ensurePrivileged(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("id, provider, secret_name, model");
-    const list = (rows ?? []) as Array<{ id: string; provider: Provider; secret_name: string; model: string | null }>;
+    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("*");
+    const list = (rows ?? []) as Array<any>;
     await Promise.all(
       list.map(async (row) => {
-        const key = process.env[row.secret_name];
+        const key = resolveKeyValue(row);
         const probe = key
-          ? await probeProvider(row.provider, key, row.model)
-          : { status: "error" as const, message: `Secret '${row.secret_name}' vazio` };
+          ? await probeProvider(row.provider as Provider, key, row.model)
+          : { status: "error" as const, message: missingKeyMessage(row) };
 
         await supabaseAdmin
           .from("ai_provider_keys")
@@ -443,6 +459,7 @@ export const testAllAiProviderKeys = createServerFn({ method: "POST" })
           })
           .eq("id", row.id);
       }),
+
     );
     return { tested: list.length };
   });
