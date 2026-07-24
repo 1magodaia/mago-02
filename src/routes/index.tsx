@@ -127,17 +127,10 @@ function Home() {
         .catch(() => {});
     };
     load();
-    const channel = supabase
-      .channel("app_settings:home")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "app_settings", filter: "id=eq.1" },
-        () => load(),
-      )
-      .subscribe();
+    const iv = setInterval(load, 60_000);
     return () => {
       alive = false;
-      supabase.removeChannel(channel);
+      clearInterval(iv);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
