@@ -862,7 +862,7 @@ function Home() {
               </div>
               {!user && (
                 <p className="mt-5 text-xs text-muted-foreground">
-                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free com {FREE_MONTHLY_SEARCH_LIMIT} buscas/mês.
+                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free ganha {FREE_LIFETIME_SEARCH_LIMIT} busca de cortesia.
                 </p>
               )}
             </div>
