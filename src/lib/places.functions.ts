@@ -35,6 +35,7 @@ export interface PlaceResult {
   latest_review_at: string | null; // ISO — data da avaliação mais recente
   reviews: PlaceReview[];
   collected_at: string; // ISO — quando este registro foi coletado do Google
+  price_level: number | null; // 0..4 (Google Places), null quando não informado
 }
 
 interface GReview {
