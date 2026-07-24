@@ -38,6 +38,7 @@ export interface AiProviderKey {
   provider: Provider;
   label: string;
   secret_name: string;
+  model: string | null;
   priority: number;
   status: "active" | "error" | "rate_limited" | "untested" | "disabled";
   last_error: string | null;
@@ -45,6 +46,36 @@ export interface AiProviderKey {
   last_used_at: string | null;
   secret_present: boolean;
 }
+
+/**
+ * Default chat model per provider (used when the user does not choose one)
+ * plus a curated list of models we surface in the master panel picker.
+ * The probe reuses this to hit `chat/completions` with the selected model
+ * instead of the generic `list models` endpoint — giving real "esse modelo
+ * responde?" feedback for NVIDIA (Nemotron/Llama-Nemotron), Groq, etc.
+ */
+export const PROVIDER_MODELS: Record<Provider, { default: string; options: string[] }> = {
+  openai:     { default: "gpt-4o-mini",                       options: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1", "o4-mini"] },
+  gemini:     { default: "gemini-2.5-flash",                  options: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"] },
+  groq:       { default: "llama-3.3-70b-versatile",           options: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"] },
+  lovable:    { default: "google/gemini-2.5-flash",           options: ["google/gemini-2.5-flash", "google/gemini-2.5-pro", "openai/gpt-4o-mini"] },
+  anthropic:  { default: "claude-3-5-haiku-latest",           options: ["claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-opus-latest"] },
+  mistral:    { default: "mistral-small-latest",              options: ["mistral-small-latest", "mistral-large-latest", "open-mixtral-8x22b"] },
+  deepseek:   { default: "deepseek-chat",                     options: ["deepseek-chat", "deepseek-reasoner"] },
+  xai:        { default: "grok-2-latest",                     options: ["grok-2-latest", "grok-2-mini", "grok-beta"] },
+  openrouter: { default: "openai/gpt-4o-mini",                options: ["openai/gpt-4o-mini", "anthropic/claude-3.5-sonnet", "google/gemini-2.5-flash", "meta-llama/llama-3.3-70b-instruct"] },
+  perplexity: { default: "sonar",                             options: ["sonar", "sonar-pro", "sonar-reasoning"] },
+  cohere:     { default: "command-r",                         options: ["command-r", "command-r-plus", "command-a-03-2025"] },
+  nvidia:     { default: "nvidia/llama-3.1-nemotron-70b-instruct", options: [
+    "nvidia/llama-3.1-nemotron-70b-instruct",
+    "nvidia/llama-3.3-nemotron-super-49b-v1",
+    "nvidia/nemotron-4-340b-instruct",
+    "meta/llama-3.3-70b-instruct",
+    "meta/llama-3.1-8b-instruct",
+    "mistralai/mixtral-8x22b-instruct-v0.1",
+  ] },
+};
+
 
 export interface AiSelection {
   mode: "auto" | "manual";
