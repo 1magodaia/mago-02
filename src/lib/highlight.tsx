@@ -98,10 +98,16 @@ function fuzzyFindSpans(normText: string, term: string, maxDist: number): Array<
  */
 export function toTerms(query: string | null | undefined): string[] {
   if (!query) return [];
-  return normalize(query)
-    .split(/\s+/)
-    .map((t) => t.trim())
-    .filter((t) => t.length >= 2);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of normalize(query).split(/[\s,;]+/)) {
+    const t = raw.trim();
+    if (t.length >= 2 && !seen.has(t)) {
+      seen.add(t);
+      out.push(t);
+    }
+  }
+  return out;
 }
 
 /** Fuzzy contains: text has a window matching term within maxDist edits. */

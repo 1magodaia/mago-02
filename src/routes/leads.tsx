@@ -163,7 +163,7 @@ function LeadsPage() {
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filtrar por nome, endereço, telefone ou site…"
+              placeholder="Filtrar por nome, endereço, telefone ou site (separe termos por espaço ou vírgula)…"
               aria-label="Filtrar leads salvos"
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
