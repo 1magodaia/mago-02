@@ -230,9 +230,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {igStatus === "unverifiable" && (
               <span
                 className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
-                title="Sem site conhecido — não conseguimos confirmar Instagram por fonte pública."
               >
                 <HelpCircle className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> não verificável
+                <HelpTip
+                  title="Não verificável"
+                  text="Não temos como confirmar esse dado com uma fonte confiável — não significa que o comércio não tenha, só que não conseguimos checar."
+                />
               </span>
             )}
             {lead.rating != null && (
