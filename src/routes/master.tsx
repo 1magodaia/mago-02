@@ -31,6 +31,7 @@ import {
 } from "@/lib/admin.functions";
 import { getAppSettings, updateAppSettings, listWhatsappChangeLog, exportWhatsappChangeLogCsv, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
+import { HelpTip } from "@/components/help-tip";
 
 
 function HeroPlaceholder({ tone }: { tone: "empty" | "warn" | "error" }) {
