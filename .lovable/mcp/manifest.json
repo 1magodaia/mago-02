@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://juhfpndomqvdqxmasssi.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "busca-magica-mcp",
+      "version": "1.0.0",
+      "title": "Busca Mágica"
+    },
+    "tools": [
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Retorna o perfil do usuário autenticado: nome, e-mail, plano (free/pro), quota de buscas usadas/restantes e status da conta.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_leads",
+        "title": "List my saved leads",
+        "description": "Lista os leads (comércios) que o usuário autenticado salvou no Busca Mágica. Retorna nome, endereço, telefone, WhatsApp, site, Instagram, score e status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "Máximo de leads a retornar (default 50, teto sensato 200).",
+              "default": 50
+            },
+            "only_status": {
+              "type": "string",
+              "description": "Filtra por status do lead (ex: 'novo', 'contatado', 'convertido'). Omita para todos."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "save_lead",
+        "title": "Save a lead",
+        "description": "Salva um comércio na lista pessoal de leads do usuário. Use após uma busca (search_places) quando o assistente identificar um comércio que valha a pena prospectar.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Nome do comércio."
+            },
+            "category": {
+              "type": "string",
+              "description": "Categoria (ex: 'padaria', 'pet shop')."
+            },
+            "city": {
+              "type": "string",
+              "description": "Cidade."
+            },
+            "address": {
+              "type": "string",
+              "description": "Endereço completo."
+            },
+            "phone": {
+              "type": "string",
+              "description": "Telefone."
+            },
+            "whatsapp": {
+              "type": "string",
+              "description": "Link do WhatsApp (https://wa.me/...)."
+            },
+            "email": {
+              "type": "string",
+              "description": "E-mail de contato."
+            },
+            "website": {
+              "type": "string",
+              "description": "Site do comércio."
+            },
+            "instagram_handle": {
+              "type": "string",
+              "description": "Handle do Instagram (sem @)."
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Latitude."
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude."
+            },
+            "score_lead": {
+              "type": "integer",
+              "description": "Score de oportunidade 1-10 (opcional)."
+            },
+            "status": {
+              "type": "string",
+              "description": "Status inicial (ex: 'novo', 'contatado'). Default 'novo'."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_places",
+        "title": "Search local businesses",
+        "description": "Busca comércios locais via Google Places por categoria + região (ex: 'padaria em São Paulo'). Consome 1 busca da quota do usuário (Free = 1 busca vitalícia, Pro = ilimitado ou por saldo). Retorna nome, endereço, coordenadas, nota e nº de avaliações. Use save_lead para persistir um resultado.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "O que buscar. Combine categoria + região, ex: 'barbearia Vila Madalena São Paulo'."
+            },
+            "max_results": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "Limite de resultados (default 20, teto 20 — Google Places retorna até 20 por página).",
+              "default": 20
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
