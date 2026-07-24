@@ -45,6 +45,8 @@ interface Props {
   onUpdate?: (updated: ScoredLead) => void;
   /** true quando o kill switch está ON e o usuário atual é Pro (ou admin/master). */
   citationsAvailable?: boolean;
+  /** Termos a destacar (accent/case-insensitive) no nome e endereço. */
+  highlight?: string[];
 }
 
 function toSaved(lead: ScoredLead): SavedLead {
