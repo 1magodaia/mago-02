@@ -88,6 +88,9 @@ function Home() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const readSettings = useServerFn(getAppSettings);
+  const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
   const requireAuth = (): boolean => {
     if (!user) {
