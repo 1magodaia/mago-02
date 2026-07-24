@@ -1155,6 +1155,41 @@ function AiKeysPanel() {
   const [form, setForm] = useState({ provider: "openai" as AiProviderKey["provider"], label: "", secret_name: "", model: PROVIDER_MODELS.openai.default, priority: 100 });
   const [loading, setLoading] = useState(true);
 
+  // Assistente ("poucos cliques")
+  const [wiz, setWiz] = useState({
+    provider: "nvidia" as AiProviderKey["provider"],
+    api_key: "",
+    model: PROVIDER_MODELS.nvidia?.default ?? "",
+    show: false,
+  });
+  const [wizResult, setWizResult] = useState<WizardResult | null>(null);
+  const [wizBusy, setWizBusy] = useState(false);
+  const [wizErr, setWizErr] = useState<string | null>(null);
+
+  async function runWizard(e: React.FormEvent) {
+    e.preventDefault();
+    setWizErr(null);
+    setWizResult(null);
+    const key = wiz.api_key.trim();
+    if (key.length < 4) { setWizErr("Cole a chave da API antes de salvar."); return; }
+    setWizBusy(true);
+    try {
+      const res = await wizard({ data: {
+        provider: wiz.provider,
+        api_key: key,
+        model: wiz.model?.trim() || null,
+      }});
+      setWizResult(res);
+      setWiz({ ...wiz, api_key: "" });
+      await reload();
+    } catch (e: any) {
+      setWizErr(String(e?.message ?? e));
+    } finally {
+      setWizBusy(false);
+    }
+  }
+
+
   async function reload() {
     setErr(null);
     try {
