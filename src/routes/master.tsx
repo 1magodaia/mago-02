@@ -1223,10 +1223,10 @@ function AiKeysPanel() {
           <select
             value={form.provider}
             onChange={(e) => setForm({ ...form, provider: e.target.value as any })}
-            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
+            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border [color-scheme:dark]"
           >
             {PROVIDERS.map((p) => (
-              <option key={p} value={p}>{PROVIDER_LABEL[p]}</option>
+              <option key={p} className="bg-background text-foreground" value={p}>{PROVIDER_LABEL[p]}</option>
             ))}
           </select>
           <input
@@ -1429,10 +1429,10 @@ function GrantMenu({ u, busy, onGrant }: { u: AdminUserRow; busy: boolean; onGra
       <select
         value={mode}
         onChange={(e) => setMode(e.target.value as "date" | "searches")}
-        className="rounded bg-glass px-2 py-1 ring-1 ring-border"
+        className="rounded bg-glass px-2 py-1 ring-1 ring-border [color-scheme:dark]"
       >
-        <option value="date">Por data</option>
-        <option value="searches">Por buscas</option>
+        <option className="bg-background text-foreground" value="date">Por data</option>
+        <option className="bg-background text-foreground" value="searches">Por buscas</option>
       </select>
       {mode === "date" ? (
         <input
