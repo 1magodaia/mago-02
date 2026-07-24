@@ -322,7 +322,7 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pt-14">
+      <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center sm:mx-0 sm:items-start sm:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
