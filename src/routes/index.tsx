@@ -374,6 +374,7 @@ function Home() {
           },
         });
         if (resp.error) setSearchError(resp.error);
+        if ((resp as { quotaExhausted?: boolean }).quotaExhausted) setQuotaBlocked(true);
         if (typeof resp.remaining === "number") setRemaining(resp.remaining);
         places = resp.results;
         if (places.length) cacheSet(cacheKey, places);
