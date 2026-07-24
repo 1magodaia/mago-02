@@ -357,6 +357,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       facebook: socials.facebook,
       whatsapp_link,
       whatsapp_source,
+      email,
       sitemap_lastmod: sitemapLastMod,
       domain_registered_at: rdap.registered,
       domain_expires_at: rdap.expires,
@@ -365,4 +366,5 @@ export const auditWebsite = createServerFn({ method: "POST" })
       audited_at: now,
       note: notes.length ? notes.join(" · ") : "dados obtidos com sucesso",
     };
+
   });
