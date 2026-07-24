@@ -72,16 +72,6 @@ function Novidades() {
                 </span>
               </header>
               <p className="mt-2 text-sm text-foreground">{e.description}</p>
-              {e.impact && (
-                <p className="mt-2 text-xs text-primary">
-                  <span className="font-semibold">Impacto:</span> {e.impact}
-                </p>
-              )}
-              {e.risk && (
-                <p className="mt-1 text-xs text-warn">
-                  <span className="font-semibold">Risco/Solução:</span> {e.risk}
-                </p>
-              )}
             </li>
           ))}
         </ol>
