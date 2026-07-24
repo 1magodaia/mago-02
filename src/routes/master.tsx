@@ -756,11 +756,136 @@ function MasterPanel() {
           <li><strong className="text-foreground">URL:</strong> https pública (CDN, Imgur, R2, etc.). A imagem ocupa toda a largura do topo.</li>
         </ul>
 
-        {heroImageUrl && (
-          <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-border">
-            <img src={heroImageUrl} alt="Preview do hero" className="block h-auto w-full" />
+        {/* Controles de exibição do banner */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <label className="rounded-xl bg-glass/60 p-3 ring-1 ring-border">
+            <div className="mb-1 flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span>Altura desktop</span>
+              <span className="font-mono text-foreground">{heroHeightDesktop}px</span>
+            </div>
+            <input
+              type="range"
+              min={120}
+              max={720}
+              step={10}
+              value={heroHeightDesktop}
+              onChange={(e) => setHeroHeightDesktop(Number(e.target.value))}
+              className="w-full accent-primary"
+            />
+          </label>
+          <label className="rounded-xl bg-glass/60 p-3 ring-1 ring-border">
+            <div className="mb-1 flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span>Altura mobile</span>
+              <span className="font-mono text-foreground">{heroHeightMobile}px</span>
+            </div>
+            <input
+              type="range"
+              min={100}
+              max={480}
+              step={10}
+              value={heroHeightMobile}
+              onChange={(e) => setHeroHeightMobile(Number(e.target.value))}
+              className="w-full accent-primary"
+            />
+          </label>
+          <div className="rounded-xl bg-glass/60 p-3 ring-1 ring-border">
+            <div className="mb-1 text-[11px] uppercase tracking-wider text-muted-foreground">Modo de ajuste</div>
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setHeroFit("cover")}
+                className={`rounded-md px-2 py-1.5 transition ${heroFit === "cover" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Cover
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeroFit("contain")}
+                className={`rounded-md px-2 py-1.5 transition ${heroFit === "contain" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Contain
+              </button>
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              {heroFit === "cover" ? "Preenche o quadro (pode cortar)." : "Mostra a imagem inteira (pode sobrar espaço)."}
+            </p>
           </div>
-        )}
+        </div>
+
+        {/* Prévia ao vivo */}
+        <div className="mt-4">
+          <div className="mb-2 flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+            <span>Prévia ao vivo</span>
+            {heroPreviewStatus === "loading" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-glass px-2 py-0.5 ring-1 ring-border">
+                <Loader2 className="h-3 w-3 animate-spin" /> carregando
+              </span>
+            )}
+            {heroPreviewStatus === "ok" && (
+              <span className="rounded-full bg-primary/15 px-2 py-0.5 text-primary ring-1 ring-primary/40">ok</span>
+            )}
+            {heroPreviewStatus === "invalid" && (
+              <span className="rounded-full bg-warn/15 px-2 py-0.5 text-warn ring-1 ring-warn/40">URL inválida</span>
+            )}
+            {heroPreviewStatus === "error" && (
+              <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-destructive ring-1 ring-destructive/40">falha ao carregar</span>
+            )}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+            {/* Desktop preview */}
+            <div>
+              <div className="mb-1 text-[10px] text-muted-foreground">Desktop · {heroHeightDesktop}px</div>
+              <div
+                className="relative overflow-hidden rounded-xl bg-glass ring-1 ring-border"
+                style={{ height: heroHeightDesktop }}
+              >
+                {heroImageUrl && heroPreviewStatus === "ok" ? (
+                  <img
+                    src={heroImageUrl}
+                    alt="Prévia desktop"
+                    className="block h-full w-full"
+                    style={{ objectFit: heroFit, objectPosition: "center" }}
+                  />
+                ) : heroPreviewStatus === "loading" ? (
+                  <div className="grid h-full place-items-center text-xs text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <HeroPlaceholder
+                    tone={heroPreviewStatus === "error" ? "error" : heroPreviewStatus === "invalid" ? "warn" : "empty"}
+                  />
+                )}
+              </div>
+            </div>
+            {/* Mobile preview */}
+            <div>
+              <div className="mb-1 text-[10px] text-muted-foreground">Mobile · {heroHeightMobile}px</div>
+              <div
+                className="relative mx-auto overflow-hidden rounded-xl bg-glass ring-1 ring-border"
+                style={{ height: heroHeightMobile, maxWidth: 360 }}
+              >
+                {heroImageUrl && heroPreviewStatus === "ok" ? (
+                  <img
+                    src={heroImageUrl}
+                    alt="Prévia mobile"
+                    className="block h-full w-full"
+                    style={{ objectFit: heroFit, objectPosition: "center" }}
+                  />
+                ) : heroPreviewStatus === "loading" ? (
+                  <div className="grid h-full place-items-center text-xs text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <HeroPlaceholder
+                    tone={heroPreviewStatus === "error" ? "error" : heroPreviewStatus === "invalid" ? "warn" : "empty"}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
       </section>
 
 
