@@ -6,8 +6,6 @@ interface VersionEntry {
   id: string;
   version: string;
   description: string;
-  impact: string | null;
-  risk: string | null;
   created_at: string;
 }
 
