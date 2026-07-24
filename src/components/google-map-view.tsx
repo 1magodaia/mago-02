@@ -99,6 +99,8 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
           styles: DARK_STYLE,
           backgroundColor: "#000",
           clickableIcons: false,
+          draggableCursor: "crosshair",
+          draggingCursor: "grabbing",
         });
         infoRef.current = new google.maps.InfoWindow();
         mapRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
