@@ -561,7 +561,7 @@ function Home() {
 
       <main className="mx-auto grid max-w-7xl gap-4 px-4 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_1.1fr]">
         <section
-          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block`}
+          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
           aria-label="Resultados"
         >
           {loading && (
