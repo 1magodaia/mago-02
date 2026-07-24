@@ -75,7 +75,7 @@ function relTime(iso: string | null | undefined): string | null {
   return `há ${y} ano${y > 1 ? "s" : ""}`;
 }
 
-export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
+export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,6 +83,35 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
   const [done, setDone] = useState(() => chkContacted(lead.place_id));
   const [copied, setCopied] = useState<"phone" | "wa" | null>(null);
+  const [citations, setCitations] = useState<{
+    items: CitationItem[];
+    summary: string;
+    cached: boolean;
+    remaining?: number;
+  } | null>(null);
+  const [citLoading, setCitLoading] = useState(false);
+  const [citError, setCitError] = useState<string | null>(null);
+  const runCitations = useServerFn(lookupCitations);
+
+  const doCitations = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCitLoading(true);
+    setCitError(null);
+    try {
+      const r = await runCitations({
+        data: {
+          place_id: lead.place_id,
+          name: lead.name,
+          address: lead.address ?? null,
+        },
+      });
+      setCitations({ items: r.items, summary: r.summary, cached: r.cached, remaining: r.remaining_today });
+    } catch (err) {
+      setCitError(err instanceof Error ? err.message : "Falha ao buscar citações.");
+    } finally {
+      setCitLoading(false);
+    }
+  };
 
   const runAudit = async (e: React.MouseEvent) => {
     e.stopPropagation();
