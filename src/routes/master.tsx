@@ -23,6 +23,7 @@ import {
   type AdminUserRow,
 } from "@/lib/admin.functions";
 import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
 export const Route = createFileRoute("/master")({
