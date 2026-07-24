@@ -467,3 +467,33 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     </article>
   );
 }
+
+const PRICE_LABELS: Record<number, string> = {
+  0: "Grátis",
+  1: "Econômico",
+  2: "Moderado",
+  3: "Caro",
+  4: "Muito caro",
+};
+
+function PriceLevelBadge({ level }: { level: number | null }) {
+  if (level == null) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
+        title="O Google não classificou a faixa de preço deste local. Não estimamos esse valor."
+      >
+        💰 Faixa de preço: não informada
+      </span>
+    );
+  }
+  const symbols = level === 0 ? "Grátis" : "$".repeat(Math.max(1, level));
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30"
+      title={`Faixa de preço classificada pelo Google (${PRICE_LABELS[level]}). Não é um valor exato de ticket médio.`}
+    >
+      💰 {symbols} · {PRICE_LABELS[level]}
+    </span>
+  );
+}
