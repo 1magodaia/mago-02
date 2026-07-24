@@ -89,6 +89,7 @@ export type Database = {
           ai_selection_mode: string
           citations_daily_limit: number
           citations_enabled: boolean
+          hero_image_url: string | null
           id: number
           support_message: string | null
           support_whatsapp: string | null
@@ -100,6 +101,7 @@ export type Database = {
           ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
+          hero_image_url?: string | null
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null
@@ -111,6 +113,7 @@ export type Database = {
           ai_selection_mode?: string
           citations_daily_limit?: number
           citations_enabled?: boolean
+          hero_image_url?: string | null
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null

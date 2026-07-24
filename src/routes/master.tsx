@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Ban,
   Check,
+  Image as ImageIcon,
   KeyRound,
   Loader2,
   MessageCircle,
@@ -13,6 +14,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+
 import { LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -62,9 +64,12 @@ function MasterPanel() {
   const [supportMsg, setSupportMsg] = useState("");
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [citationsLimit, setCitationsLimit] = useState(20);
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroBusy, setHeroBusy] = useState(false);
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
+
 
 
   useEffect(() => {
@@ -99,10 +104,12 @@ function MasterPanel() {
           setSupportMsg(s.support_message ?? "");
           setCitationsEnabled(s.citations_enabled);
           setCitationsLimit(s.citations_daily_limit);
+          setHeroImageUrl(s.hero_image_url ?? "");
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
@@ -145,6 +152,23 @@ function MasterPanel() {
       setSettingsBusy(false);
     }
   };
+
+  const saveHero = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHeroBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({ data: { hero_image_url: heroImageUrl.trim() || null } });
+      setHeroImageUrl(r.hero_image_url ?? "");
+      setNotice("Imagem do hero atualizada.");
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao salvar imagem.");
+    } finally {
+      setHeroBusy(false);
+    }
+  };
+
+
 
 
   type GrantPayload =
@@ -304,6 +328,46 @@ function MasterPanel() {
           </p>
         )}
       </section>
+
+      {/* IMAGEM DO HERO — banner topo da home */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/40">
+            <ImageIcon className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Imagem do topo (hero)</h2>
+            <p className="max-w-2xl text-xs text-muted-foreground">
+              Cole a URL pública (https://...) da imagem que aparece no topo da home.
+              Deixe em branco para voltar à imagem padrão.
+            </p>
+          </div>
+        </div>
+        <form onSubmit={saveHero} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+          <input
+            type="url"
+            placeholder="https://..."
+            value={heroImageUrl}
+            onChange={(e) => setHeroImageUrl(e.target.value)}
+            maxLength={2048}
+            className="w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+          />
+          <button
+            type="submit"
+            disabled={heroBusy}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+          >
+            {heroBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Salvar
+          </button>
+        </form>
+        {heroImageUrl && (
+          <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-border">
+            <img src={heroImageUrl} alt="Preview do hero" className="block h-auto w-full" />
+          </div>
+        )}
+      </section>
+
 
       {/* CITAÇÕES WEB — Kill switch + limite diário + custo */}
       <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">

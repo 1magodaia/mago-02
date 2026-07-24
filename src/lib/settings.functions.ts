@@ -8,7 +8,9 @@ export interface AppSettings {
   support_message: string | null;
   citations_enabled: boolean;
   citations_daily_limit: number;
+  hero_image_url: string | null;
 }
+
 
 /** Public read — used by the floating support widget on every page. */
 export const getAppSettings = createServerFn({ method: "GET" }).handler(async (): Promise<AppSettings> => {
@@ -26,7 +28,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("app_settings")
-    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url")
     .eq("id", 1)
     .maybeSingle();
   return {
@@ -34,6 +36,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
     support_message: data?.support_message ?? null,
     citations_enabled: data?.citations_enabled ?? false,
     citations_daily_limit: data?.citations_daily_limit ?? 20,
+    hero_image_url: (data as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
   };
 });
 
@@ -51,7 +54,17 @@ const inputSchema = z.object({
   support_message: z.string().trim().max(280).nullable().optional(),
   citations_enabled: z.boolean().optional(),
   citations_daily_limit: z.number().int().min(0).max(1000).optional(),
+  hero_image_url: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((s) => s === "" || /^https?:\/\/|^\/__l5e\//.test(s), {
+      message: "Use uma URL http(s) válida.",
+    })
+    .nullable()
+    .optional(),
 });
+
 
 export const updateAppSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -68,13 +81,14 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       ...(data.support_message !== undefined ? { support_message: data.support_message || null } : {}),
       ...(data.citations_enabled !== undefined ? { citations_enabled: data.citations_enabled } : {}),
       ...(data.citations_daily_limit !== undefined ? { citations_daily_limit: data.citations_daily_limit } : {}),
+      ...(data.hero_image_url !== undefined ? { hero_image_url: data.hero_image_url || null } : {}),
     };
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit")
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url")
       .single();
     if (error) throw new Error(error.message);
     return {
@@ -82,5 +96,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       support_message: row?.support_message ?? null,
       citations_enabled: row?.citations_enabled ?? false,
       citations_daily_limit: row?.citations_daily_limit ?? 20,
+      hero_image_url: (row as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
     };
   });
+

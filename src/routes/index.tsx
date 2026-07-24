@@ -18,7 +18,7 @@ import {
   MapPin,
   Search,
   Shield,
-  Sparkles,
+  
   Star,
   User as UserIcon,
 } from "lucide-react";
@@ -33,6 +33,8 @@ import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, TutorialBadge, hasSeenTutorial, markTutorialSeen, resetTutorial } from "@/components/tutorial-modal";
+import heroDefault from "@/assets/hero-banner.png.asset.json";
+
 
 const MapView = lazy(() => import("@/components/google-map-view"));
 
@@ -91,10 +93,12 @@ function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [showTutorialBadge, setShowTutorialBadge] = useState(false);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
+
 
   useEffect(() => {
     setShowTutorialBadge(!hasSeenTutorial());
@@ -102,10 +106,14 @@ function Home() {
 
   useEffect(() => {
     readSettings()
-      .then((s) => setCitationsEnabled(!!s.citations_enabled))
+      .then((s) => {
+        setCitationsEnabled(!!s.citations_enabled);
+        if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+      })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // Auto-solicita GPS ao montar (opt-in): reaproveita coordenadas em cache
   // e só dispara o prompt do browser se o usuário ainda não negou explicitamente.
@@ -426,27 +434,16 @@ function Home() {
       </nav>
 
       <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10">
-        <div className="mx-auto flex max-w-3xl flex-col items-center text-center sm:mx-0 sm:items-start sm:text-left">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-            <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
-          </div>
-
-          <LogoIcon className="mt-8 h-32 w-32 shrink-0 drop-shadow-[0_10px_30px_rgba(107,70,224,0.55)] sm:h-44 sm:w-44" />
-
-          <h1 className="mt-6 text-5xl font-black leading-[1.02] tracking-tight sm:text-7xl">
-            <span className="text-white">Busca</span>{" "}
-            <span className="text-warn">Mágica</span>
-          </h1>
-
-          <p className="mt-4 max-w-xl text-lg font-medium text-muted-foreground sm:text-xl">
-            Encontre seus leads antes da concorrência.
-          </p>
-
-          <p className="mt-6 max-w-xl text-sm text-muted-foreground/80 sm:text-base">
-            Busque por segmento e região, ou use seu GPS. Cruzamos com uma auditoria de site
-            (WHOIS + sitemap) para achar quem está com presença digital fraca.
-          </p>
+        <div className="overflow-hidden rounded-3xl ring-1 ring-border shadow-elevated">
+          <img
+            src={heroImageUrl}
+            alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
+            className="block h-auto w-full"
+            loading="eager"
+            decoding="async"
+          />
         </div>
+
 
 
 
