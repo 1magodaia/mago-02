@@ -152,7 +152,7 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
-          const nextUrl = s.hero_image_url ?? "";
+          const nextUrl = s.hero_image_url ?? heroDefault.url;
           const nextHd = s.hero_height_desktop ?? 320;
           const nextHm = s.hero_height_mobile ?? 200;
           const nextFit: "cover" | "contain" = s.hero_fit ?? "cover";
