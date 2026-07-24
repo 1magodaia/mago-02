@@ -173,7 +173,7 @@ export const listWhatsappChangeLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => logQuerySchema.parse(raw ?? {}))
   .handler(async ({ data, context }): Promise<WhatsappChangeLogPage> => {
-    await assertAdmin(context);
+    await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
       .from("whatsapp_change_log")
       .select("id, changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, reason, created_at", { count: "exact" })
@@ -201,7 +201,7 @@ export const exportWhatsappChangeLogCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => logQuerySchema.omit({ page: true, pageSize: true }).parse(raw ?? {}))
   .handler(async ({ data, context }): Promise<{ csv: string }> => {
-    await assertAdmin(context);
+    await assertAdmin(context.supabase, context.userId);
     let q = context.supabase
       .from("whatsapp_change_log")
       .select("changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, reason, created_at")
