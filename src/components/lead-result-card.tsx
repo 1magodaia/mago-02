@@ -180,10 +180,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       : "unverifiable";
 
 
+  const permanentlyClosed = lead.business_status === "CLOSED_PERMANENTLY";
+
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -293,6 +295,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           ))}
         </ul>
       )}
+
+      {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
 
       {lead.audit && (
         <div className="grid grid-cols-3 gap-2 rounded-xl bg-glass p-2.5 ring-1 ring-border text-center">
@@ -515,6 +519,60 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
       <p className={`text-[11px] leading-snug ${m.text}`}>
         <span className="font-semibold">Sugestão:</span> {suggestion}
       </p>
+    </div>
+  );
+}
+
+function BusinessStatusBadge({ status }: { status: string | null }) {
+  if (!status || status === "OPERATIONAL") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30" title="Google Places reporta este local como em operação.">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operando
+      </span>
+    );
+  }
+  if (status === "CLOSED_TEMPORARILY") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40" title="Google Places: fechado temporariamente.">
+        ⏸ Fechado temporariamente
+      </span>
+    );
+  }
+  if (status === "CLOSED_PERMANENTLY") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-red-300 ring-1 ring-red-400/40" title="Google Places: fechado permanentemente. Não perca tempo abordando este lead.">
+        ✕ Fechado permanentemente
+      </span>
+    );
+  }
+  return null;
+}
+
+function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | null }) {
+  if (!info) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum CNPJ localizado no site do comércio. Não estimamos esse valor a partir do nome.">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+        CNPJ: não localizado
+      </div>
+    );
+  }
+  const situacao = info.situacao_cadastral ?? "—";
+  const isAtiva = situacao.toLowerCase().startsWith("ativa");
+  return (
+    <div className="rounded-lg bg-glass px-2.5 py-2 ring-1 ring-border">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+        <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
+        {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
+        <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${
+          isAtiva ? "bg-emerald-500/10 text-emerald-300 ring-emerald-400/30" : "bg-red-500/15 text-red-300 ring-red-400/40"
+        }`}>{situacao}</span>
+      </div>
+      {info.data_abertura && (
+        <div className="mt-1 text-[10px] text-muted-foreground/80" title="Data de abertura da empresa na Receita Federal. Pode não coincidir exatamente com o tempo neste endereço específico.">
+          Abertura: {new Date(info.data_abertura).toLocaleDateString("pt-BR")} · dado da empresa, não do endereço.
+        </div>
+      )}
     </div>
   );
 }
