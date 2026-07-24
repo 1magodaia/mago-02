@@ -152,6 +152,7 @@ function MasterPanel() {
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
       setNotice("Configurações atualizadas.");
+      readWaLog().then(setWaLog).catch(() => {});
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
     } finally {
