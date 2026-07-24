@@ -33,7 +33,10 @@ export function SupportWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-4 z-40 w-72 rounded-2xl border border-border bg-popover p-4 shadow-2xl sm:right-6">
+        <div
+          className="fixed right-4 z-40 w-72 rounded-2xl border border-border bg-popover p-4 shadow-2xl sm:right-6"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5.5rem)" }}
+        >
           <div className="flex items-start justify-between gap-2">
             <div>
               <h3 className="text-sm font-bold text-foreground">Fale com a gente</h3>
@@ -63,7 +66,8 @@ export function SupportWidget() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Falar com o desenvolvedor"
-        className="fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl ring-4 ring-[#25D366]/25 transition hover:scale-105 sm:bottom-6 sm:right-6"
+        className="fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl ring-4 ring-[#25D366]/25 transition hover:scale-105 sm:right-6"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
@@ -73,7 +77,10 @@ export function SupportWidget() {
 
 export function SupportWidgetFallback() {
   return (
-    <div className="fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-glass ring-1 ring-border sm:bottom-6 sm:right-6">
+    <div
+      className="fixed right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-glass ring-1 ring-border sm:right-6"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+    >
       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
     </div>
   );
