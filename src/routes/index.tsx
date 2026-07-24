@@ -512,7 +512,7 @@ function Home() {
   const searchUsage = profile
     ? isPro
       ? "Pro · buscas ilimitadas"
-      : `${profile.search_count_month}/${FREE_MONTHLY_SEARCH_LIMIT} buscas este mês`
+      : `${Math.min(profile.search_count_month, FREE_LIFETIME_SEARCH_LIMIT)}/${FREE_LIFETIME_SEARCH_LIMIT} busca grátis usada`
     : null;
 
   // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
