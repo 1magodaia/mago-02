@@ -82,7 +82,7 @@ export const lookupCitations = createServerFn({ method: "POST" })
         .maybeSingle();
       if (cached) {
         const r = cached.result as { items?: CitationItem[]; summary?: string };
-        const remaining = await countRemainingToday(userId, dailyLimit);
+        const remaining = await countCitationsRemainingToday(userId, dailyLimit);
         return {
           place_id: data.place_id,
           cached: true,
@@ -97,7 +97,7 @@ export const lookupCitations = createServerFn({ method: "POST" })
     }
 
     // 3) Daily limit (só bloqueia não-privilegiados)
-    const remainingBefore = await countRemainingToday(userId, dailyLimit);
+    const remainingBefore = await countCitationsRemainingToday(userId, dailyLimit);
     if (!isPrivileged && remainingBefore <= 0) {
       throw new Error(`Limite diário de ${dailyLimit} buscas de citações atingido. Tente novamente amanhã.`);
     }
@@ -179,7 +179,7 @@ Comércio: ${query}`;
     };
   });
 
-async function countRemainingToday(userId: string, limit: number): Promise<number> {
+async function countCitationsRemainingToday(userId: string, limit: number): Promise<number> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
