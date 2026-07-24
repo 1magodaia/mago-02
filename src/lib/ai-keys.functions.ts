@@ -37,7 +37,7 @@ export interface AiProviderKey {
   id: string;
   provider: Provider;
   label: string;
-  secret_name: string;
+  secret_name: string | null;
   model: string | null;
   priority: number;
   status: "active" | "error" | "rate_limited" | "untested" | "disabled";
@@ -45,7 +45,9 @@ export interface AiProviderKey {
   last_tested_at: string | null;
   last_used_at: string | null;
   secret_present: boolean;
+  has_inline_key: boolean;
 }
+
 
 /**
  * Default chat model per provider (used when the user does not choose one)
