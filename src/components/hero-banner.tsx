@@ -31,32 +31,29 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
         @media (min-width:640px){.hero-banner{height:var(--hero-h-desktop) !important;}}
       `}</style>
       <div
-        ref={observed}
         className="hero-banner absolute inset-0"
         style={{ height: "var(--hero-h-mobile)" }}
       >
         {url && !error ? (
           <>
-            {inView && (
-              <img
-                src={url}
-                alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
-                className="block h-full w-full transition-opacity duration-300"
-                style={{
-                  objectFit: fit,
-                  objectPosition: "center",
-                  opacity: ready ? 1 : 0,
-                }}
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-                onLoad={() => {
-                  LOADED_URLS.add(url);
-                  setReady(true);
-                }}
-                onError={() => setError(true)}
-              />
-            )}
+            <img
+              src={url}
+              alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
+              className="block h-full w-full transition-opacity duration-300"
+              style={{
+                objectFit: fit,
+                objectPosition: "center",
+                opacity: ready ? 1 : 0,
+              }}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              onLoad={() => {
+                LOADED_URLS.add(url);
+                setReady(true);
+              }}
+              onError={() => setError(true)}
+            />
             {!ready && (
               <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/10 via-background to-accent/10" />
             )}
