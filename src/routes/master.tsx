@@ -1147,7 +1147,7 @@ function AiKeysPanel() {
   const [selection, setSelection] = useState<AiSelection>({ mode: "auto", manual_key_id: null });
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [form, setForm] = useState({ provider: "openai" as AiProviderKey["provider"], label: "", secret_name: "", priority: 100 });
+  const [form, setForm] = useState({ provider: "openai" as AiProviderKey["provider"], label: "", secret_name: "", model: PROVIDER_MODELS.openai.default, priority: 100 });
   const [loading, setLoading] = useState(true);
 
   async function reload() {
