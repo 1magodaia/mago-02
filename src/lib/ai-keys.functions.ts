@@ -410,14 +410,15 @@ export const testAllAiProviderKeys = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await ensurePrivileged(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("id, provider, secret_name");
-    const list = (rows ?? []) as Array<{ id: string; provider: Provider; secret_name: string }>;
+    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("id, provider, secret_name, model");
+    const list = (rows ?? []) as Array<{ id: string; provider: Provider; secret_name: string; model: string | null }>;
     await Promise.all(
       list.map(async (row) => {
         const key = process.env[row.secret_name];
         const probe = key
-          ? await probeProvider(row.provider, key)
+          ? await probeProvider(row.provider, key, row.model)
           : { status: "error" as const, message: `Secret '${row.secret_name}' vazio` };
+
         await supabaseAdmin
           .from("ai_provider_keys")
           .update({
