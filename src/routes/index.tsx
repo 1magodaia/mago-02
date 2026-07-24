@@ -620,6 +620,7 @@ function Home() {
               selected={selected === lead.place_id}
               onSelect={() => setSelected(lead.place_id)}
               onUpdate={updateOne}
+              citationsAvailable={citationsAvailable}
             />
           ))}
           {filtered.length > 0 && (
