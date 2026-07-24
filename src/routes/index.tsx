@@ -969,31 +969,21 @@ function Home() {
             </div>
           )}
           {!loading && rawResults.length === 0 && (
-            <div className="glass-panel rounded-2xl p-8 text-center">
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
-                <Search className="h-6 w-6 text-primary" />
+            <div className="glass-panel rounded-2xl p-6 text-center">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/30">
+                <Search className="h-5 w-5 text-primary" />
               </div>
-              <p className="mt-4 text-sm text-foreground">
-                Faça uma busca acima ou experimente uma sugestão:
+              <p className="mt-3 text-sm text-foreground">
+                Digite uma categoria e uma região acima para começar.
               </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s.label}
-                    onClick={() => runSuggestion(s)}
-                    className="rounded-full border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
               {!user && (
-                <p className="mt-5 text-xs text-muted-foreground">
+                <p className="mt-3 text-xs text-muted-foreground">
                   <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free ganha {FREE_LIFETIME_SEARCH_LIMIT} busca de cortesia.
                 </p>
               )}
             </div>
           )}
+
           {!loading && rawResults.length > 0 && filtered.length === 0 && (
             <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
               Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
