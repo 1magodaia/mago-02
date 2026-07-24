@@ -106,6 +106,7 @@ function Home() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -117,6 +118,8 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
+          if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+
           
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
