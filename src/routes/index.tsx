@@ -524,38 +524,14 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10">
-        <div className="overflow-hidden rounded-3xl ring-1 ring-border shadow-elevated">
-          <img
-            src={heroImageUrl}
-            alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
-            className="block h-auto w-full"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
-
-
-
-
-
-
-
+      <header className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
         {gpsError && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
+          <div className="mb-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{gpsError} Continue buscando por texto — nada trava.</span>
           </div>
         )}
 
-        {showTutorialBadge && (
-          <div className="mt-4">
-            <TutorialBadge
-              onStart={() => { setTutorialOpen(true); setShowTutorialBadge(false); }}
-              onSkip={() => { markTutorialSeen(); setShowTutorialBadge(false); }}
-            />
-          </div>
-        )}
 
 
 
