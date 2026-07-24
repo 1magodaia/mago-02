@@ -1165,10 +1165,15 @@ function AiKeysPanel() {
     e.preventDefault();
     if (!form.label || !form.secret_name) return;
     setBusy("new");
-    try { await upsert({ data: form }); setForm({ ...form, label: "", secret_name: "" }); await reload(); }
+    try {
+      await upsert({ data: { ...form, model: form.model?.trim() || null } });
+      setForm({ ...form, label: "", secret_name: "" });
+      await reload();
+    }
     catch (e: any) { setErr(String(e?.message ?? e)); }
     finally { setBusy(null); }
   }
+
 
   async function changeMode(mode: "auto" | "manual", manualId?: string | null) {
     setBusy("mode");
