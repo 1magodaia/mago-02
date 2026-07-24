@@ -664,22 +664,31 @@ function Home() {
             onClick={useGps}
             disabled={locating}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
-              usingGps
+              usingGps && !pinned
                 ? "border-primary bg-primary/15 text-primary"
                 : "border-primary/60 text-primary hover:bg-primary/10"
             }`}
           >
             <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
-            {locating ? "Localizando..." : usingGps ? "GPS ativo" : "Usar minha localização"}
+            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ativo" : "Usar minha localização"}
           </button>
+          {usingGps && pinned && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+              <MapPin className="h-3.5 w-3.5" />
+              Ponto fixado no mapa
+            </span>
+          )}
           {usingGps && (
             <button
-              onClick={() => setUsingGps(false)}
+              onClick={() => { setUsingGps(false); setPinned(false); }}
               className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
             >
               Voltar para texto
             </button>
           )}
+          <span className="hidden text-[11px] text-muted-foreground sm:inline">
+            Dica: clique em qualquer ponto do mapa para definir o centro da busca.
+          </span>
 
           <button
             onClick={() => setShowAdvanced((s) => !s)}
