@@ -97,8 +97,11 @@ function MasterPanel() {
         .then((s) => {
           setSupportWa(s.support_whatsapp ?? "");
           setSupportMsg(s.support_message ?? "");
+          setCitationsEnabled(s.citations_enabled);
+          setCitationsLimit(s.citations_daily_limit);
         })
         .catch(() => {});
+      readCostStats().then(setCostStats).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
@@ -109,13 +112,35 @@ function MasterPanel() {
     setSettingsError(null);
     try {
       const r = await writeSettings({
-        data: { support_whatsapp: supportWa || null, support_message: supportMsg || null },
+        data: {
+          support_whatsapp: supportWa || null,
+          support_message: supportMsg || null,
+          citations_enabled: citationsEnabled,
+          citations_daily_limit: citationsLimit,
+        },
       });
       setSupportWa(r.support_whatsapp ?? "");
       setSupportMsg(r.support_message ?? "");
-      setNotice("Configurações de suporte atualizadas.");
+      setCitationsEnabled(r.citations_enabled);
+      setCitationsLimit(r.citations_daily_limit);
+      setNotice("Configurações atualizadas.");
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
+  const toggleCitations = async (next: boolean) => {
+    setCitationsEnabled(next);
+    setSettingsBusy(true);
+    try {
+      const r = await writeSettings({ data: { citations_enabled: next } });
+      setCitationsEnabled(r.citations_enabled);
+      setNotice(next ? "Busca de citações ATIVADA para usuários Pro." : "Busca de citações DESLIGADA.");
+    } catch (err) {
+      setCitationsEnabled(!next);
+      setSettingsError(err instanceof Error ? err.message : "Erro ao alternar.");
     } finally {
       setSettingsBusy(false);
     }
