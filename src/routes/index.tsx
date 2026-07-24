@@ -742,6 +742,7 @@ function Home() {
           </ClientOnly>
         </section>
       </main>
+      <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </div>
   );
 }
