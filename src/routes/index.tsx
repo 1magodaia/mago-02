@@ -535,40 +535,6 @@ function Home() {
           />
         </div>
 
-        {(() => {
-          const digits = (supportWa ?? "").replace(/\D/g, "");
-          const active = /^\d{10,15}$/.test(digits);
-          const updated = supportUpdatedAt
-            ? new Date(supportUpdatedAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
-            : null;
-          return (
-            <div
-              className={
-                "mt-4 flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs " +
-                (active
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-muted/40 bg-muted/10 text-muted-foreground")
-              }
-              role="status"
-              aria-live="polite"
-            >
-              <span
-                className={
-                  "inline-block h-2 w-2 rounded-full " +
-                  (active ? "bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400/60" : "bg-muted-foreground/60")
-                }
-                aria-hidden
-              />
-              <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-              <span className="font-semibold">
-                Suporte WhatsApp: {active ? "ativo" : "não configurado"}
-              </span>
-              {updated && (
-                <span className="text-muted-foreground">· atualizado em {updated}</span>
-              )}
-            </div>
-          );
-        })()}
 
 
 
@@ -592,46 +558,6 @@ function Home() {
         )}
 
 
-        {/* PRESETS DE CATEGORIAS DIFÍCEIS (esportes & fitness) */}
-        <div className="mt-6">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Predefinidos difíceis de achar
-            </span>
-            {selectedSports.length > 0 && (
-              <button
-                onClick={() => setSelectedSports([])}
-                className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
-              >
-                Limpar ({selectedSports.length})
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {SPORT_CATEGORIES.map((c) => {
-              const on = selectedSports.includes(c.id);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() =>
-                    setSelectedSports((prev) =>
-                      on ? prev.filter((i) => i !== c.id) : [...prev, c.id],
-                    )
-                  }
-                  title={c.label}
-                  className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
-                    on
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "border-border bg-glass text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <span>{c.emoji}</span>
-                  <span className="truncate">{c.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
 
 
