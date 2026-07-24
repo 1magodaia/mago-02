@@ -628,7 +628,7 @@ function Home() {
                   <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
                 )}
                 <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
+                {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
                 <button
                   onClick={() => { resetTutorial(); setTutorialOpen(true); }}
                   className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
