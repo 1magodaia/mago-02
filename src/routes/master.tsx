@@ -109,6 +109,27 @@ function MasterPanel() {
     }
   };
 
+  const loadWaLog = async (opts?: { page?: number; author?: string; from?: string; to?: string }) => {
+    setWaLogBusy(true);
+    try {
+      const r = await readWaLog({
+        data: {
+          author: opts?.author ?? waLogAuthor,
+          from: opts?.from ?? waLogFrom,
+          to: opts?.to ?? waLogTo,
+          page: opts?.page ?? waLogPage,
+          pageSize: waLogPageSize,
+        },
+      });
+      setWaLog(r.entries);
+      setWaLogTotal(r.total);
+    } catch {
+      // ignore
+    } finally {
+      setWaLogBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (ready) {
       load();
@@ -122,11 +143,12 @@ function MasterPanel() {
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
-      readWaLog().then(setWaLog).catch(() => {});
+      loadWaLog({ page: 1 });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
+
 
   // Normaliza para dígitos (aceita "+" apenas no início) e formata visualmente como +DDI (DD) NNNNN-NNNN
   const normalizeWa = (raw: string): string => {
