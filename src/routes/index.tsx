@@ -144,6 +144,14 @@ function Home() {
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
+  // Regra: a tela inicial é a de login. Usuários não autenticados são
+  // redirecionados para /auth; usuários logados seguem usando a home/busca.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      nav({ to: "/auth", replace: true });
+    }
+  }, [authLoading, user, nav]);
+
 
   useEffect(() => {
     let alive = true;
@@ -493,8 +501,19 @@ function Home() {
       : `${profile.search_count_month}/${FREE_MONTHLY_SEARCH_LIMIT} buscas este mês`
     : null;
 
+  // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
+  // a home para evitar flash da tela de busca a usuários deslogados.
+  if (authLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Carregando" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
+
       {/* NAV — botões padronizados: h-9 rounded-full px-3 text-xs font-semibold */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
