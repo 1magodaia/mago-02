@@ -558,46 +558,6 @@ function Home() {
         )}
 
 
-        {/* PRESETS DE CATEGORIAS DIFÍCEIS (esportes & fitness) */}
-        <div className="mt-6">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Predefinidos difíceis de achar
-            </span>
-            {selectedSports.length > 0 && (
-              <button
-                onClick={() => setSelectedSports([])}
-                className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
-              >
-                Limpar ({selectedSports.length})
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {SPORT_CATEGORIES.map((c) => {
-              const on = selectedSports.includes(c.id);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() =>
-                    setSelectedSports((prev) =>
-                      on ? prev.filter((i) => i !== c.id) : [...prev, c.id],
-                    )
-                  }
-                  title={c.label}
-                  className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
-                    on
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "border-border bg-glass text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <span>{c.emoji}</span>
-                  <span className="truncate">{c.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
 
 
