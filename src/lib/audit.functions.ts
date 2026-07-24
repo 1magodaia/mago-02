@@ -248,6 +248,11 @@ export const auditWebsite = createServerFn({ method: "POST" })
 
     const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
     const whatsapp_link = socials.whatsapp ?? waFromPhone;
+    const whatsapp_source: DigitalAudit["whatsapp_source"] = socials.whatsapp
+      ? "site"
+      : waFromPhone
+        ? "phone"
+        : null;
 
     let approx_stale_days: number | null = null;
     if (sitemapLastMod) {
@@ -267,6 +272,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       instagram: socials.instagram,
       facebook: socials.facebook,
       whatsapp_link,
+      whatsapp_source,
       sitemap_lastmod: sitemapLastMod,
       domain_registered_at: rdap.registered,
       domain_expires_at: rdap.expires,
