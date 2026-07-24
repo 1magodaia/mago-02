@@ -2,8 +2,36 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const PROVIDERS = ["openai", "gemini", "groq", "lovable"] as const;
-type Provider = (typeof PROVIDERS)[number];
+export const PROVIDERS = [
+  "openai",
+  "gemini",
+  "groq",
+  "lovable",
+  "anthropic",
+  "mistral",
+  "deepseek",
+  "xai",
+  "openrouter",
+  "perplexity",
+  "cohere",
+  "nvidia",
+] as const;
+export type Provider = (typeof PROVIDERS)[number];
+
+export const PROVIDER_LABEL: Record<Provider, string> = {
+  openai: "OpenAI",
+  gemini: "Google Gemini",
+  groq: "Groq",
+  lovable: "Lovable AI",
+  anthropic: "Anthropic (Claude)",
+  mistral: "Mistral",
+  deepseek: "DeepSeek",
+  xai: "xAI (Grok)",
+  openrouter: "OpenRouter",
+  perplexity: "Perplexity",
+  cohere: "Cohere",
+  nvidia: "NVIDIA NIM",
+};
 
 export interface AiProviderKey {
   id: string;
@@ -16,6 +44,11 @@ export interface AiProviderKey {
   last_tested_at: string | null;
   last_used_at: string | null;
   secret_present: boolean;
+}
+
+export interface AiSelection {
+  mode: "auto" | "manual";
+  manual_key_id: string | null;
 }
 
 async function ensurePrivileged(context: { supabase: any; userId: string }) {
@@ -90,9 +123,107 @@ export const deleteAiProviderKey = createServerFn({ method: "POST" })
   });
 
 /**
- * Testa uma chave: verifica presença do secret e faz uma chamada mínima
- * pelo Lovable AI Gateway (que abstrai OpenAI/Gemini/Groq). Para o provedor
- * `lovable` (LOVABLE_API_KEY), testa uma completion trivial.
+ * Provider-specific health-check. Uses the cheapest/lightest reachable endpoint
+ * for each provider — usually the "list models" endpoint — so testing a key
+ * never consumes generation credits.
+ */
+async function probeProvider(
+  provider: Provider,
+  key: string,
+): Promise<{ status: "active" | "rate_limited" | "error"; message: string }> {
+  try {
+    let res: Response;
+    switch (provider) {
+      case "openai":
+        res = await fetch("https://api.openai.com/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "groq":
+        res = await fetch("https://api.groq.com/openai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "mistral":
+        res = await fetch("https://api.mistral.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "deepseek":
+        res = await fetch("https://api.deepseek.com/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "xai":
+        res = await fetch("https://api.x.ai/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "openrouter":
+        res = await fetch("https://openrouter.ai/api/v1/auth/key", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "perplexity":
+        // Perplexity has no public models endpoint; do a minimal chat ping.
+        res = await fetch("https://api.perplexity.ai/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "sonar", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
+        });
+        break;
+      case "nvidia":
+        res = await fetch("https://integrate.api.nvidia.com/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "cohere":
+        res = await fetch("https://api.cohere.com/v1/models", {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        break;
+      case "anthropic":
+        res = await fetch("https://api.anthropic.com/v1/models", {
+          headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
+        });
+        break;
+      case "gemini":
+        res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
+        );
+        break;
+      case "lovable":
+      default:
+        res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: "ping" }],
+            max_tokens: 1,
+          }),
+        });
+        break;
+    }
+    if (res.status === 429) return { status: "rate_limited", message: "Limite de requisições atingido (429)" };
+    if (res.status === 401 || res.status === 403) return { status: "error", message: `Chave inválida (${res.status})` };
+    if (res.status === 402) return { status: "error", message: "Créditos esgotados (402)" };
+    if (!res.ok) {
+      let extra = "";
+      try {
+        const txt = await res.text();
+        extra = txt ? ` — ${txt.slice(0, 160)}` : "";
+      } catch { /* ignore */ }
+      return { status: "error", message: `HTTP ${res.status}${extra}` };
+    }
+    return { status: "active", message: "OK" };
+  } catch (e: any) {
+    return { status: "error", message: String(e?.message ?? e) };
+  }
+}
+
+/**
+ * Testa uma chave chamando o endpoint mais leve do provedor (list models quando existe).
  * Marca status = active | rate_limited | error com mensagem.
  */
 export const testAiProviderKey = createServerFn({ method: "POST" })
@@ -121,46 +252,122 @@ export const testAiProviderKey = createServerFn({ method: "POST" })
       return { status: "error", message: `Secret '${row.secret_name}' vazio` };
     }
 
-    // Teste real via gateway Lovable (unifica todos os provedores).
-    try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`,
-        },
-        body: JSON.stringify({
-          model: row.provider === "gemini" ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash",
-          messages: [{ role: "user", content: "ping" }],
-          max_tokens: 1,
-        }),
-      });
-      let status: "active" | "rate_limited" | "error" = "active";
-      let msg = "OK";
-      if (res.status === 429) { status = "rate_limited"; msg = "Rate limit atingido"; }
-      else if (res.status === 402) { status = "error"; msg = "Créditos esgotados (402)"; }
-      else if (!res.ok) { status = "error"; msg = `HTTP ${res.status}`; }
-      await supabaseAdmin
-        .from("ai_provider_keys")
-        .update({ status, last_error: status === "active" ? null : msg, last_tested_at: new Date().toISOString() })
-        .eq("id", data.id);
-      return { status, message: msg };
-    } catch (e: any) {
-      await supabaseAdmin
-        .from("ai_provider_keys")
-        .update({ status: "error", last_error: String(e?.message ?? e), last_tested_at: new Date().toISOString() })
-        .eq("id", data.id);
-      return { status: "error", message: String(e?.message ?? e) };
-    }
+    const probe = await probeProvider(row.provider as Provider, key);
+    await supabaseAdmin
+      .from("ai_provider_keys")
+      .update({
+        status: probe.status,
+        last_error: probe.status === "active" ? null : probe.message,
+        last_tested_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
+    return probe;
   });
 
 /**
- * Helper de failover: retorna a próxima chave utilizável em ordem de prioridade.
- * Consumidores (ex: lookupCitations) devem tentar em sequência e reportar erros
- * via `reportAiKeyError` para promover a próxima chave. Só executa no servidor.
+ * Testa TODAS as chaves cadastradas em paralelo.
+ */
+export const testAllAiProviderKeys = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await ensurePrivileged(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("id, provider, secret_name");
+    const list = (rows ?? []) as Array<{ id: string; provider: Provider; secret_name: string }>;
+    await Promise.all(
+      list.map(async (row) => {
+        const key = process.env[row.secret_name];
+        const probe = key
+          ? await probeProvider(row.provider, key)
+          : { status: "error" as const, message: `Secret '${row.secret_name}' vazio` };
+        await supabaseAdmin
+          .from("ai_provider_keys")
+          .update({
+            status: probe.status,
+            last_error: probe.status === "active" ? null : probe.message,
+            last_tested_at: new Date().toISOString(),
+          })
+          .eq("id", row.id);
+      }),
+    );
+    return { tested: list.length };
+  });
+
+/* ---------- Seleção Auto vs Manual ---------- */
+
+export const getAiSelection = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AiSelection> => {
+    await ensurePrivileged(context);
+    const { data } = await context.supabase
+      .from("app_settings")
+      .select("ai_selection_mode, ai_manual_key_id")
+      .eq("id", 1)
+      .maybeSingle();
+    return {
+      mode: (data as any)?.ai_selection_mode ?? "auto",
+      manual_key_id: (data as any)?.ai_manual_key_id ?? null,
+    };
+  });
+
+const SelectionSchema = z.object({
+  mode: z.enum(["auto", "manual"]),
+  manual_key_id: z.string().uuid().nullable().optional(),
+});
+
+export const setAiSelection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => SelectionSchema.parse(d))
+  .handler(async ({ data, context }): Promise<AiSelection> => {
+    await ensurePrivileged(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: any = {
+      ai_selection_mode: data.mode,
+      ai_manual_key_id: data.mode === "manual" ? data.manual_key_id ?? null : null,
+      updated_at: new Date().toISOString(),
+      updated_by: context.userId,
+    };
+    const { data: row, error } = await supabaseAdmin
+      .from("app_settings")
+      .update(patch)
+      .eq("id", 1)
+      .select("ai_selection_mode, ai_manual_key_id")
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      mode: (row as any).ai_selection_mode,
+      manual_key_id: (row as any).ai_manual_key_id,
+    };
+  });
+
+/**
+ * Helper de failover: retorna a próxima chave utilizável.
+ * - modo "manual": usa exclusivamente a chave escolhida (se ativa e com secret).
+ * - modo "auto":   percorre por prioridade escolhendo a primeira active/untested com secret.
  */
 export async function getNextAvailableAiKey(): Promise<{ id: string; provider: Provider; value: string } | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: settings } = await supabaseAdmin
+    .from("app_settings")
+    .select("ai_selection_mode, ai_manual_key_id")
+    .eq("id", 1)
+    .maybeSingle();
+  const mode = (settings as any)?.ai_selection_mode ?? "auto";
+  const manualId = (settings as any)?.ai_manual_key_id ?? null;
+
+  if (mode === "manual" && manualId) {
+    const { data: row } = await supabaseAdmin
+      .from("ai_provider_keys")
+      .select("id, provider, secret_name, status")
+      .eq("id", manualId)
+      .maybeSingle();
+    if (row && (row as any).status !== "disabled") {
+      const value = process.env[(row as any).secret_name];
+      if (value) return { id: (row as any).id, provider: (row as any).provider, value };
+    }
+    return null;
+  }
+
   const { data } = await supabaseAdmin
     .from("ai_provider_keys")
     .select("id, provider, secret_name, status, priority")
