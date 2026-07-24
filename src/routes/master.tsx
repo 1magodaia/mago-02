@@ -179,6 +179,7 @@ function MasterPanel() {
           support_message: supportMsg || null,
           citations_enabled: citationsEnabled,
           citations_daily_limit: citationsLimit,
+          reason: reason.trim() || null,
         },
       });
       setSupportWa(r.support_whatsapp ?? "");
@@ -186,7 +187,9 @@ function MasterPanel() {
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
       setNotice("Configurações atualizadas.");
-      readWaLog().then(setWaLog).catch(() => {});
+      setReason("");
+      setWaLogPage(1);
+      loadWaLog({ page: 1 });
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
     } finally {
