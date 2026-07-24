@@ -76,8 +76,12 @@ const inputSchema = z.object({
     })
     .nullable()
     .optional(),
+  hero_height_desktop: z.number().int().min(120).max(720).optional(),
+  hero_height_mobile: z.number().int().min(100).max(480).optional(),
+  hero_fit: z.enum(["cover", "contain"]).optional(),
   reason: z.string().trim().max(500).nullable().optional(),
 });
+
 
 
 export const updateAppSettings = createServerFn({ method: "POST" })
