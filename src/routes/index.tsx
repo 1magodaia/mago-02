@@ -35,6 +35,7 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
 import { useServerFn } from "@tanstack/react-start";
+import { toTerms } from "@/lib/highlight";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
