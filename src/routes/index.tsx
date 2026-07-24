@@ -35,6 +35,7 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
 import { useServerFn } from "@tanstack/react-start";
+import { toTerms } from "@/lib/highlight";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
@@ -523,6 +524,8 @@ function Home() {
     runSearchWith(s.query, s.region);
   };
 
+  const highlightTerms = useMemo(() => toTerms(query), [query]);
+
   const filtered = useMemo(() => {
     let list = [...rawResults];
     if (siteFilter === "no_site") list = list.filter((l) => !l.website);
@@ -1007,7 +1010,9 @@ function Home() {
                   onSelect={() => setSelected(lead.place_id)}
                   onUpdate={updateOne}
                   citationsAvailable={citationsAvailable}
+                  highlight={highlightTerms}
                 />
+
               </div>
             );
           })}

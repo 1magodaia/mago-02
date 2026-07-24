@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
+import { Highlight } from "@/lib/highlight";
 import { HelpTip } from "@/components/help-tip";
 import { auditWebsite } from "@/lib/audit.functions";
 import { refreshPlace } from "@/lib/places.functions";
@@ -45,6 +46,8 @@ interface Props {
   onUpdate?: (updated: ScoredLead) => void;
   /** true quando o kill switch está ON e o usuário atual é Pro (ou admin/master). */
   citationsAvailable?: boolean;
+  /** Termos a destacar (accent/case-insensitive) no nome e endereço. */
+  highlight?: string[];
 }
 
 function toSaved(lead: ScoredLead): SavedLead {
@@ -77,7 +80,7 @@ function relTime(iso: string | null | undefined): string | null {
   return `há ${y} ano${y > 1 ? "s" : ""}`;
 }
 
-export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable }: Props) {
+export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -257,8 +260,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <PriceLevelBadge level={lead.price_level ?? null} />
             <BusinessStatusBadge status={lead.business_status ?? null} />
           </div>
-          <h3 className="mt-1.5 truncate text-base font-bold text-foreground">{lead.name}</h3>
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">{lead.address}</p>
+          <h3 className="mt-1.5 truncate text-base font-bold text-foreground">
+            <Highlight text={lead.name} terms={highlight ?? []} />
+          </h3>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            <Highlight text={lead.address} terms={highlight ?? []} />
+          </p>
           {collectedAgo && (
             <p className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/80">
               <RefreshCw className="h-2.5 w-2.5" aria-hidden />
