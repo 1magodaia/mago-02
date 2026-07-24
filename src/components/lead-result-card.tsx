@@ -386,7 +386,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       )}
 
       <div className="grid grid-cols-4 gap-1.5">
-        {lead.website && (
+        {hasRealSite && lead.website && (
           <button
             onClick={runAudit}
             disabled={auditing}
@@ -403,8 +403,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
             className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            title={linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"}
           >
-            <Globe className="h-3 w-3" /> Site
+            {linkKind === "instagram" ? (
+              <><Instagram className="h-3 w-3" /> Instagram</>
+            ) : linkKind === "facebook" ? (
+              <><Globe className="h-3 w-3" /> Facebook</>
+            ) : (
+              <><Globe className="h-3 w-3" /> Site</>
+            )}
           </a>
         )}
         {lead.phone && (
