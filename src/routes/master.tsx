@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Ban,
@@ -228,13 +229,12 @@ function MasterPanel() {
     }
   };
 
-  const revertWaEntry = async (entry: WhatsappChangeLogEntry) => {
+  const performRevert = async (entry: WhatsappChangeLogEntry) => {
     const target = entry.old_whatsapp ?? "";
     const targetMsg = entry.old_message ?? "";
-    const label = target ? target : "(vazio)";
-    if (!window.confirm(`Reverter WhatsApp para "${label}"?`)) return;
     setSettingsBusy(true);
     setSettingsError(null);
+    const tid = toast.loading("Revertendo configuração...");
     try {
       const r = await writeSettings({
         data: {
@@ -248,12 +248,29 @@ function MasterPanel() {
       setNotice("Configuração revertida.");
       setWaLogPage(1);
       loadWaLog({ page: 1 });
+      toast.success("Configuração revertida.", {
+        id: tid,
+        description: `WhatsApp: ${target || "(vazio)"}`,
+      });
     } catch (err) {
-      setSettingsError(err instanceof Error ? err.message : "Erro ao reverter.");
+      const msg = err instanceof Error ? err.message : "Erro ao reverter.";
+      setSettingsError(msg);
+      toast.error("Falha ao reverter.", { id: tid, description: msg });
     } finally {
       setSettingsBusy(false);
     }
   };
+
+  const revertWaEntry = (entry: WhatsappChangeLogEntry) => {
+    const label = entry.old_whatsapp ? entry.old_whatsapp : "(vazio)";
+    toast(`Reverter WhatsApp para "${label}"?`, {
+      description: `Alteração de ${new Date(entry.created_at).toLocaleString("pt-BR")} por ${entry.changed_by_email ?? "—"}. Isso será registrado como uma nova mudança.`,
+      action: { label: "Reverter", onClick: () => performRevert(entry) },
+      cancel: { label: "Cancelar", onClick: () => {} },
+      duration: 10000,
+    });
+  };
+
 
   const applyWaFilters = () => {
     setWaLogPage(1);
@@ -275,6 +292,7 @@ function MasterPanel() {
 
   const downloadWaCsv = async () => {
     setWaLogExporting(true);
+    const tid = toast.loading("Gerando CSV...");
     try {
       const { csv } = await exportWaCsv({
         data: { author: waLogAuthor, from: waLogFrom, to: waLogTo },
@@ -283,17 +301,22 @@ function MasterPanel() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      const filename = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success("CSV exportado.", { id: tid, description: filename });
     } catch (err) {
-      setSettingsError(err instanceof Error ? err.message : "Erro ao exportar CSV.");
+      const msg = err instanceof Error ? err.message : "Erro ao exportar CSV.";
+      setSettingsError(msg);
+      toast.error("Falha ao exportar CSV.", { id: tid, description: msg });
     } finally {
       setWaLogExporting(false);
     }
   };
+
 
 
 

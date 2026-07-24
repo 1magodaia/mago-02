@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
 import { SupportWidget } from "../components/support-widget";
 import { SupportChat } from "../components/support-chat";
+import { Toaster } from "../components/ui/sonner";
 import favicon from "../assets/favicon.png.asset.json";
 
 
@@ -130,6 +131,7 @@ function RootComponent() {
         <Outlet />
         <SupportChat />
         <SupportWidget />
+        <Toaster />
       </AuthProvider>
 
     </QueryClientProvider>
