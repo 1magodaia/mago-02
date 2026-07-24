@@ -93,6 +93,13 @@ function Home() {
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
+  useEffect(() => {
+    readSettings()
+      .then((s) => setCitationsEnabled(!!s.citations_enabled))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const requireAuth = (): boolean => {
     if (!user) {
       nav({ to: "/auth", search: { redirect: "/" } });
