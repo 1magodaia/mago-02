@@ -75,7 +75,7 @@ interface Props {
   onMapClick?: (coords: { lat: number; lng: number }) => void;
 }
 
-export default function GoogleMapView({ center, radiusKm, leads, selectedId, onSelect }: Props) {
+export default function GoogleMapView({ center, radiusKm, leads, selectedId, onSelect, onMapClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
