@@ -681,11 +681,11 @@ function Home() {
               value={siteFilter}
               onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
               aria-label="Filtro de site"
-              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
             >
-              <option value="any">Site: qualquer</option>
-              <option value="no_site">Sem site</option>
-              <option value="with_site">Com site</option>
+              <option className="bg-background text-foreground" value="any">Site: qualquer</option>
+              <option className="bg-background text-foreground" value="no_site">Sem site</option>
+              <option className="bg-background text-foreground" value="with_site">Com site</option>
             </select>
 
             <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
