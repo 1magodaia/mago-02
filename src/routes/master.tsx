@@ -147,14 +147,19 @@ function MasterPanel() {
   };
 
 
-  const grant = async (u: AdminUserRow, payload: Parameters<typeof grantAccess>[0]["data"]) => {
+  type GrantPayload =
+    | { userId: string; mode: "free"; reason?: string }
+    | { userId: string; mode: "date"; valid_until: string; reason?: string }
+    | { userId: string; mode: "searches"; searches_granted: number; reason?: string };
+
+  const grant = async (u: AdminUserRow, payload: GrantPayload) => {
     setBusy(u.id);
     try {
       await grantAccess({ data: payload });
       const nice = payload.mode === "free"
         ? `${u.email} voltou para Free.`
         : payload.mode === "date"
-          ? `${u.email} é Pro até ${new Date(payload.valid_until!).toLocaleDateString("pt-BR")}.`
+          ? `${u.email} é Pro até ${new Date(payload.valid_until).toLocaleDateString("pt-BR")}.`
           : `${u.email} é Pro com ${payload.searches_granted} buscas.`;
       setNotice(nice);
       await load();
@@ -385,9 +390,7 @@ function MasterPanel() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${u.plan === "pro" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {u.plan.toUpperCase()}
-                    </span>
+                    <PlanCell u={u} />
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${u.status === "active" ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>
@@ -400,13 +403,7 @@ function MasterPanel() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex flex-wrap justify-end gap-1.5">
-                      <button
-                        onClick={() => togglePlan(u)}
-                        disabled={busy === u.id}
-                        className="rounded-full bg-glass px-3 py-1 text-xs font-semibold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
-                      >
-                        {u.plan === "pro" ? "Voltar Free" : "Tornar Pro"}
-                      </button>
+                      <GrantMenu u={u} busy={busy === u.id} onGrant={(p) => grant(u, p)} />
                       <button
                         onClick={() => toggleStatus(u)}
                         disabled={busy === u.id || isSelf}
