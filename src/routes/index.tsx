@@ -752,7 +752,7 @@ function Home() {
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
             placeholder="Categoria (padaria, pet shop, advogado...)"
             aria-label="Categoria de comércio"
-            staticList={CATEGORY_SUGGESTIONS}
+            autocomplete={false}
             leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
           />
           <SmartAutocomplete
@@ -762,12 +762,13 @@ function Home() {
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
             placeholder="Cidade, bairro ou endereço"
             aria-label="Região"
+            asyncSource={regionSource}
             disabled={usingGps}
-            autocomplete={false}
             wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
             className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
             leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
           />
+
 
 
           <button

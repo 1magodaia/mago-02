@@ -278,7 +278,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
           <ul
             id={listId}
             role="listbox"
-            className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
+            className="absolute z-[1000] mt-1 max-h-72 w-full overflow-auto rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
           >
             {items.map((it, idx) => (
               <li
