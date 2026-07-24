@@ -111,6 +111,7 @@ const UpsertSchema = z.object({
   provider: z.enum(PROVIDERS),
   label: z.string().min(1).max(60),
   secret_name: z.string().regex(/^[A-Z_][A-Z0-9_]*$/, "Nome de secret inválido"),
+  model: z.string().trim().max(120).optional().nullable(),
   priority: z.number().int().min(1).max(999),
   status: z.enum(["active", "error", "rate_limited", "untested", "disabled"]).optional(),
 });
@@ -125,6 +126,7 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
       provider: data.provider,
       label: data.label,
       secret_name: data.secret_name,
+      model: data.model?.trim() || null,
       priority: data.priority,
       status: data.status ?? "untested",
     };
@@ -141,6 +143,7 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: inserted!.id };
   });
+
 
 export const deleteAiProviderKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
