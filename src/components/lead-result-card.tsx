@@ -627,7 +627,9 @@ function EmailBlock({ email }: { email: string | null }) {
   );
 }
 
+function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | null }) {
   if (!info) {
+
     return (
       <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum CNPJ localizado no site do comércio. Não estimamos esse valor a partir do nome.">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
