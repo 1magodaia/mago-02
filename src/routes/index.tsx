@@ -411,7 +411,9 @@ function Home() {
       "Nota (Rating)": l.rating ?? "",
       "Número de Avaliações": l.user_ratings_total ?? 0,
       "Última Avaliação (dias atrás)": daysAgoLabel(l.latest_review_at),
-      "Categoria": formatCategory(l.types),
+      "Categoria": sportsMap[l.place_id]
+        ? `${SPORT_BY_ID[sportsMap[l.place_id]].emoji} ${SPORT_BY_ID[sportsMap[l.place_id]].label}`
+        : formatCategory(l.types),
       "Status Presença Digital": digitalStatus(l),
       "Score Oportunidade": opportunityScore10(l),
       "Data Coleta": today,
