@@ -228,6 +228,75 @@ function MasterPanel() {
     }
   };
 
+  const revertWaEntry = async (entry: WhatsappChangeLogEntry) => {
+    const target = entry.old_whatsapp ?? "";
+    const targetMsg = entry.old_message ?? "";
+    const label = target ? target : "(vazio)";
+    if (!window.confirm(`Reverter WhatsApp para "${label}"?`)) return;
+    setSettingsBusy(true);
+    setSettingsError(null);
+    try {
+      const r = await writeSettings({
+        data: {
+          support_whatsapp: target || null,
+          support_message: targetMsg || null,
+          reason: `Revert de ${new Date(entry.created_at).toLocaleString("pt-BR")} (por ${entry.changed_by_email ?? "—"})`,
+        },
+      });
+      setSupportWa(r.support_whatsapp ?? "");
+      setSupportMsg(r.support_message ?? "");
+      setNotice("Configuração revertida.");
+      setWaLogPage(1);
+      loadWaLog({ page: 1 });
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao reverter.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
+  const applyWaFilters = () => {
+    setWaLogPage(1);
+    loadWaLog({ page: 1 });
+  };
+
+  const clearWaFilters = () => {
+    setWaLogAuthor("");
+    setWaLogFrom("");
+    setWaLogTo("");
+    setWaLogPage(1);
+    loadWaLog({ page: 1, author: "", from: "", to: "" });
+  };
+
+  const changeWaPage = (next: number) => {
+    setWaLogPage(next);
+    loadWaLog({ page: next });
+  };
+
+  const downloadWaCsv = async () => {
+    setWaLogExporting(true);
+    try {
+      const { csv } = await exportWaCsv({
+        data: { author: waLogAuthor, from: waLogFrom, to: waLogTo },
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `whatsapp-change-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setSettingsError(err instanceof Error ? err.message : "Erro ao exportar CSV.");
+    } finally {
+      setWaLogExporting(false);
+    }
+  };
+
+
+
 
 
 
