@@ -42,6 +42,8 @@ interface Props {
   selected?: boolean;
   onSelect?: () => void;
   onUpdate?: (updated: ScoredLead) => void;
+  /** true quando o kill switch está ON e o usuário atual é Pro (ou admin/master). */
+  citationsAvailable?: boolean;
 }
 
 function toSaved(lead: ScoredLead): SavedLead {
