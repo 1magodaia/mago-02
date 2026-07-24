@@ -43,6 +43,8 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          citations_daily_limit: number
+          citations_enabled: boolean
           id: number
           support_message: string | null
           support_whatsapp: string | null
@@ -50,6 +52,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          citations_daily_limit?: number
+          citations_enabled?: boolean
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null
@@ -57,11 +61,55 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          citations_daily_limit?: number
+          citations_enabled?: boolean
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      citation_lookups: {
+        Row: {
+          cached_at: string
+          cost_cents: number
+          created_at: string
+          id: string
+          lead_address: string | null
+          lead_name: string | null
+          model: string | null
+          place_id: string
+          query: string
+          result: Json
+          user_id: string
+        }
+        Insert: {
+          cached_at?: string
+          cost_cents?: number
+          created_at?: string
+          id?: string
+          lead_address?: string | null
+          lead_name?: string | null
+          model?: string | null
+          place_id: string
+          query: string
+          result: Json
+          user_id: string
+        }
+        Update: {
+          cached_at?: string
+          cost_cents?: number
+          created_at?: string
+          id?: string
+          lead_address?: string | null
+          lead_name?: string | null
+          model?: string | null
+          place_id?: string
+          query?: string
+          result?: Json
+          user_id?: string
         }
         Relationships: []
       }
