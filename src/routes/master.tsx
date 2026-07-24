@@ -110,6 +110,7 @@ function MasterPanel() {
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
+      readWaLog().then(setWaLog).catch(() => {});
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
