@@ -11,10 +11,12 @@ import {
   KeyRound,
   Loader2,
   MessageCircle,
+  Monitor,
   RotateCcw,
   Save,
   Shield,
   ShieldCheck,
+  Smartphone,
   Users,
 } from "lucide-react";
 
@@ -106,6 +108,7 @@ function MasterPanel() {
   const [heroHeightMobile, setHeroHeightMobile] = useState(200);
   const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
   const [heroPreviewStatus, setHeroPreviewStatus] = useState<"idle" | "loading" | "ok" | "invalid" | "error">("idle");
+  const [heroPreviewDevice, setHeroPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [heroBusy, setHeroBusy] = useState(false);
 
   const [settingsBusy, setSettingsBusy] = useState(false);
@@ -864,56 +867,57 @@ function MasterPanel() {
             )}
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
-            {/* Desktop preview */}
-            <div>
-              <div className="mb-1 text-[10px] text-muted-foreground">Desktop · {heroHeightDesktop}px</div>
-              <div
-                className="relative overflow-hidden rounded-xl bg-glass ring-1 ring-border"
-                style={{ height: heroHeightDesktop }}
+          {/* Toggle Desktop / Mobile */}
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="inline-flex rounded-lg bg-muted p-1 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setHeroPreviewDevice("desktop")}
+                aria-pressed={heroPreviewDevice === "desktop"}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition ${heroPreviewDevice === "desktop" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
-                {heroImageUrl && heroPreviewStatus === "ok" ? (
-                  <img
-                    src={heroImageUrl}
-                    alt="Prévia desktop"
-                    className="block h-full w-full"
-                    style={{ objectFit: heroFit, objectPosition: "center" }}
-                  />
-                ) : heroPreviewStatus === "loading" ? (
-                  <div className="grid h-full place-items-center text-xs text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  </div>
-                ) : (
-                  <HeroPlaceholder
-                    tone={heroPreviewStatus === "error" ? "error" : heroPreviewStatus === "invalid" ? "warn" : "empty"}
-                  />
-                )}
-              </div>
+                <Monitor className="h-3.5 w-3.5" /> Desktop
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeroPreviewDevice("mobile")}
+                aria-pressed={heroPreviewDevice === "mobile"}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 transition ${heroPreviewDevice === "mobile" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Smartphone className="h-3.5 w-3.5" /> Mobile
+              </button>
             </div>
-            {/* Mobile preview */}
-            <div>
-              <div className="mb-1 text-[10px] text-muted-foreground">Mobile · {heroHeightMobile}px</div>
-              <div
-                className="relative mx-auto overflow-hidden rounded-xl bg-glass ring-1 ring-border"
-                style={{ height: heroHeightMobile, maxWidth: 360 }}
-              >
-                {heroImageUrl && heroPreviewStatus === "ok" ? (
-                  <img
-                    src={heroImageUrl}
-                    alt="Prévia mobile"
-                    className="block h-full w-full"
-                    style={{ objectFit: heroFit, objectPosition: "center" }}
-                  />
-                ) : heroPreviewStatus === "loading" ? (
-                  <div className="grid h-full place-items-center text-xs text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  </div>
-                ) : (
-                  <HeroPlaceholder
-                    tone={heroPreviewStatus === "error" ? "error" : heroPreviewStatus === "invalid" ? "warn" : "empty"}
-                  />
-                )}
-              </div>
+            <div className="text-[10px] text-muted-foreground">
+              {heroPreviewDevice === "desktop"
+                ? `Altura ${heroHeightDesktop}px · modo ${heroFit}`
+                : `Altura ${heroHeightMobile}px · modo ${heroFit}`}
+            </div>
+          </div>
+
+          {/* Frame — mesma altura/fit da home; sem cortar em telas estreitas */}
+          <div className="overflow-x-auto rounded-2xl bg-glass/40 p-3 ring-1 ring-border">
+            <div
+              className={`relative mx-auto overflow-hidden rounded-xl bg-glass ring-1 ring-border ${heroPreviewDevice === "mobile" ? "w-[390px] max-w-full" : "w-full min-w-[640px]"}`}
+              style={{
+                height: heroPreviewDevice === "desktop" ? heroHeightDesktop : heroHeightMobile,
+              }}
+            >
+              {heroImageUrl && heroPreviewStatus === "ok" ? (
+                <img
+                  src={heroImageUrl}
+                  alt={`Prévia ${heroPreviewDevice}`}
+                  className="block h-full w-full"
+                  style={{ objectFit: heroFit, objectPosition: "center" }}
+                />
+              ) : heroPreviewStatus === "loading" ? (
+                <div className="grid h-full place-items-center text-xs text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                </div>
+              ) : (
+                <HeroPlaceholder
+                  tone={heroPreviewStatus === "error" ? "error" : heroPreviewStatus === "invalid" ? "warn" : "empty"}
+                />
+              )}
             </div>
           </div>
         </div>
