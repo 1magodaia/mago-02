@@ -317,6 +317,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       )}
 
       {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
+      {lead.audit && <EmailBlock email={lead.audit.email} />}
+
 
       {lead.audit && (
         <div className="grid grid-cols-3 gap-2 rounded-xl bg-glass p-2.5 ring-1 ring-border text-center">
