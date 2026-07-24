@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Ban,
   Check,
+  Image as ImageIcon,
   KeyRound,
   Loader2,
   MessageCircle,
@@ -13,6 +14,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+
 import { LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -62,9 +64,12 @@ function MasterPanel() {
   const [supportMsg, setSupportMsg] = useState("");
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [citationsLimit, setCitationsLimit] = useState(20);
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroBusy, setHeroBusy] = useState(false);
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
+
 
 
   useEffect(() => {
@@ -99,10 +104,12 @@ function MasterPanel() {
           setSupportMsg(s.support_message ?? "");
           setCitationsEnabled(s.citations_enabled);
           setCitationsLimit(s.citations_daily_limit);
+          setHeroImageUrl(s.hero_image_url ?? "");
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
