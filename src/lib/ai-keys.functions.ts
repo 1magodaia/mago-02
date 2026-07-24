@@ -157,104 +157,208 @@ export const deleteAiProviderKey = createServerFn({ method: "POST" })
   });
 
 /**
- * Provider-specific health-check. Uses the cheapest/lightest reachable endpoint
- * for each provider — usually the "list models" endpoint — so testing a key
- * never consumes generation credits.
+ * Extract a human-readable failure reason from a provider error body.
+ * Providers vary wildly in shape — try the common ones (OpenAI-style
+ * `{ error: { message } }`, NVIDIA/NIM `{ detail | title | message }`,
+ * Anthropic `{ error: { message, type } }`, Cohere `{ message }`) and
+ * fall back to a truncated raw string.
+ */
+function extractProviderMessage(bodyText: string): string {
+  if (!bodyText) return "";
+  const trimmed = bodyText.trim();
+  try {
+    const j = JSON.parse(trimmed);
+    const candidates = [
+      j?.error?.message,
+      j?.error?.detail,
+      j?.error,
+      j?.detail?.[0]?.msg,
+      j?.detail?.message,
+      j?.detail,
+      j?.title,
+      j?.message,
+      j?.error_description,
+      j?.status,
+    ];
+    for (const c of candidates) {
+      if (typeof c === "string" && c.trim()) return c.trim().slice(0, 240);
+    }
+    return JSON.stringify(j).slice(0, 240);
+  } catch {
+    return trimmed.slice(0, 240);
+  }
+}
+
+/**
+ * Classify an HTTP status + body into a friendly PT-BR reason so the
+ * master panel can show *why* a key failed (autenticação, modelo inválido,
+ * cota, rede etc.) instead of a bare "HTTP 400".
+ */
+function classifyFailure(status: number, bodyText: string): { status: "error" | "rate_limited"; message: string } {
+  const detail = extractProviderMessage(bodyText);
+  const lower = (detail || "").toLowerCase();
+  const suffix = detail ? ` — ${detail}` : "";
+
+  if (status === 429 || /rate.?limit|too many requests|quota exceeded/i.test(lower)) {
+    return { status: "rate_limited", message: `Limite de requisições atingido (429)${suffix}` };
+  }
+  if (status === 401 || status === 403 || /invalid api key|unauthor|forbidden|api key not valid|incorrect api key/.test(lower)) {
+    return { status: "error", message: `Autenticação falhou — chave inválida, revogada ou sem permissão (${status})${suffix}` };
+  }
+  if (status === 402 || /insufficient|no credits|billing|payment required|balance/.test(lower)) {
+    return { status: "error", message: `Créditos/saldo insuficiente na conta do provedor (${status})${suffix}` };
+  }
+  if (status === 404 || /model.*(not found|does not exist|not available|unknown)|no such model|invalid model/.test(lower)) {
+    return { status: "error", message: `Modelo inválido ou indisponível para essa chave (${status}). Escolha outro modelo no seletor.${suffix}` };
+  }
+  if (status === 400 && /model|parameter|schema/.test(lower)) {
+    return { status: "error", message: `Requisição rejeitada pelo provedor — provavelmente o modelo selecionado não é suportado (${status}).${suffix}` };
+  }
+  if (status === 400) return { status: "error", message: `Requisição inválida (400)${suffix}` };
+  if (status === 408 || status === 504) return { status: "error", message: `Tempo esgotado — o provedor demorou para responder (${status})${suffix}` };
+  if (status >= 500) return { status: "error", message: `Provedor com instabilidade (${status})${suffix}` };
+  return { status: "error", message: `HTTP ${status}${suffix}` };
+}
+
+function classifyNetworkError(e: any): { status: "error"; message: string } {
+  const raw = String(e?.message ?? e ?? "").trim();
+  const l = raw.toLowerCase();
+  if (e?.name === "AbortError" || /timeout|timed out/.test(l)) {
+    return { status: "error", message: `Rede: tempo esgotado ao contatar o provedor — ${raw}` };
+  }
+  if (/enotfound|dns|getaddrinfo/.test(l)) {
+    return { status: "error", message: `Rede: DNS não resolveu — ${raw}` };
+  }
+  if (/econnrefused|econnreset|socket|network|fetch failed/.test(l)) {
+    return { status: "error", message: `Rede: conexão recusada/interrompida com o provedor — ${raw}` };
+  }
+  return { status: "error", message: `Rede: falha ao contatar o provedor — ${raw || "erro desconhecido"}` };
+}
+
+/**
+ * Provider health-check with rich diagnostics. When a `model` is given,
+ * we hit `chat/completions` with that exact model so the admin knows if
+ * *that specific model* (e.g. NVIDIA Nemotron-70b, Llama-Nemotron) responds
+ * for this key — not just whether the account is authenticated.
+ * Without a model, we call the cheap `list models` endpoint of each provider.
  */
 async function probeProvider(
   provider: Provider,
   key: string,
+  model?: string | null,
 ): Promise<{ status: "active" | "rate_limited" | "error"; message: string }> {
+  const chosenModel = model?.trim() || PROVIDER_MODELS[provider]?.default;
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 12000);
+
+  const chatPing = async (url: string, headers: Record<string, string>, extraBody?: Record<string, unknown>) =>
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...headers },
+      body: JSON.stringify({
+        model: chosenModel,
+        messages: [{ role: "user", content: "ping" }],
+        max_tokens: 1,
+        ...extraBody,
+      }),
+      signal: ac.signal,
+    });
+
   try {
     let res: Response;
     switch (provider) {
       case "openai":
-        res = await fetch("https://api.openai.com/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://api.openai.com/v1/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "groq":
-        res = await fetch("https://api.groq.com/openai/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://api.groq.com/openai/v1/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://api.groq.com/openai/v1/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "mistral":
-        res = await fetch("https://api.mistral.ai/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://api.mistral.ai/v1/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://api.mistral.ai/v1/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "deepseek":
-        res = await fetch("https://api.deepseek.com/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://api.deepseek.com/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://api.deepseek.com/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "xai":
-        res = await fetch("https://api.x.ai/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://api.x.ai/v1/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://api.x.ai/v1/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "openrouter":
-        res = await fetch("https://openrouter.ai/api/v1/auth/key", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await chatPing("https://openrouter.ai/api/v1/chat/completions", { Authorization: `Bearer ${key}` })
+          : await fetch("https://openrouter.ai/api/v1/auth/key", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "perplexity":
-        // Perplexity has no public models endpoint; do a minimal chat ping.
-        res = await fetch("https://api.perplexity.ai/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "sonar", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
-        });
+        res = await chatPing("https://api.perplexity.ai/chat/completions", { Authorization: `Bearer ${key}` });
         break;
       case "nvidia":
-        res = await fetch("https://integrate.api.nvidia.com/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        // NVIDIA NIM is OpenAI-compatible. Always ping chat/completions with the
+        // chosen model so the error reflects the *model* — Nemotron/Llama-Nemotron
+        // gates access per model and returns 404/400 with a helpful detail body.
+        res = await chatPing("https://integrate.api.nvidia.com/v1/chat/completions", {
+          Authorization: `Bearer ${key}`,
+        }, { stream: false, temperature: 0 });
         break;
       case "cohere":
-        res = await fetch("https://api.cohere.com/v1/models", {
-          headers: { Authorization: `Bearer ${key}` },
-        });
+        res = chosenModel
+          ? await fetch("https://api.cohere.com/v2/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+              body: JSON.stringify({ model: chosenModel, messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
+              signal: ac.signal,
+            })
+          : await fetch("https://api.cohere.com/v1/models", { headers: { Authorization: `Bearer ${key}` }, signal: ac.signal });
         break;
       case "anthropic":
-        res = await fetch("https://api.anthropic.com/v1/models", {
-          headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
-        });
+        res = chosenModel
+          ? await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+              body: JSON.stringify({ model: chosenModel, max_tokens: 1, messages: [{ role: "user", content: "ping" }] }),
+              signal: ac.signal,
+            })
+          : await fetch("https://api.anthropic.com/v1/models", { headers: { "x-api-key": key, "anthropic-version": "2023-06-01" }, signal: ac.signal });
         break;
       case "gemini":
-        res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
-        );
+        res = chosenModel
+          ? await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(chosenModel)}:generateContent?key=${encodeURIComponent(key)}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }], generationConfig: { maxOutputTokens: 1 } }),
+                signal: ac.signal,
+              },
+            )
+          : await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`, { signal: ac.signal });
         break;
       case "lovable":
       default:
-        res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [{ role: "user", content: "ping" }],
-            max_tokens: 1,
-          }),
-        });
+        res = await chatPing("https://ai.gateway.lovable.dev/v1/chat/completions", { Authorization: `Bearer ${key}` });
         break;
     }
-    if (res.status === 429) return { status: "rate_limited", message: "Limite de requisições atingido (429)" };
-    if (res.status === 401 || res.status === 403) return { status: "error", message: `Chave inválida (${res.status})` };
-    if (res.status === 402) return { status: "error", message: "Créditos esgotados (402)" };
-    if (!res.ok) {
-      let extra = "";
-      try {
-        const txt = await res.text();
-        extra = txt ? ` — ${txt.slice(0, 160)}` : "";
-      } catch { /* ignore */ }
-      return { status: "error", message: `HTTP ${res.status}${extra}` };
-    }
-    return { status: "active", message: "OK" };
+
+    clearTimeout(timer);
+    if (res.ok) return { status: "active", message: chosenModel ? `OK — modelo "${chosenModel}" respondeu` : "OK" };
+
+    let bodyText = "";
+    try { bodyText = await res.text(); } catch { /* ignore */ }
+    return classifyFailure(res.status, bodyText);
   } catch (e: any) {
-    return { status: "error", message: String(e?.message ?? e) };
+    clearTimeout(timer);
+    return classifyNetworkError(e);
   }
 }
+
 
 /**
  * Testa uma chave chamando o endpoint mais leve do provedor (list models quando existe).
