@@ -240,6 +240,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               </span>
             )}
             <PriceLevelBadge level={lead.price_level ?? null} />
+            <BusinessStatusBadge status={lead.business_status ?? null} />
           </div>
           <h3 className="mt-1.5 truncate text-base font-bold text-foreground">{lead.name}</h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">{lead.address}</p>
