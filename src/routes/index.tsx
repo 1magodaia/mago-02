@@ -243,7 +243,7 @@ function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* NAV */}
+      {/* NAV — botões padronizados: h-9 rounded-full px-3 text-xs font-semibold */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
           <LogoIcon className="h-9 w-9 sm:hidden" />
@@ -253,42 +253,46 @@ function Home() {
           {user && (
             <Link
               to="/leads"
-              className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
+              className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
             >
               <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
             </Link>
           )}
           <Link
             to="/planos"
-            className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ring-1 ${
+              isPro
+                ? "bg-glass text-foreground ring-border hover:bg-white/5"
+                : "bg-warn/15 text-warn ring-warn/40 hover:bg-warn/25"
+            }`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-warn" /> {isPro ? "Pro" : "Upgrade"}
+            <Sparkles className="h-3.5 w-3.5" /> {isPro ? "Pro" : "Upgrade"}
           </Link>
           <Link
             to="/novidades"
-            className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
+            className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
           >
             <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
           </Link>
           {isAdmin && (
             <Link
               to="/master"
-              className="flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1.5 text-xs font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/20"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
             >
               <Shield className="h-3.5 w-3.5" /> {isMaster ? "Master" : "Admin"}
             </Link>
           )}
           {authLoading ? (
-            <span className="grid h-8 w-8 place-items-center">
+            <span className="grid h-9 w-9 place-items-center">
               <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
             </span>
           ) : user ? (
             <div className="group relative">
               <button
-                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
                 aria-label="Menu da conta"
               >
-                <UserIcon className="h-3.5 w-3.5" />
+                <UserIcon className="h-3.5 w-3.5 text-primary" />
                 <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
               </button>
               <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
@@ -310,7 +314,7 @@ function Home() {
           ) : (
             <Link
               to="/auth"
-              className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-bold text-primary-foreground hover:brightness-110"
             >
               <LogIn className="h-3.5 w-3.5" /> Entrar
             </Link>
