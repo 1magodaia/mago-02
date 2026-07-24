@@ -1264,16 +1264,22 @@ function AiKeysPanel() {
             onChange={(e) => setForm({ ...form, secret_name: e.target.value.toUpperCase() })}
             className="rounded-md bg-background px-2 py-1.5 text-sm font-mono ring-1 ring-border"
           />
-          <input
-            type="number"
-            min={1}
-            max={999}
-            value={form.priority}
-            onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
-            title="Prioridade de failover — menor número é tentado primeiro (padrão: 100)"
-            placeholder="Prioridade"
-            className="rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
-          />
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min={1}
+              max={999}
+              value={form.priority}
+              onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
+              title="Prioridade de failover — menor número é tentado primeiro (padrão: 100)"
+              placeholder="Prioridade"
+              className="w-full rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
+            />
+            <HelpTip
+              title="Prioridade de failover"
+              text="Menor número é tentado primeiro. Use 10 para a chave principal, 20/30 para reservas. Se todas empatarem em 100, a ordem fica aleatória."
+            />
+          </div>
           <button
             disabled={busy === "new"}
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110 disabled:opacity-50"
