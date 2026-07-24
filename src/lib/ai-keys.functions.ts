@@ -484,7 +484,7 @@ export const setAiSelection = createServerFn({ method: "POST" })
  * - modo "manual": usa exclusivamente a chave escolhida (se ativa e com secret).
  * - modo "auto":   percorre por prioridade escolhendo a primeira active/untested com secret.
  */
-export async function getNextAvailableAiKey(): Promise<{ id: string; provider: Provider; value: string } | null> {
+export async function getNextAvailableAiKey(): Promise<{ id: string; provider: Provider; value: string; model: string | null } | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: settings } = await supabaseAdmin
     .from("app_settings")
@@ -497,24 +497,25 @@ export async function getNextAvailableAiKey(): Promise<{ id: string; provider: P
   if (mode === "manual" && manualId) {
     const { data: row } = await supabaseAdmin
       .from("ai_provider_keys")
-      .select("id, provider, secret_name, status")
+      .select("id, provider, secret_name, model, status")
       .eq("id", manualId)
       .maybeSingle();
     if (row && (row as any).status !== "disabled") {
       const value = process.env[(row as any).secret_name];
-      if (value) return { id: (row as any).id, provider: (row as any).provider, value };
+      if (value) return { id: (row as any).id, provider: (row as any).provider, value, model: (row as any).model ?? null };
     }
     return null;
   }
 
   const { data } = await supabaseAdmin
     .from("ai_provider_keys")
-    .select("id, provider, secret_name, status, priority")
+    .select("id, provider, secret_name, model, status, priority")
     .in("status", ["active", "untested"])
     .order("priority", { ascending: true });
   for (const row of data ?? []) {
     const value = process.env[(row as any).secret_name];
-    if (value) return { id: (row as any).id, provider: (row as any).provider, value };
+    if (value) return { id: (row as any).id, provider: (row as any).provider, value, model: (row as any).model ?? null };
   }
   return null;
+
 }
