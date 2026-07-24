@@ -70,6 +70,7 @@ function MasterPanel() {
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
+  const [waLog, setWaLog] = useState<WhatsappChangeLogEntry[]>([]);
 
 
 
