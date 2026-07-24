@@ -968,7 +968,13 @@ function MasterPanel() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr]">
           <label className="block">
-            <span className="text-[11px] font-semibold uppercase text-muted-foreground">Limite diário por usuário</span>
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
+              Limite diário por usuário
+              <HelpTip
+                title="Limite diário por usuário"
+                text="Quantidade máxima de buscas de citação que cada usuário pode fazer por dia — protege contra custo alto se muita gente usar ao mesmo tempo."
+              />
+            </span>
             <input
               type="number"
               min={0}
