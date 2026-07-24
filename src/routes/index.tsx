@@ -107,6 +107,10 @@ function Home() {
   const [supportWa, setSupportWa] = useState<string | null>(null);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
+  const [heroHeightDesktop, setHeroHeightDesktop] = useState<number>(320);
+  const [heroHeightMobile, setHeroHeightMobile] = useState<number>(200);
+  const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
+  const [heroError, setHeroError] = useState(false);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -118,9 +122,12 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
-          if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+          setHeroImageUrl(s.hero_image_url ?? "");
+          setHeroError(false);
+          setHeroHeightDesktop(s.hero_height_desktop ?? 320);
+          setHeroHeightMobile(s.hero_height_mobile ?? 200);
+          setHeroFit(s.hero_fit ?? "cover");
 
-          
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
         })
@@ -134,6 +141,7 @@ function Home() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
 
 
