@@ -118,8 +118,10 @@ export const updateAppSettings = createServerFn({ method: "POST" })
         new_whatsapp: newWa,
         old_message: oldMsg,
         new_message: newMsg,
+        reason: data.reason ? data.reason : null,
       });
     }
+
 
     return {
       support_whatsapp: row?.support_whatsapp ?? null,
