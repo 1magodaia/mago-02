@@ -1,0 +1,1 @@
+ALTER TABLE public.whatsapp_change_log ADD COLUMN IF NOT EXISTS reason TEXT;
