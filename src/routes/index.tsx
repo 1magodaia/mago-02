@@ -143,6 +143,18 @@ function Home() {
   const [heroHeightMobile, setHeroHeightMobile] = useState<number>(_initHero?.hm ?? 200);
   const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
+  const reverseGeocodeFn = useServerFn(reverseGeocode);
+  const [pinned, setPinned] = useState(false);
+
+  const onMapPin = (coords: { lat: number; lng: number }) => {
+    setCenter(coords);
+    setUsingGps(true); // faz a busca usar lat/lng em vez de texto
+    setPinned(true);
+    setGpsError(null);
+    reverseGeocodeFn({ data: coords })
+      .then((r) => { if (r.address) setRegion(r.address); })
+      .catch(() => { /* silencioso: coordenadas já bastam */ });
+  };
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
   // Regra: a tela inicial é a de login. Usuários não autenticados são
