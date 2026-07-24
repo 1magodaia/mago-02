@@ -116,7 +116,7 @@ export function SupportChat() {
     <>
       {open && (
         <div
-          className="fixed inset-x-4 bottom-24 z-[999] flex max-h-[70vh] w-auto flex-col overflow-hidden rounded-2xl border border-primary/40 bg-popover shadow-2xl sm:inset-x-auto sm:right-24 sm:bottom-6 sm:h-[600px] sm:max-h-[calc(100vh-6rem)] sm:w-[380px]"
+          className="fixed inset-x-4 bottom-36 z-[999] flex max-h-[70vh] w-auto flex-col overflow-hidden rounded-2xl border border-primary/40 bg-popover shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-24 sm:h-[560px] sm:max-h-[calc(100vh-8rem)] sm:w-[360px]"
           role="dialog"
           aria-label="Chat de suporte"
         >
@@ -220,10 +220,9 @@ export function SupportChat() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Fechar chat" : "Abrir chat de suporte"}
         title="Precisa de ajuda?"
-        className="fixed bottom-4 right-24 z-[999] flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl ring-4 ring-primary/25 transition hover:scale-105 sm:bottom-6 sm:right-28"
-        style={{ animation: open ? undefined : "pulse 2s ease-in-out infinite" }}
+        className="fixed bottom-20 right-4 z-[999] flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/25 transition hover:scale-105 sm:bottom-24 sm:right-6"
       >
-        {open ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
+        {open ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
       </button>
     </>
   );
