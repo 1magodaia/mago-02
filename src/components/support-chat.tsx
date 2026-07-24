@@ -220,7 +220,7 @@ export function SupportChat() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Fechar chat" : "Abrir chat de suporte"}
         title="Precisa de ajuda?"
-        className="fixed bottom-20 right-4 z-[999] flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/25 transition hover:scale-105 sm:bottom-24 sm:right-6"
+        className="fixed bottom-[4.75rem] right-3 z-[999] flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/25 transition hover:scale-105 sm:h-10 sm:w-10 sm:bottom-24 sm:right-6"
       >
         {open ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
       </button>
