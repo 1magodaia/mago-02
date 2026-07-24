@@ -48,6 +48,10 @@ const DARK_STYLE: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#0a0a0a" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#000" }] },
+  // Hide administrative labels to avoid duplicated city names overlapping
+  // the native locality label (Google renders both at some zoom levels in dark styles).
+  { featureType: "administrative", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative.locality", elementType: "labels", stylers: [{ visibility: "on" }] },
   { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "road", elementType: "geometry", stylers: [{ color: "#1c1c1c" }] },
