@@ -32,6 +32,7 @@ import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { TutorialModal, TutorialBadge, hasSeenTutorial, markTutorialSeen, resetTutorial } from "@/components/tutorial-modal";
 
 const MapView = lazy(() => import("@/components/google-map-view"));
 
@@ -90,8 +91,14 @@ function Home() {
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [showTutorialBadge, setShowTutorialBadge] = useState(false);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
+
+  useEffect(() => {
+    setShowTutorialBadge(!hasSeenTutorial());
+  }, []);
 
   useEffect(() => {
     readSettings()
@@ -394,6 +401,12 @@ function Home() {
                 <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
                 <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
                 <button
+                  onClick={() => { resetTutorial(); setTutorialOpen(true); }}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                >
+                  Ver tutorial novamente
+                </button>
+                <button
                   onClick={() => signOut().then(() => nav({ to: "/" }))}
                   className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
                 >
@@ -441,6 +454,15 @@ function Home() {
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{gpsError} Continue buscando por texto — nada trava.</span>
+          </div>
+        )}
+
+        {showTutorialBadge && (
+          <div className="mt-4">
+            <TutorialBadge
+              onStart={() => { setTutorialOpen(true); setShowTutorialBadge(false); }}
+              onSkip={() => { markTutorialSeen(); setShowTutorialBadge(false); }}
+            />
           </div>
         )}
 
@@ -720,6 +742,7 @@ function Home() {
           </ClientOnly>
         </section>
       </main>
+      <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
     </div>
   );
 }
