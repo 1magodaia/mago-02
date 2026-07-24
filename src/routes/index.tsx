@@ -144,6 +144,14 @@ function Home() {
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
+  // Regra: a tela inicial é a de login. Usuários não autenticados são
+  // redirecionados para /auth; usuários logados seguem usando a home/busca.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      nav({ to: "/auth", replace: true });
+    }
+  }, [authLoading, user, nav]);
+
 
   useEffect(() => {
     let alive = true;
