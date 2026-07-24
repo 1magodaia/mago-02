@@ -524,6 +524,8 @@ function Home() {
     runSearchWith(s.query, s.region);
   };
 
+  const highlightTerms = useMemo(() => toTerms(query), [query]);
+
   const filtered = useMemo(() => {
     let list = [...rawResults];
     if (siteFilter === "no_site") list = list.filter((l) => !l.website);
