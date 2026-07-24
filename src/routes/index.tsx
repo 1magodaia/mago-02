@@ -519,7 +519,7 @@ function Home() {
     return runSearchWith(query, region);
   };
 
-  const runSuggestion = (s: { query: string; region: string }) => {
+
     setQuery(s.query);
     setRegion(s.region);
     setUsingGps(false);
