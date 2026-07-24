@@ -50,6 +50,7 @@ function MasterPanel() {
   const resetPwd = useServerFn(sendPasswordReset);
   const readSettings = useServerFn(getAppSettings);
   const writeSettings = useServerFn(updateAppSettings);
+  const readCostStats = useServerFn(getCitationCostStats);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -59,8 +60,11 @@ function MasterPanel() {
 
   const [supportWa, setSupportWa] = useState("");
   const [supportMsg, setSupportMsg] = useState("");
+  const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const [citationsLimit, setCitationsLimit] = useState(20);
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
 
 
   useEffect(() => {
