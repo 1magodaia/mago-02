@@ -1106,9 +1106,11 @@ import {
   setAiSelection,
   PROVIDERS,
   PROVIDER_LABEL,
+  PROVIDER_MODELS,
   type AiProviderKey,
   type AiSelection,
 } from "@/lib/ai-keys.functions";
+
 import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2 } from "lucide-react";
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
