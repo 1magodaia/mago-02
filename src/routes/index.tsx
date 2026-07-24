@@ -39,6 +39,36 @@ import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
+import { HeroBanner } from "@/components/hero-banner";
+
+const HERO_CACHE_KEY = "bm.heroSettings.v1";
+type HeroCache = {
+  url: string;
+  hd: number;
+  hm: number;
+  fit: "cover" | "contain";
+};
+function readHeroCache(): HeroCache | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(HERO_CACHE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Partial<HeroCache>;
+    if (typeof p.url !== "string") return null;
+    return {
+      url: p.url,
+      hd: typeof p.hd === "number" ? p.hd : 320,
+      hm: typeof p.hm === "number" ? p.hm : 200,
+      fit: p.fit === "contain" ? "contain" : "cover",
+    };
+  } catch {
+    return null;
+  }
+}
+function writeHeroCache(c: HeroCache) {
+  if (typeof window === "undefined") return;
+  try { sessionStorage.setItem(HERO_CACHE_KEY, JSON.stringify(c)); } catch { /* quota */ }
+}
 
 
 
@@ -106,11 +136,11 @@ function Home() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
-  const [heroHeightDesktop, setHeroHeightDesktop] = useState<number>(320);
-  const [heroHeightMobile, setHeroHeightMobile] = useState<number>(200);
-  const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
-  const [heroError, setHeroError] = useState(false);
+  const _initHero = typeof window !== "undefined" ? readHeroCache() : null;
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(_initHero?.url ?? heroDefault.url);
+  const [heroHeightDesktop, setHeroHeightDesktop] = useState<number>(_initHero?.hd ?? 320);
+  const [heroHeightMobile, setHeroHeightMobile] = useState<number>(_initHero?.hm ?? 200);
+  const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -122,11 +152,15 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
-          setHeroImageUrl(s.hero_image_url ?? "");
-          setHeroError(false);
-          setHeroHeightDesktop(s.hero_height_desktop ?? 320);
-          setHeroHeightMobile(s.hero_height_mobile ?? 200);
-          setHeroFit(s.hero_fit ?? "cover");
+          const nextUrl = s.hero_image_url ?? "";
+          const nextHd = s.hero_height_desktop ?? 320;
+          const nextHm = s.hero_height_mobile ?? 200;
+          const nextFit: "cover" | "contain" = s.hero_fit ?? "cover";
+          setHeroImageUrl((prev) => (prev === nextUrl ? prev : nextUrl));
+          setHeroHeightDesktop((prev) => (prev === nextHd ? prev : nextHd));
+          setHeroHeightMobile((prev) => (prev === nextHm ? prev : nextHm));
+          setHeroFit((prev) => (prev === nextFit ? prev : nextFit));
+          writeHeroCache({ url: nextUrl, hd: nextHd, hm: nextHm, fit: nextFit });
 
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
@@ -533,40 +567,12 @@ function Home() {
       </nav>
 
       <header className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
-        <div
-          className="relative overflow-hidden rounded-3xl bg-glass ring-1 ring-border shadow-elevated"
-          style={{ height: "var(--hero-h-mobile)" }}
-        >
-          <style>{`
-            :root{--hero-h-mobile:${heroHeightMobile}px;--hero-h-desktop:${heroHeightDesktop}px;}
-            @media (min-width:640px){.hero-banner{height:var(--hero-h-desktop) !important;}}
-          `}</style>
-          <div className="hero-banner absolute inset-0" style={{ height: "var(--hero-h-mobile)" }}>
-            {heroImageUrl && !heroError ? (
-              <img
-                src={heroImageUrl}
-                alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
-                className="block h-full w-full"
-                style={{ objectFit: heroFit, objectPosition: "center" }}
-                loading="eager"
-                decoding="async"
-                onError={() => setHeroError(true)}
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 via-background to-accent/15">
-                <div className="flex items-center gap-3 text-center">
-                  <LogoIcon className="h-10 w-10 text-primary" />
-                  <div>
-                    <div className="text-lg font-black tracking-tight">Busca Mágica</div>
-                    <div className="text-xs text-muted-foreground">
-                      {heroError ? "Não foi possível carregar o banner." : "Configure um banner no painel master."}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <HeroBanner
+          url={heroImageUrl}
+          fit={heroFit}
+          heightMobile={heroHeightMobile}
+          heightDesktop={heroHeightDesktop}
+        />
 
 
         {gpsError && (
