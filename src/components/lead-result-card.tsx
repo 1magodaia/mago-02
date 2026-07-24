@@ -80,24 +80,7 @@ function relTime(iso: string | null | undefined): string | null {
   return `há ${y} ano${y > 1 ? "s" : ""}`;
 }
 
-/**
- * O Google Places frequentemente devolve o Instagram/Facebook do comércio
- * no campo `website`. Isso confundia o usuário: o botão dizia "Site" mas
- * abria o Instagram. Aqui classificamos a URL para rotular corretamente
- * e evitar auditoria de site sobre uma página social.
- */
-type LinkKind = "site" | "instagram" | "facebook" | "other";
-function classifyLink(url: string | null | undefined): LinkKind {
-  if (!url) return "other";
-  try {
-    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
-    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
-    if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.com" || host === "m.facebook.com") return "facebook";
-    return "site";
-  } catch {
-    return "other";
-  }
-}
+import { classifyLink } from "@/lib/link-classify";
 
 export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
@@ -199,12 +182,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const collectedAgo = relTime(lead.collected_at);
   const lastReviewAgo = relTime(lead.latest_review_at);
   // Classifica a URL do "website" do Google Places — pode ser site real,
-  // Instagram ou Facebook. Isso evita rotular Instagram como "site".
-  const linkKind = classifyLink(lead.website);
-  const hasRealSite = linkKind === "site" || linkKind === "other";
+  // Instagram, Facebook, ou vir embrulhada em redirecionador/tracking.
+  // O módulo devolve o destino já normalizado (sem utm/redirects) e o tipo.
+  const classified = classifyLink(lead.website);
+  const linkKind = classified.kind;
+  const resolvedHref = classified.url ?? lead.website ?? null;
+  const hasRealSite = linkKind === "site";
   // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
-  const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? lead.website : null);
-  const fbUrl = linkKind === "facebook" ? lead.website : null;
+  const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? resolvedHref : null);
+  const fbUrl = linkKind === "facebook" ? resolvedHref : null;
 
   const permanentlyClosed = lead.business_status === "CLOSED_PERMANENTLY";
 
@@ -396,9 +382,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {lead.audit ? "Reauditar" : "Auditar"}
           </button>
         )}
-        {lead.website && (
+        {resolvedHref && (
           <a
-            href={lead.website}
+            href={resolvedHref}
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}

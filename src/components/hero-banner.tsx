@@ -30,11 +30,21 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
       style={{
         ["--hero-h-mobile" as string]: `${heightMobile}px`,
         ["--hero-h-desktop" as string]: `${heightDesktop}px`,
+        ["--hero-fit-desktop" as string]: fit,
       }}
     >
+      {/*
+        Mobile: força object-fit:contain — em telas estreitas "cover" corta
+        a face do mago e/ou o texto do flyer. Desktop respeita a preferência
+        configurada no /master (cover ou contain).
+      */}
       <style>{`
         .bm-hero-wrap { height: var(--hero-h-mobile); }
-        @media (min-width: 640px){ .bm-hero-wrap{ height: var(--hero-h-desktop); } }
+        .bm-hero-img { object-fit: contain; }
+        @media (min-width: 640px){
+          .bm-hero-wrap { height: var(--hero-h-desktop); }
+          .bm-hero-img { object-fit: var(--hero-fit-desktop); }
+        }
       `}</style>
 
       <div className="bm-hero-wrap relative w-full">
@@ -43,9 +53,8 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
             <img
               src={url}
               alt="Busca Mágica"
-              className="absolute inset-0 h-full w-full transition-opacity duration-500"
+              className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-500"
               style={{
-                objectFit: fit,
                 objectPosition: "center",
                 opacity: ready ? 1 : 0,
               }}
