@@ -27,6 +27,8 @@ import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
+import { supabase } from "@/integrations/supabase/client";
+
 import { useServerFn } from "@tanstack/react-start";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
