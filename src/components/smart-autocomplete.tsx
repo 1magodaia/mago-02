@@ -130,6 +130,8 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState<SuggestionItem[]>([]);
     const [highlight, setHighlight] = useState(-1);
+    const [loading, setLoading] = useState(false);
+    const [searched, setSearched] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -151,26 +153,35 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
     useEffect(() => {
       if (!autocomplete) {
         setItems([]);
+        setLoading(false);
+        setSearched(false);
         return;
       }
       if (timerRef.current) clearTimeout(timerRef.current);
       const q = value.trim();
       if (q.length < minChars) {
         setItems(staticItems);
+        setLoading(false);
+        setSearched(false);
         return;
       }
       if (!asyncSource) {
         setItems(staticItems);
+        setLoading(false);
+        setSearched(true);
         return;
       }
       const cacheKey = normalize(q);
       const cached = asyncCache.get(cacheKey);
       if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-        const merged = mergeUnique(staticItems, cached.items, maxItems);
-        setItems(merged);
-      } else {
-        setItems(staticItems);
+        setItems(mergeUnique(staticItems, cached.items, maxItems));
+        setLoading(false);
+        setSearched(true);
+        return;
       }
+      setItems(staticItems);
+      setLoading(true);
+      setSearched(false);
       timerRef.current = setTimeout(async () => {
         abortRef.current?.abort();
         const ac = new AbortController();
@@ -182,12 +193,18 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
           setItems(mergeUnique(staticItems, remote, maxItems));
         } catch {
           // silent — keep static suggestions
+        } finally {
+          if (!ac.signal.aborted) {
+            setLoading(false);
+            setSearched(true);
+          }
         }
       }, debounceMs);
       return () => {
         if (timerRef.current) clearTimeout(timerRef.current);
       };
     }, [value, staticItems, asyncSource, autocomplete, debounceMs, minChars, maxItems]);
+
 
     // Close on outside click.
     useEffect(() => {
