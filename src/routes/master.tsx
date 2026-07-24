@@ -227,16 +227,45 @@ function MasterPanel() {
     e.preventDefault();
     setHeroBusy(true);
     setSettingsError(null);
+    const tid = toast.loading("Salvando banner...");
     try {
-      const r = await writeSettings({ data: { hero_image_url: heroImageUrl.trim() || null } });
+      const r = await writeSettings({
+        data: {
+          hero_image_url: heroImageUrl.trim() || null,
+          hero_height_desktop: heroHeightDesktop,
+          hero_height_mobile: heroHeightMobile,
+          hero_fit: heroFit,
+        },
+      });
       setHeroImageUrl(r.hero_image_url ?? "");
-      setNotice("Imagem do hero atualizada.");
+      setHeroHeightDesktop(r.hero_height_desktop);
+      setHeroHeightMobile(r.hero_height_mobile);
+      setHeroFit(r.hero_fit);
+      setNotice("Banner atualizado.");
+      toast.success("Banner salvo.", { id: tid });
     } catch (err) {
-      setSettingsError(err instanceof Error ? err.message : "Erro ao salvar imagem.");
+      const msg = err instanceof Error ? err.message : "Erro ao salvar imagem.";
+      setSettingsError(msg);
+      toast.error("Falha ao salvar banner.", { id: tid, description: msg });
     } finally {
       setHeroBusy(false);
     }
   };
+
+  // Live preview validation: probe the URL by loading it in a hidden Image
+  useEffect(() => {
+    const url = heroImageUrl.trim();
+    if (!url) { setHeroPreviewStatus("idle"); return; }
+    if (!/^https?:\/\/|^\/__l5e\//.test(url)) { setHeroPreviewStatus("invalid"); return; }
+    setHeroPreviewStatus("loading");
+    const img = new Image();
+    let cancelled = false;
+    img.onload = () => { if (!cancelled) setHeroPreviewStatus("ok"); };
+    img.onerror = () => { if (!cancelled) setHeroPreviewStatus("error"); };
+    img.src = url;
+    return () => { cancelled = true; };
+  }, [heroImageUrl]);
+
 
   const performRevert = async (entry: WhatsappChangeLogEntry) => {
     const target = entry.old_whatsapp ?? "";
