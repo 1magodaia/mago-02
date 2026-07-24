@@ -303,10 +303,26 @@ function MasterPanel() {
               inputMode="tel"
               placeholder="5511999998888"
               value={supportWa}
-              onChange={(e) => setSupportWa(e.target.value)}
-              maxLength={20}
-              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm tabular-nums outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+              onChange={(e) => setSupportWa(normalizeWa(e.target.value))}
+              onBlur={(e) => setSupportWa(normalizeWa(e.target.value))}
+              onPaste={(e) => {
+                e.preventDefault();
+                const txt = e.clipboardData.getData("text");
+                setSupportWa(normalizeWa(txt));
+              }}
+              maxLength={16}
+              aria-invalid={!waValid}
+              aria-describedby="wa-hint"
+              className={`mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm tabular-nums outline-none ring-1 focus:ring-2 ${
+                waValid ? "ring-border focus:ring-primary/70" : "ring-destructive/60 focus:ring-destructive"
+              }`}
             />
+            <p
+              id="wa-hint"
+              className={`mt-1 text-[10px] ${waValid ? "text-muted-foreground" : "text-destructive"}`}
+            >
+              {waHint}
+            </p>
           </label>
           <label className="block">
             <span className="text-[11px] font-semibold uppercase text-muted-foreground">Mensagem pré-preenchida</span>
@@ -321,7 +337,7 @@ function MasterPanel() {
           </label>
           <button
             type="submit"
-            disabled={settingsBusy}
+            disabled={settingsBusy || !waValid}
             className="mt-6 inline-flex items-center justify-center gap-2 self-end rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60 sm:mt-0"
           >
             {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -333,16 +349,16 @@ function MasterPanel() {
             {settingsError}
           </div>
         )}
-        {supportWa && (
+        {waValid && waDigits && (
           <p className="mt-3 text-[11px] text-muted-foreground">
             Preview:{" "}
             <a
-              href={`https://wa.me/${supportWa.replace(/\D/g, "")}`}
+              href={`https://wa.me/${waDigits}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              wa.me/{supportWa.replace(/\D/g, "")}
+              wa.me/{waDigits}
             </a>
           </p>
         )}
