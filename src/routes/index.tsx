@@ -51,10 +51,10 @@ export const Route = createFileRoute("/")({
         content:
           "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
       },
-      { property: "og:title", content: "Busca Mágica — Prospecção geolocalizada" },
+      { property: "og:title", content: "Busca Mágica — Prospecção de comércios locais" },
       {
         property: "og:description",
-        content: "Busca por Google Places, auditoria digital sob demanda e priorização de leads quentes.",
+        content: "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
