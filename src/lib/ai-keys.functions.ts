@@ -134,11 +134,16 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
     const row: any = {
       provider: data.provider,
       label: data.label,
-      secret_name: data.secret_name,
+      secret_name: data.secret_name ?? null,
       model: data.model?.trim() || null,
       priority: data.priority,
       status: data.status ?? "untested",
     };
+    // Only patch secret_value when a non-empty value is supplied — keeps
+    // existing inline keys intact when the wizard is used to edit metadata.
+    if (typeof data.secret_value === "string" && data.secret_value.trim().length > 0) {
+      row.secret_value = data.secret_value.trim();
+    }
     if (data.id) {
       const { error } = await supabaseAdmin.from("ai_provider_keys").update(row).eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -152,6 +157,7 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: inserted!.id };
   });
+
 
 
 export const deleteAiProviderKey = createServerFn({ method: "POST" })
