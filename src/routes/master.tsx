@@ -1102,6 +1102,7 @@ import {
   deleteAiProviderKey,
   testAiProviderKey,
   testAllAiProviderKeys,
+  saveAndTestProvider,
   getAiSelection,
   setAiSelection,
   PROVIDERS,
@@ -1109,9 +1110,11 @@ import {
   PROVIDER_MODELS,
   type AiProviderKey,
   type AiSelection,
+  type WizardResult,
 } from "@/lib/ai-keys.functions";
 
-import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2, Eye, EyeOff, Wand2, AlertTriangle } from "lucide-react";
+
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
   active:       "bg-emerald-500/15 text-emerald-300 ring-emerald-400/40",
