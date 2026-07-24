@@ -55,6 +55,7 @@ function toSaved(lead: ScoredLead): SavedLead {
     website: lead.website,
     google_maps_uri: lead.google_maps_uri,
     saved_at: new Date().toISOString(),
+    price_level: lead.price_level ?? null,
   };
 }
 
