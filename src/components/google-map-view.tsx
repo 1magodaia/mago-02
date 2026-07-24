@@ -72,6 +72,7 @@ interface Props {
   leads: ScoredLead[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  onMapClick?: (coords: { lat: number; lng: number }) => void;
 }
 
 export default function GoogleMapView({ center, radiusKm, leads, selectedId, onSelect }: Props) {
