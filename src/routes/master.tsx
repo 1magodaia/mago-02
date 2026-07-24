@@ -24,7 +24,7 @@ import {
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
-import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+import { getAppSettings, updateAppSettings, listWhatsappChangeLog, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
