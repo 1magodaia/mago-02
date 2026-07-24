@@ -146,11 +146,15 @@ function MasterPanel() {
           setCitationsEnabled(s.citations_enabled);
           setCitationsLimit(s.citations_daily_limit);
           setHeroImageUrl(s.hero_image_url ?? "");
+          setHeroHeightDesktop(s.hero_height_desktop ?? 320);
+          setHeroHeightMobile(s.hero_height_mobile ?? 200);
+          setHeroFit(s.hero_fit ?? "cover");
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
       loadWaLog({ page: 1 });
     }
+
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
