@@ -213,6 +213,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
         site_reachable: false, site_status_code: null,
         instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
+        whatsapp_source: normalizeWhatsAppFromPhone(data.phone) ? "phone" : null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         audited_at: now, note: "URL inválida.",
