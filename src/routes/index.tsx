@@ -1002,7 +1002,7 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock supportWa={supportWa} />
+        <FreeQuotaBlock supportWa={supportWa} onClose={() => setQuotaBlocked(false)} />
       )}
     </div>
   );
