@@ -274,33 +274,67 @@ function Home() {
       setSearchError("Exportação CSV está disponível apenas no plano Pro. Fale com o administrador para liberar seu acesso.");
       return;
     }
-    exportToCsv(
-      filtered.map((l) => ({
-        nome: l.name,
-        endereco: l.address,
-        telefone: l.phone ?? "",
-        whatsapp: l.audit?.whatsapp_link ?? (l.phone ? `https://wa.me/${(l.phone.startsWith("+") ? l.phone : `55${l.phone}`).replace(/\D/g, "")}` : ""),
-        tem_site: l.website ? "sim" : "nao",
-        site: l.website ?? "",
-        instagram: l.audit?.instagram ?? "",
-        facebook: l.audit?.facebook ?? "",
-        nota: l.rating ?? "",
-        avaliacoes: l.user_ratings_total ?? 0,
-        ultima_avaliacao: l.latest_review_at ?? "",
-        coletado_em: l.collected_at ?? "",
-        faixa_preco_google: l.price_level == null ? "nao_informado" : "$".repeat(Math.max(1, l.price_level)),
-        status_google: l.business_status ?? "",
-        cnpj: l.audit?.cnpj_info?.cnpj ?? "nao_localizado",
-        razao_social: l.audit?.cnpj_info?.razao_social ?? "",
-        data_abertura: l.audit?.cnpj_info?.data_abertura ?? "",
-        situacao_cadastral: l.audit?.cnpj_info?.situacao_cadastral ?? "",
-        score_oportunidade: l.opportunity_score,
-        status: l.status,
-        google_maps: l.google_maps_uri ?? "",
-      })),
-      `busca-magica-${new Date().toISOString().slice(0, 10)}.csv`,
-    );
+    const today = new Date().toISOString().slice(0, 10);
+    const formatCategory = (types: string[] | undefined): string => {
+      const t = types?.[0];
+      if (!t) return "";
+      return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    };
+    const whatsappFromPhone = (phone: string | null | undefined): string => {
+      if (!phone) return "";
+      const digits = phone.replace(/\D/g, "");
+      if (digits.length < 10) return "";
+      const withCountry = digits.startsWith("55") ? digits : `55${digits}`;
+      return `https://wa.me/${withCountry}`;
+    };
+    const daysAgoLabel = (iso: string | null | undefined): string => {
+      if (!iso) return "Sem avaliações recentes";
+      const d = Date.parse(iso);
+      if (!Number.isFinite(d)) return "Sem avaliações recentes";
+      const days = Math.floor((Date.now() - d) / 86400000);
+      return `${days} dias atrás`;
+    };
+    const digitalStatus = (l: ScoredLead): "Completa" | "Parcial" | "Mínima" => {
+      const count = [!!l.website, !!l.audit?.instagram, !!l.audit?.facebook].filter(Boolean).length;
+      if (count >= 3) return "Completa";
+      if (count >= 1) return "Parcial";
+      return "Mínima";
+    };
+    // Score 1-10 alinhado com a lógica de 3 cores (verde=oportunidade quente).
+    const opportunityScore10 = (l: ScoredLead): number => {
+      const hasSite = !!l.website;
+      const hasIg = !!l.audit?.instagram;
+      const hasFb = !!l.audit?.facebook;
+      const social = (hasIg ? 1 : 0) + (hasFb ? 1 : 0);
+      let base: number;
+      if (!hasSite && social === 0) base = 9; // 🟢 8-10
+      else if (!hasSite || social < 2) base = 6; // 🟡 5-7
+      else base = 3; // 🟠 1-4
+      const days = l.latest_review_at ? Math.floor((Date.now() - Date.parse(l.latest_review_at)) / 86400000) : null;
+      if (days != null && days > 180) base = Math.min(10, base + 1);
+      return Math.max(1, Math.min(10, base));
+    };
+
+    const rows = filtered.map((l) => ({
+      "Nome": l.name,
+      "Endereço Completo": l.address,
+      "Telefone": l.phone ?? "",
+      "WhatsApp": l.audit?.whatsapp_link ?? whatsappFromPhone(l.phone),
+      "Website": l.website ?? "",
+      "Google Maps Link": l.google_maps_uri ?? (l.lat != null && l.lng != null ? `https://maps.google.com/?q=${l.lat},${l.lng}` : ""),
+      "Instagram": l.audit?.instagram ?? "",
+      "Facebook": l.audit?.facebook ?? "",
+      "Nota (Rating)": l.rating ?? "",
+      "Número de Avaliações": l.user_ratings_total ?? 0,
+      "Última Avaliação (dias atrás)": daysAgoLabel(l.latest_review_at),
+      "Categoria": formatCategory(l.types),
+      "Status Presença Digital": digitalStatus(l),
+      "Score Oportunidade": opportunityScore10(l),
+      "Data Coleta": today,
+    }));
+    exportToCsv(rows, `busca-magica-leads-${today}.csv`);
   };
+
 
   const searchUsage = profile
     ? isPro
