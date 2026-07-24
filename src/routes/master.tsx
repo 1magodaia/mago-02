@@ -108,6 +108,7 @@ function MasterPanel() {
   const [heroHeightMobile, setHeroHeightMobile] = useState(200);
   const [heroFit, setHeroFit] = useState<"cover" | "contain">("cover");
   const [heroPreviewStatus, setHeroPreviewStatus] = useState<"idle" | "loading" | "ok" | "invalid" | "error">("idle");
+  const [heroPreviewDevice, setHeroPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [heroBusy, setHeroBusy] = useState(false);
 
   const [settingsBusy, setSettingsBusy] = useState(false);
