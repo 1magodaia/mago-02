@@ -113,14 +113,32 @@ function MasterPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
+  // Normaliza para dígitos (aceita "+" apenas no início) e formata visualmente como +DDI (DD) NNNNN-NNNN
+  const normalizeWa = (raw: string): string => {
+    const hasPlus = raw.trim().startsWith("+");
+    const digits = raw.replace(/\D/g, "").slice(0, 15);
+    return (hasPlus && digits ? "+" : "") + digits;
+  };
+  const waDigits = supportWa.replace(/\D/g, "");
+  const waValid = waDigits === "" || (waDigits.length >= 10 && waDigits.length <= 15);
+  const waHint = supportWa === ""
+    ? "Deixe em branco para ocultar o widget."
+    : waValid
+      ? `Será salvo como ${waDigits} (${waDigits.length} dígitos).`
+      : "Formato inválido. Use DDI + DDD + número (10 a 15 dígitos). Ex.: 5511999998888.";
+
   const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!waValid) {
+      setSettingsError("Número de WhatsApp inválido. Use DDI + DDD + número (10 a 15 dígitos).");
+      return;
+    }
     setSettingsBusy(true);
     setSettingsError(null);
     try {
       const r = await writeSettings({
         data: {
-          support_whatsapp: supportWa || null,
+          support_whatsapp: waDigits || null,
           support_message: supportMsg || null,
           citations_enabled: citationsEnabled,
           citations_daily_limit: citationsLimit,
@@ -137,6 +155,7 @@ function MasterPanel() {
       setSettingsBusy(false);
     }
   };
+
 
   const toggleCitations = async (next: boolean) => {
     setCitationsEnabled(next);
