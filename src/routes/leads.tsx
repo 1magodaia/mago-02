@@ -58,6 +58,7 @@ function SavedList({
                 tem_site: l.website ? "sim" : "nao",
                 site: l.website ?? "",
                 google_maps: l.google_maps_uri ?? "",
+                faixa_preco_google: l.price_level == null ? "nao_informado" : "$".repeat(Math.max(1, l.price_level)),
                 salvo_em: l.saved_at,
               })),
               filename,

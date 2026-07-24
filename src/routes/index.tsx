@@ -242,6 +242,7 @@ function Home() {
         avaliacoes: l.user_ratings_total ?? 0,
         ultima_avaliacao: l.latest_review_at ?? "",
         coletado_em: l.collected_at ?? "",
+        faixa_preco_google: l.price_level == null ? "nao_informado" : "$".repeat(Math.max(1, l.price_level)),
         score_oportunidade: l.opportunity_score,
         status: l.status,
         google_maps: l.google_maps_uri ?? "",

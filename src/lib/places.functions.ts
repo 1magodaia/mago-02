@@ -35,6 +35,7 @@ export interface PlaceResult {
   latest_review_at: string | null; // ISO — data da avaliação mais recente
   reviews: PlaceReview[];
   collected_at: string; // ISO — quando este registro foi coletado do Google
+  price_level: number | null; // 0..4 (Google Places), null quando não informado
 }
 
 interface GReview {
@@ -57,6 +58,18 @@ interface GPlace {
   types?: string[];
   googleMapsUri?: string;
   reviews?: GReview[];
+  priceLevel?: string; // "PRICE_LEVEL_FREE" | "_INEXPENSIVE" | "_MODERATE" | "_EXPENSIVE" | "_VERY_EXPENSIVE" | "_UNSPECIFIED"
+}
+
+function mapPriceLevel(v?: string): number | null {
+  switch (v) {
+    case "PRICE_LEVEL_FREE": return 0;
+    case "PRICE_LEVEL_INEXPENSIVE": return 1;
+    case "PRICE_LEVEL_MODERATE": return 2;
+    case "PRICE_LEVEL_EXPENSIVE": return 3;
+    case "PRICE_LEVEL_VERY_EXPENSIVE": return 4;
+    default: return null;
+  }
 }
 
 
@@ -115,6 +128,7 @@ function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
     latest_review_at: latest,
     reviews: list,
     collected_at: collectedAt,
+    price_level: mapPriceLevel(p.priceLevel),
   };
 }
 
@@ -132,6 +146,7 @@ const PLACE_FIELDS = [
   "types",
   "googleMapsUri",
   "reviews",
+  "priceLevel",
 ];
 
 const FIELD_MASK = PLACE_FIELDS.map((f) => `places.${f}`).join(",");
