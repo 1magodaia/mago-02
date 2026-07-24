@@ -73,16 +73,6 @@ export function VersionLog() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-foreground">{e.description}</p>
-                  {e.impact && (
-                    <p className="mt-2 text-xs text-emerald">
-                      <span className="font-semibold">Impacto:</span> {e.impact}
-                    </p>
-                  )}
-                  {e.risk && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-semibold">Risco:</span> {e.risk}
-                    </p>
-                  )}
                 </li>
               ))}
               {entries.length === 0 && (
