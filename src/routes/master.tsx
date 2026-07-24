@@ -1249,10 +1249,13 @@ function AiKeysPanel() {
           </button>
         </div>
 
-        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[160px_1fr_1fr_90px_auto]">
+        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[160px_1fr_1fr_1fr_90px_auto]">
           <select
             value={form.provider}
-            onChange={(e) => setForm({ ...form, provider: e.target.value as any })}
+            onChange={(e) => {
+              const next = e.target.value as AiProviderKey["provider"];
+              setForm({ ...form, provider: next, model: PROVIDER_MODELS[next]?.default ?? "" });
+            }}
             className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border [color-scheme:dark]"
           >
             {PROVIDERS.map((p) => (
@@ -1271,6 +1274,24 @@ function AiKeysPanel() {
             onChange={(e) => setForm({ ...form, secret_name: e.target.value.toUpperCase() })}
             className="rounded-md bg-background px-2 py-1.5 text-sm font-mono ring-1 ring-border"
           />
+          <div className="flex items-center gap-1">
+            <input
+              list={`models-${form.provider}`}
+              placeholder="Modelo (ex: nvidia/llama-3.1-nemotron-70b-instruct)"
+              value={form.model}
+              onChange={(e) => setForm({ ...form, model: e.target.value })}
+              className="w-full rounded-md bg-background px-2 py-1.5 text-xs font-mono ring-1 ring-border"
+            />
+            <datalist id={`models-${form.provider}`}>
+              {(PROVIDER_MODELS[form.provider]?.options ?? []).map((m) => (
+                <option key={m} value={m} />
+              ))}
+            </datalist>
+            <HelpTip
+              title="Modelo do provedor"
+              text="Escolha um modelo compatível com o provedor (ex.: Nemotron-70b, Llama-Nemotron para NVIDIA). O teste passa a chamar esse modelo específico e o erro mostra exatamente o que falhou (autenticação, modelo indisponível, limite ou rede). Deixe em branco para usar o padrão do provedor."
+            />
+          </div>
           <div className="flex items-center gap-1">
             <input
               type="number"
@@ -1294,6 +1315,7 @@ function AiKeysPanel() {
             <Plus className="h-3.5 w-3.5" /> Cadastrar
           </button>
         </form>
+
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[11px] text-muted-foreground">
             Depois de cadastrar, salve o valor da chave em <b>Configurações → Secrets</b> com o mesmo nome. O status é atualizado ao clicar em <b>Testar</b>.
