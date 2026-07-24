@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { countCitationsRemainingToday } from "./citations.server";
 
 export interface CitationItem {
   source: string;
