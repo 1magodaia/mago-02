@@ -27,6 +27,7 @@ import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
+import { reverseGeocode } from "@/lib/geocode.functions";
 
 
 import { useServerFn } from "@tanstack/react-start";
@@ -142,6 +143,18 @@ function Home() {
   const [heroHeightMobile, setHeroHeightMobile] = useState<number>(_initHero?.hm ?? 200);
   const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
+  const reverseGeocodeFn = useServerFn(reverseGeocode);
+  const [pinned, setPinned] = useState(false);
+
+  const onMapPin = (coords: { lat: number; lng: number }) => {
+    setCenter(coords);
+    setUsingGps(true); // faz a busca usar lat/lng em vez de texto
+    setPinned(true);
+    setGpsError(null);
+    reverseGeocodeFn({ data: coords })
+      .then((r) => { if (r.address) setRegion(r.address); })
+      .catch(() => { /* silencioso: coordenadas já bastam */ });
+  };
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
   // Regra: a tela inicial é a de login. Usuários não autenticados são
@@ -245,6 +258,7 @@ function Home() {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setCenter(coords);
         setUsingGps(true);
+        setPinned(false);
         setGpsError(null);
         setLocating(false);
         try {
@@ -651,22 +665,31 @@ function Home() {
             onClick={useGps}
             disabled={locating}
             className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
-              usingGps
+              usingGps && !pinned
                 ? "border-primary bg-primary/15 text-primary"
                 : "border-primary/60 text-primary hover:bg-primary/10"
             }`}
           >
             <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
-            {locating ? "Localizando..." : usingGps ? "GPS ativo" : "Usar minha localização"}
+            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ativo" : "Usar minha localização"}
           </button>
+          {usingGps && pinned && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+              <MapPin className="h-3.5 w-3.5" />
+              Ponto fixado no mapa
+            </span>
+          )}
           {usingGps && (
             <button
-              onClick={() => setUsingGps(false)}
+              onClick={() => { setUsingGps(false); setPinned(false); }}
               className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
             >
               Voltar para texto
             </button>
           )}
+          <span className="hidden text-[11px] text-muted-foreground sm:inline">
+            Dica: clique em qualquer ponto do mapa para definir o centro da busca.
+          </span>
 
           <button
             onClick={() => setShowAdvanced((s) => !s)}
@@ -893,6 +916,7 @@ function Home() {
                 leads={filtered}
                 selectedId={selected}
                 onSelect={setSelected}
+                onMapClick={onMapPin}
               />
             </Suspense>
           </ClientOnly>

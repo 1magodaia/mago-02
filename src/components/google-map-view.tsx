@@ -72,15 +72,19 @@ interface Props {
   leads: ScoredLead[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  onMapClick?: (coords: { lat: number; lng: number }) => void;
 }
 
-export default function GoogleMapView({ center, radiusKm, leads, selectedId, onSelect }: Props) {
+export default function GoogleMapView({ center, radiusKm, leads, selectedId, onSelect, onMapClick }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
+
+  const onMapClickRef = useRef(onMapClick);
+  useEffect(() => { onMapClickRef.current = onMapClick; }, [onMapClick]);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,8 +98,14 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
           zoomControl: true,
           styles: DARK_STYLE,
           backgroundColor: "#000",
+          clickableIcons: false,
         });
         infoRef.current = new google.maps.InfoWindow();
+        mapRef.current.addListener("click", (e: google.maps.MapMouseEvent) => {
+          const ll = e.latLng;
+          if (!ll || !onMapClickRef.current) return;
+          onMapClickRef.current({ lat: ll.lat(), lng: ll.lng() });
+        });
       })
       .catch((err) => console.error("[map] load", err));
     return () => { cancelled = true; };
