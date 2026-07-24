@@ -94,7 +94,7 @@ function Home() {
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
   const [sportsMap, setSportsMap] = useState<Record<string, string>>({}); // place_id -> sport id
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [showSports, setShowSports] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
