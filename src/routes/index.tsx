@@ -94,7 +94,7 @@ function Home() {
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
   const [sportsMap, setSportsMap] = useState<Record<string, string>>({}); // place_id -> sport id
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [showSports, setShowSports] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -592,63 +592,48 @@ function Home() {
         )}
 
 
-        {/* ESPORTES & FITNESS */}
-        <div className="glass-panel mt-6 rounded-2xl p-4">
-          <button
-            onClick={() => setShowSports((v) => !v)}
-            className="flex w-full items-center justify-between gap-2 text-left"
-            aria-expanded={showSports}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🏆</span>
-              <span className="text-sm font-bold text-foreground">Esportes & Fitness</span>
-              {selectedSports.length > 0 && (
-                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
-                  {selectedSports.length} selecionado(s)
-                </span>
-              )}
-            </div>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showSports ? "rotate-180" : ""}`} />
-          </button>
-          {showSports && (
-            <div className="mt-3 space-y-3">
-              <div className="flex flex-wrap gap-2 text-[11px]">
+        {/* PRESETS DE CATEGORIAS DIFÍCEIS (esportes & fitness) */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Predefinidos difíceis de achar
+            </span>
+            {selectedSports.length > 0 && (
+              <button
+                onClick={() => setSelectedSports([])}
+                className="text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Limpar ({selectedSports.length})
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {SPORT_CATEGORIES.map((c) => {
+              const on = selectedSports.includes(c.id);
+              return (
                 <button
-                  onClick={() => setSelectedSports(SPORT_CATEGORIES.map((c) => c.id))}
-                  className="rounded-full bg-glass px-3 py-1 font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/10"
+                  key={c.id}
+                  onClick={() =>
+                    setSelectedSports((prev) =>
+                      on ? prev.filter((i) => i !== c.id) : [...prev, c.id],
+                    )
+                  }
+                  title={c.label}
+                  className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                    on
+                      ? "border-primary bg-primary/15 text-primary"
+                      : "border-border bg-glass text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  Selecionar todos
+                  <span>{c.emoji}</span>
+                  <span className="truncate">{c.label}</span>
                 </button>
-                <button
-                  onClick={() => setSelectedSports([])}
-                  className="rounded-full bg-glass px-3 py-1 font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
-                >
-                  Desselecionar todos
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-                {SPORT_CATEGORIES.map((c) => {
-                  const on = selectedSports.includes(c.id);
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedSports((prev) => on ? prev.filter((i) => i !== c.id) : [...prev, c.id])}
-                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition ${on ? "border-primary bg-primary/15 text-primary" : "border-border bg-glass text-foreground hover:bg-white/5"}`}
-                    >
-                      <span className="text-base">{c.emoji}</span>
-                      <span className="truncate">{c.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedSports.length > 0 && (
-                <p className="text-[11px] text-muted-foreground">
-                  🎯 Ao buscar, ignoramos o campo de categoria acima e procuramos as {selectedSports.length} categoria(s) esportiva(s) selecionada(s).
-                </p>
-              )}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
+
+
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
         <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
