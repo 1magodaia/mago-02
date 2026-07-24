@@ -54,16 +54,19 @@ function SavedList({
                 nome: l.name,
                 endereco: l.address,
                 telefone: l.phone ?? "",
+                whatsapp: l.phone ? `https://wa.me/${(l.phone.startsWith("+") ? l.phone : `55${l.phone}`).replace(/\D/g, "")}` : "",
+                tem_site: l.website ? "sim" : "nao",
                 site: l.website ?? "",
+                google_maps: l.google_maps_uri ?? "",
                 salvo_em: l.saved_at,
               })),
               filename,
             )
           }
           disabled={items.length === 0}
-          className="flex items-center gap-1 rounded-full bg-glass px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-40"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-elevated hover:brightness-110 disabled:opacity-40"
         >
-          <Download className="h-3 w-3" /> CSV
+          <Download className="h-3.5 w-3.5" /> Baixar lista (CSV)
         </button>
       </header>
       {items.length === 0 ? (
