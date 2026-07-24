@@ -18,7 +18,7 @@ import {
   MapPin,
   Search,
   Shield,
-  Sparkles,
+  
   Star,
   User as UserIcon,
 } from "lucide-react";
