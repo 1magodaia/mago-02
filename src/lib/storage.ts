@@ -14,6 +14,7 @@ export interface SavedLead {
   website: string | null;
   google_maps_uri: string | null;
   saved_at: string;
+  price_level?: number | null;
 }
 
 export interface SearchHistoryEntry {
