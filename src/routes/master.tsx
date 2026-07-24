@@ -1372,7 +1372,13 @@ function AiKeysPanel() {
                     />
                   </td>
                   <td className="px-3 py-2 font-bold uppercase text-primary">{PROVIDER_LABEL[r.provider] ?? r.provider}</td>
-                  <td className="px-3 py-2">{r.label}</td>
+                  <td className="px-3 py-2">
+                    <div>{r.label}</div>
+                    <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/80" title="Modelo usado no teste e no failover">
+                      {r.model ?? <span className="italic">padrão do provedor</span>}
+                    </div>
+                  </td>
+
                   <td className="px-3 py-2 font-mono text-[11px]">
                     {r.secret_name}{" "}
                     {!r.secret_present && (
