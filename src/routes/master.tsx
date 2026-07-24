@@ -405,7 +405,7 @@ function MasterPanel() {
             </p>
           </div>
         </div>
-        <form onSubmit={saveSettings} className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr_auto]">
+        <form onSubmit={saveSettings} className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="text-[11px] font-semibold uppercase text-muted-foreground">WhatsApp</span>
             <input
@@ -445,15 +445,31 @@ function MasterPanel() {
               className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
             />
           </label>
-          <button
-            type="submit"
-            disabled={settingsBusy || !waValid}
-            className="mt-6 inline-flex items-center justify-center gap-2 self-end rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60 sm:mt-0"
-          >
-            {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Salvar
-          </button>
+          <label className="block sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">
+              Motivo da alteração <span className="text-muted-foreground/70">(opcional, aparece no histórico)</span>
+            </span>
+            <input
+              type="text"
+              placeholder="Ex.: troca de plantonista, número antigo saiu, etc."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              maxLength={500}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <div className="sm:col-span-2 flex justify-end">
+            <button
+              type="submit"
+              disabled={settingsBusy || !waValid}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+            >
+              {settingsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Salvar
+            </button>
+          </div>
         </form>
+
         {settingsError && (
           <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
             {settingsError}
