@@ -29,6 +29,9 @@ import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
 import { reverseGeocode } from "@/lib/geocode.functions";
+import { autocompleteRegion, resolvePlace } from "@/lib/places-suggest.functions";
+import { SmartAutocomplete, type SuggestionItem } from "@/components/smart-autocomplete";
+import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
 import { useServerFn } from "@tanstack/react-start";
@@ -216,6 +219,8 @@ function Home() {
   const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
   const reverseGeocodeFn = useServerFn(reverseGeocode);
+  const autocompleteRegionFn = useServerFn(autocompleteRegion);
+  const resolvePlaceFn = useServerFn(resolvePlace);
   const [pinned, setPinned] = useState(false);
 
   const onMapPin = (coords: { lat: number; lng: number }) => {
@@ -227,6 +232,40 @@ function Home() {
       .then((r) => { if (r.address) setRegion(r.address); })
       .catch(() => { /* silencioso: coordenadas já bastam */ });
   };
+
+  const regionSource = useMemo(
+    () =>
+      async (input: string, signal: AbortSignal): Promise<SuggestionItem[]> => {
+        const r = await autocompleteRegionFn({
+          data: { input, bias: center ? { lat: center.lat, lng: center.lng } : undefined },
+        });
+        if (signal.aborted) return [];
+        return (r.suggestions ?? []).map((s) => ({
+          id: `p:${s.placeId}`,
+          label: s.full,
+          secondary: s.secondary,
+          payload: { placeId: s.placeId },
+        }));
+      },
+    [autocompleteRegionFn, center],
+  );
+
+  const onSelectRegion = (item: SuggestionItem) => {
+    const payload = item.payload as { placeId?: string } | undefined;
+    if (!payload?.placeId) return;
+    resolvePlaceFn({ data: { placeId: payload.placeId } })
+      .then((r) => {
+        if (r.lat != null && r.lng != null) {
+          setCenter({ lat: r.lat, lng: r.lng });
+          setUsingGps(true);
+          setPinned(true);
+          setGpsError(null);
+        }
+        if (r.address) setRegion(r.address);
+      })
+      .catch(() => { /* silencioso */ });
+  };
+
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
   // Regra: a tela inicial é a de login. Usuários não autenticados são
@@ -704,29 +743,29 @@ function Home() {
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
         <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
-          <label className="flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
-            <Filter className="h-4 w-4 text-muted-foreground" aria-hidden />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Categoria (padaria, pet shop, advogado...)"
-              aria-label="Categoria de comércio"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-          </label>
-          <label className={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}>
-            <MapPin className="h-4 w-4 text-primary" aria-hidden />
-            <input
-              disabled={usingGps}
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Cidade, bairro ou endereço"
-              aria-label="Região"
-              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            />
-          </label>
+          <SmartAutocomplete
+            value={query}
+            onChange={setQuery}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Categoria (padaria, pet shop, advogado...)"
+            aria-label="Categoria de comércio"
+            staticList={CATEGORY_SUGGESTIONS}
+            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+          />
+          <SmartAutocomplete
+            value={region}
+            onChange={setRegion}
+            onSelect={onSelectRegion}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Cidade, bairro ou endereço"
+            aria-label="Região"
+            asyncSource={regionSource}
+            disabled={usingGps}
+            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+          />
+
           <button
             onClick={runSearch}
             disabled={loading}
