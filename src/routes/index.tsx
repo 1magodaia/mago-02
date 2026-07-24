@@ -832,16 +832,28 @@ function Home() {
               Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
             </div>
           )}
-          {filtered.map((lead) => (
-            <LeadResultCard
-              key={lead.place_id}
-              lead={lead}
-              selected={selected === lead.place_id}
-              onSelect={() => setSelected(lead.place_id)}
-              onUpdate={updateOne}
-              citationsAvailable={citationsAvailable}
-            />
-          ))}
+          {filtered.map((lead) => {
+            const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+            return (
+              <div key={lead.place_id} className="space-y-1">
+                {sport && (
+                  <div className="flex">
+                    <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                      <span>{sport.emoji}</span>
+                      <span>{sport.label}</span>
+                    </span>
+                  </div>
+                )}
+                <LeadResultCard
+                  lead={lead}
+                  selected={selected === lead.place_id}
+                  onSelect={() => setSelected(lead.place_id)}
+                  onUpdate={updateOne}
+                  citationsAvailable={citationsAvailable}
+                />
+              </div>
+            );
+          })}
           {filtered.length > 0 && (
             <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
               <Info className="h-3 w-3" aria-hidden />
