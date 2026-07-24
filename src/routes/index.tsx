@@ -29,6 +29,9 @@ import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
 import { reverseGeocode } from "@/lib/geocode.functions";
+import { autocompleteRegion, resolvePlace } from "@/lib/places-suggest.functions";
+import { SmartAutocomplete, type SuggestionItem } from "@/components/smart-autocomplete";
+import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
 import { useServerFn } from "@tanstack/react-start";
