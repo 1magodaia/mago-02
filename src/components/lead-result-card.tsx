@@ -247,7 +247,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 <Instagram className="h-2.5 w-2.5" /> sem IG no site
               </span>
             )}
-            {igStatus === "unverifiable" && (
+            {!igUrl && !lead.audit && !fbUrl && (
               <span
                 className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
               >
@@ -257,6 +257,18 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                   text="Não temos como confirmar esse dado com uma fonte confiável — não significa que o comércio não tenha, só que não conseguimos checar."
                 />
               </span>
+            )}
+            {fbUrl && (
+              <a
+                href={fbUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
+                title="Facebook do comércio"
+              >
+                Facebook
+              </a>
             )}
             {lead.rating != null && (
               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
