@@ -38,6 +38,8 @@ import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
+import heroDefault from "@/assets/hero-banner.png.asset.json";
+
 
 
 
@@ -104,6 +106,7 @@ function Home() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -115,6 +118,8 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
+          if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+
           
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
@@ -520,12 +525,23 @@ function Home() {
       </nav>
 
       <header className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
+        <div className="overflow-hidden rounded-3xl ring-1 ring-border shadow-elevated">
+          <img
+            src={heroImageUrl}
+            alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
+            className="block h-auto w-full"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+
         {gpsError && (
-          <div className="mb-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-4 py-2.5 text-xs text-warn" role="status">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{gpsError} Continue buscando por texto — nada trava.</span>
           </div>
         )}
+
 
 
 
