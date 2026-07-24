@@ -96,27 +96,34 @@ export const listAiProviderKeys = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AiProviderKey[]> => {
     await ensurePrivileged(context);
-    const { data, error } = await context.supabase
+    // Uses supabaseAdmin to read `secret_value` presence (column is revoked
+    // from authenticated/anon). We only expose a boolean flag, never the value.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
       .from("ai_provider_keys")
       .select("*")
       .order("priority", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
-      ...r,
-      secret_present: !!process.env[r.secret_name],
-    }));
+    return (data ?? []).map((r: any) => {
+      const hasInline = typeof r.secret_value === "string" && r.secret_value.length > 0;
+      const hasEnv = r.secret_name ? !!process.env[r.secret_name] : false;
+      const { secret_value, ...safe } = r;
+      return { ...safe, secret_present: hasInline || hasEnv, has_inline_key: hasInline };
+    });
   });
 
 const UpsertSchema = z.object({
   id: z.string().uuid().optional(),
   provider: z.enum(PROVIDERS),
   label: z.string().min(1).max(60),
-  secret_name: z.string().regex(/^[A-Z_][A-Z0-9_]*$/, "Nome de secret inválido"),
+  secret_name: z.string().regex(/^[A-Z_][A-Z0-9_]*$/, "Nome de secret inválido").optional().nullable(),
+  secret_value: z.string().trim().min(1).max(4000).optional().nullable(),
   model: z.string().trim().max(120).optional().nullable(),
   priority: z.number().int().min(1).max(999),
   status: z.enum(["active", "error", "rate_limited", "untested", "disabled"]).optional(),
 });
+
 
 export const upsertAiProviderKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
