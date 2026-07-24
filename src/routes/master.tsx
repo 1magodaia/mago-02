@@ -1223,10 +1223,10 @@ function AiKeysPanel() {
           <select
             value={form.provider}
             onChange={(e) => setForm({ ...form, provider: e.target.value as any })}
-            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
+            className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border [color-scheme:dark]"
           >
             {PROVIDERS.map((p) => (
-              <option key={p} value={p}>{PROVIDER_LABEL[p]}</option>
+              <option key={p} className="bg-background text-foreground" value={p}>{PROVIDER_LABEL[p]}</option>
             ))}
           </select>
           <input
