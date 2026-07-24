@@ -219,6 +219,8 @@ function Home() {
   const [heroFit, setHeroFit] = useState<"cover" | "contain">(_initHero?.fit ?? "cover");
   const readSettings = useServerFn(getAppSettings);
   const reverseGeocodeFn = useServerFn(reverseGeocode);
+  const autocompleteRegionFn = useServerFn(autocompleteRegion);
+  const resolvePlaceFn = useServerFn(resolvePlace);
   const [pinned, setPinned] = useState(false);
 
   const onMapPin = (coords: { lat: number; lng: number }) => {
@@ -230,6 +232,40 @@ function Home() {
       .then((r) => { if (r.address) setRegion(r.address); })
       .catch(() => { /* silencioso: coordenadas já bastam */ });
   };
+
+  const regionSource = useMemo(
+    () =>
+      async (input: string, signal: AbortSignal): Promise<SuggestionItem[]> => {
+        const r = await autocompleteRegionFn({
+          data: { input, bias: center ? { lat: center.lat, lng: center.lng } : undefined },
+        });
+        if (signal.aborted) return [];
+        return (r.suggestions ?? []).map((s) => ({
+          id: `p:${s.placeId}`,
+          label: s.full,
+          secondary: s.secondary,
+          payload: { placeId: s.placeId },
+        }));
+      },
+    [autocompleteRegionFn, center],
+  );
+
+  const onSelectRegion = (item: SuggestionItem) => {
+    const payload = item.payload as { placeId?: string } | undefined;
+    if (!payload?.placeId) return;
+    resolvePlaceFn({ data: { placeId: payload.placeId } })
+      .then((r) => {
+        if (r.lat != null && r.lng != null) {
+          setCenter({ lat: r.lat, lng: r.lng });
+          setUsingGps(true);
+          setPinned(true);
+          setGpsError(null);
+        }
+        if (r.address) setRegion(r.address);
+      })
+      .catch(() => { /* silencioso */ });
+  };
+
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
   // Regra: a tela inicial é a de login. Usuários não autenticados são
