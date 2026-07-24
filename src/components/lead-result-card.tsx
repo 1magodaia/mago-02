@@ -552,24 +552,33 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
 }
 
 function BusinessStatusBadge({ status }: { status: string | null }) {
+  const helper = (
+    <HelpTip
+      title="Status do comércio"
+      text="Informação direta do Google, atualizada quando você clica em 'Atualizar agora' no card."
+    />
+  );
   if (!status || status === "OPERATIONAL") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30" title="Google Places reporta este local como em operação.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operando
+        {helper}
       </span>
     );
   }
   if (status === "CLOSED_TEMPORARILY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40" title="Google Places: fechado temporariamente.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40">
         ⏸ Fechado temporariamente
+        {helper}
       </span>
     );
   }
   if (status === "CLOSED_PERMANENTLY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-red-300 ring-1 ring-red-400/40" title="Google Places: fechado permanentemente. Não perca tempo abordando este lead.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-red-300 ring-1 ring-red-400/40">
         ✕ Fechado permanentemente
+        {helper}
       </span>
     );
   }
