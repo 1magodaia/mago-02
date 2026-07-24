@@ -190,6 +190,7 @@ export type Database = {
           phone: string | null
           score_lead: number
           status: string
+          user_id: string | null
           website: string | null
           whatsapp: string | null
         }
@@ -210,6 +211,7 @@ export type Database = {
           phone?: string | null
           score_lead?: number
           status?: string
+          user_id?: string | null
           website?: string | null
           whatsapp?: string | null
         }
@@ -230,6 +232,7 @@ export type Database = {
           phone?: string | null
           score_lead?: number
           status?: string
+          user_id?: string | null
           website?: string | null
           whatsapp?: string | null
         }
@@ -405,7 +408,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_app_settings: {
+        Row: {
+          citations_daily_limit: number | null
+          citations_enabled: boolean | null
+          hero_image_url: string | null
+          id: number | null
+          support_message: string | null
+          support_whatsapp: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          citations_daily_limit?: number | null
+          citations_enabled?: boolean | null
+          hero_image_url?: string | null
+          id?: number | null
+          support_message?: string | null
+          support_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          citations_daily_limit?: number | null
+          citations_enabled?: boolean | null
+          hero_image_url?: string | null
+          id?: number | null
+          support_message?: string | null
+          support_whatsapp?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      public_version_log: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          version: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          version?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       consume_search_quota: {
