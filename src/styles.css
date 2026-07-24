@@ -129,3 +129,27 @@ div[style*="Edit with Lovable"],
   z-index: -9999 !important;
 }
 
+/* ============================================================
+   Mobile hardening — safe-area + overflow guards
+   (no visual redesign, desktop unaffected)
+   ============================================================ */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* leave top/bottom to individual sticky/fixed elements so hero/full-bleed still work */
+}
+
+/* Prevent long unbroken strings (URLs, emails) from causing horizontal scroll on phones */
+@media (max-width: 640px) {
+  p, span, a, li, td, th, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
