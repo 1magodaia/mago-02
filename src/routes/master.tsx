@@ -439,3 +439,15 @@ function MasterPanel() {
     </div>
   );
 }
+
+function CostTile({ label, calls, cents, sub }: { label: string; calls?: number; cents?: number; sub?: string }) {
+  const brl = cents == null ? "—" : `R$ ${(cents / 100).toFixed(2)}`;
+  return (
+    <div className="rounded-xl bg-glass p-3 ring-1 ring-border">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 text-lg font-extrabold tabular-nums text-foreground">{calls ?? 0}</div>
+      <div className="text-[11px] tabular-nums text-primary">{brl}</div>
+      {sub && <div className="mt-0.5 text-[10px] text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
