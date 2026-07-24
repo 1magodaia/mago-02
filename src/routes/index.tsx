@@ -720,12 +720,12 @@ function Home() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortKey)}
               aria-label="Ordenação"
-              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
             >
-              <option value="score">Ordenar: Oportunidade</option>
-              <option value="distance">Ordenar: Distância</option>
-              <option value="rating">Ordenar: Avaliação</option>
-              <option value="name">Ordenar: Nome</option>
+              <option className="bg-background text-foreground" value="score">Ordenar: Oportunidade</option>
+              <option className="bg-background text-foreground" value="distance">Ordenar: Distância</option>
+              <option className="bg-background text-foreground" value="rating">Ordenar: Avaliação</option>
+              <option className="bg-background text-foreground" value="name">Ordenar: Nome</option>
             </select>
           </div>
         )}
