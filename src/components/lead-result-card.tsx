@@ -280,8 +280,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           </div>
         );
       })()}
-
-
+      <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
 
 
       {lead.reasons.length > 0 && (
@@ -495,5 +494,26 @@ function PriceLevelBadge({ level }: { level: number | null }) {
     >
       💰 {symbols} · {PRICE_LABELS[level]}
     </span>
+  );
+}
+
+const TIER_META = {
+  high:   { label: "Oportunidade alta",  dot: "bg-emerald-400",  ring: "ring-emerald-400/40", bg: "bg-emerald-500/10",  text: "text-emerald-300" },
+  medium: { label: "Oportunidade média", dot: "bg-amber-400",    ring: "ring-amber-400/40",   bg: "bg-amber-500/10",    text: "text-amber-200" },
+  low:    { label: "Oportunidade baixa", dot: "bg-orange-400",   ring: "ring-orange-400/40",  bg: "bg-orange-500/10",   text: "text-orange-200" },
+} as const;
+
+function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low"; suggestion: string }) {
+  const m = TIER_META[tier];
+  return (
+    <div className={`flex items-start gap-2 rounded-xl px-3 py-2 ring-1 ${m.bg} ${m.ring}`}>
+      <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/20 shrink-0`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
+        {m.label}
+      </span>
+      <p className={`text-[11px] leading-snug ${m.text}`}>
+        <span className="font-semibold">Sugestão:</span> {suggestion}
+      </p>
+    </div>
   );
 }
