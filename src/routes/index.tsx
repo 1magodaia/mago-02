@@ -33,6 +33,7 @@ import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, TutorialBadge, hasSeenTutorial, markTutorialSeen, resetTutorial } from "@/components/tutorial-modal";
+import { SPORT_CATEGORIES, SPORT_BY_ID, type SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
 
 
@@ -88,6 +89,9 @@ function Home() {
   const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
 
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
+  const [sportsMap, setSportsMap] = useState<Record<string, string>>({}); // place_id -> sport id
+  const [selectedSports, setSelectedSports] = useState<string[]>([]);
+  const [showSports, setShowSports] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -191,6 +195,67 @@ function Home() {
   };
 
 
+  const runSportsSearch = async () => {
+    if (!requireAuth()) return;
+    if (selectedSports.length === 0) return;
+    setLoading(true);
+    setSearchError(null);
+    try {
+      const cats = selectedSports.map((id) => SPORT_BY_ID[id]).filter(Boolean) as SportCategory[];
+      const queries: Array<{ sportId: string; q: string }> = [];
+      for (const c of cats) {
+        for (const kw of c.keywords) queries.push({ sportId: c.id, q: kw });
+      }
+      const responses = await Promise.all(
+        queries.map((qi) =>
+          searchPlaces({
+            data: {
+              query: qi.q,
+              regionText: usingGps ? undefined : region.trim() || undefined,
+              lat: usingGps ? center.lat : undefined,
+              lng: usingGps ? center.lng : undefined,
+              radiusKm,
+            },
+          }).then((r) => ({ qi, r })).catch(() => null),
+        ),
+      );
+      const seen = new Set<string>();
+      const merged: PlaceResult[] = [];
+      const sMap: Record<string, string> = {};
+      let lastRemaining: number | null = null;
+      let firstError: string | null = null;
+      for (const item of responses) {
+        if (!item) continue;
+        const { qi, r } = item;
+        if (r.error && !firstError) firstError = r.error;
+        if (typeof r.remaining === "number") lastRemaining = r.remaining;
+        for (const p of r.results) {
+          if (seen.has(p.place_id)) continue;
+          seen.add(p.place_id);
+          sMap[p.place_id] = qi.sportId;
+          merged.push(p);
+        }
+      }
+      if (firstError && merged.length === 0) setSearchError(firstError);
+      if (lastRemaining != null) setRemaining(lastRemaining);
+      setSportsMap(sMap);
+      setRawResults(merged.map((p) => scoreLead(p)));
+      refreshProfile();
+      addHistory({
+        query: `Esportes: ${cats.map((c) => c.emoji).join(" ")}`,
+        region: usingGps ? "GPS" : region.trim(),
+        radiusKm,
+        used_gps: usingGps,
+        count: merged.length,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Falha na busca.";
+      setSearchError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const runSearchWith = async (q: string, r: string) => {
     if (!requireAuth()) return;
     if (!q.trim()) {
@@ -199,6 +264,7 @@ function Home() {
     }
     setLoading(true);
     setSearchError(null);
+    setSportsMap({});
     const cacheKey = JSON.stringify({
       q: q.trim().toLowerCase(),
       r: usingGps ? "gps" : r.trim().toLowerCase(),
@@ -246,7 +312,10 @@ function Home() {
     }
   };
 
-  const runSearch = () => runSearchWith(query, region);
+  const runSearch = () => {
+    if (selectedSports.length > 0) return runSportsSearch();
+    return runSearchWith(query, region);
+  };
 
   const runSuggestion = (s: { query: string; region: string }) => {
     setQuery(s.query);
@@ -342,7 +411,9 @@ function Home() {
       "Nota (Rating)": l.rating ?? "",
       "Número de Avaliações": l.user_ratings_total ?? 0,
       "Última Avaliação (dias atrás)": daysAgoLabel(l.latest_review_at),
-      "Categoria": formatCategory(l.types),
+      "Categoria": sportsMap[l.place_id]
+        ? `${SPORT_BY_ID[sportsMap[l.place_id]].emoji} ${SPORT_BY_ID[sportsMap[l.place_id]].label}`
+        : formatCategory(l.types),
       "Status Presença Digital": digitalStatus(l),
       "Score Oportunidade": opportunityScore10(l),
       "Data Coleta": today,
@@ -462,6 +533,65 @@ function Home() {
             />
           </div>
         )}
+
+
+        {/* ESPORTES & FITNESS */}
+        <div className="glass-panel mt-6 rounded-2xl p-4">
+          <button
+            onClick={() => setShowSports((v) => !v)}
+            className="flex w-full items-center justify-between gap-2 text-left"
+            aria-expanded={showSports}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🏆</span>
+              <span className="text-sm font-bold text-foreground">Esportes & Fitness</span>
+              {selectedSports.length > 0 && (
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
+                  {selectedSports.length} selecionado(s)
+                </span>
+              )}
+            </div>
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showSports ? "rotate-180" : ""}`} />
+          </button>
+          {showSports && (
+            <div className="mt-3 space-y-3">
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                <button
+                  onClick={() => setSelectedSports(SPORT_CATEGORIES.map((c) => c.id))}
+                  className="rounded-full bg-glass px-3 py-1 font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/10"
+                >
+                  Selecionar todos
+                </button>
+                <button
+                  onClick={() => setSelectedSports([])}
+                  className="rounded-full bg-glass px-3 py-1 font-semibold text-muted-foreground ring-1 ring-border hover:text-foreground"
+                >
+                  Desselecionar todos
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                {SPORT_CATEGORIES.map((c) => {
+                  const on = selectedSports.includes(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedSports((prev) => on ? prev.filter((i) => i !== c.id) : [...prev, c.id])}
+                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-semibold transition ${on ? "border-primary bg-primary/15 text-primary" : "border-border bg-glass text-foreground hover:bg-white/5"}`}
+                    >
+                      <span className="text-base">{c.emoji}</span>
+                      <span className="truncate">{c.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedSports.length > 0 && (
+                <p className="text-[11px] text-muted-foreground">
+                  🎯 Ao buscar, ignoramos o campo de categoria acima e procuramos as {selectedSports.length} categoria(s) esportiva(s) selecionada(s).
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
         <div className="glass-panel mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
@@ -702,16 +832,28 @@ function Home() {
               Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
             </div>
           )}
-          {filtered.map((lead) => (
-            <LeadResultCard
-              key={lead.place_id}
-              lead={lead}
-              selected={selected === lead.place_id}
-              onSelect={() => setSelected(lead.place_id)}
-              onUpdate={updateOne}
-              citationsAvailable={citationsAvailable}
-            />
-          ))}
+          {filtered.map((lead) => {
+            const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+            return (
+              <div key={lead.place_id} className="space-y-1">
+                {sport && (
+                  <div className="flex">
+                    <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                      <span>{sport.emoji}</span>
+                      <span>{sport.label}</span>
+                    </span>
+                  </div>
+                )}
+                <LeadResultCard
+                  lead={lead}
+                  selected={selected === lead.place_id}
+                  onSelect={() => setSelected(lead.place_id)}
+                  onUpdate={updateOne}
+                  citationsAvailable={citationsAvailable}
+                />
+              </div>
+            );
+          })}
           {filtered.length > 0 && (
             <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
               <Info className="h-3 w-3" aria-hidden />
