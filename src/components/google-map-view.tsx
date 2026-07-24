@@ -121,14 +121,22 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
     userMarkerRef.current = new google.maps.Marker({
       position: center,
       map,
+      draggable: true,
+      cursor: "grab",
+      title: "Arraste para ajustar o centro da busca",
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
-        scale: 7,
+        scale: 8,
         fillColor: "#7C4DFF",
         fillOpacity: 1,
         strokeColor: "#000",
         strokeWeight: 2,
       },
+    });
+    userMarkerRef.current.addListener("dragend", (e: google.maps.MapMouseEvent) => {
+      const ll = e.latLng;
+      if (!ll || !onMapClickRef.current) return;
+      onMapClickRef.current({ lat: ll.lat(), lng: ll.lng() });
     });
     circleRef.current?.setMap(null);
     circleRef.current = new google.maps.Circle({
