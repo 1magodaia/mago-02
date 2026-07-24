@@ -1247,6 +1247,8 @@ function AiKeysPanel() {
             max={999}
             value={form.priority}
             onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
+            title="Prioridade de failover — menor número é tentado primeiro (padrão: 100)"
+            placeholder="Prioridade"
             className="rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
           />
           <button
