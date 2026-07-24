@@ -80,6 +80,25 @@ function relTime(iso: string | null | undefined): string | null {
   return `há ${y} ano${y > 1 ? "s" : ""}`;
 }
 
+/**
+ * O Google Places frequentemente devolve o Instagram/Facebook do comércio
+ * no campo `website`. Isso confundia o usuário: o botão dizia "Site" mas
+ * abria o Instagram. Aqui classificamos a URL para rotular corretamente
+ * e evitar auditoria de site sobre uma página social.
+ */
+type LinkKind = "site" | "instagram" | "facebook" | "other";
+function classifyLink(url: string | null | undefined): LinkKind {
+  if (!url) return "other";
+  try {
+    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+    if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.com" || host === "m.facebook.com") return "facebook";
+    return "site";
+  } catch {
+    return "other";
+  }
+}
+
 export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
