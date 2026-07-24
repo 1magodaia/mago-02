@@ -19,6 +19,7 @@ import {
   Search,
   Shield,
   MessageCircle,
+  X,
   Star,
   User as UserIcon,
 } from "lucide-react";
@@ -107,12 +108,17 @@ const SUGGESTIONS = [
 ];
 
 
-function FreeQuotaBlock({ supportWa }: { supportWa: string | null }) {
+function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onClose: () => void }) {
   const digits = (supportWa ?? "").replace(/\D/g, "");
   const msg = encodeURIComponent(
-    "Olá! Já usei minha busca gratuita no Busca Mágica e quero liberar acesso completo.",
+    "Olá! Já usei minha busca gratuita no Busca Mágica e quero ativar minha conta para liberar acesso completo.",
   );
   const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   return (
     <div
       role="alertdialog"
@@ -120,8 +126,20 @@ function FreeQuotaBlock({ supportWa }: { supportWa: string | null }) {
       aria-labelledby="quota-block-title"
       aria-describedby="quota-block-desc"
       className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
+      onClick={onClose}
     >
-      <div className="glass-panel w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl">
+      <div
+        className="glass-panel relative w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fechar"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
           <Search className="h-7 w-7 text-primary" aria-hidden />
         </div>
@@ -129,27 +147,35 @@ function FreeQuotaBlock({ supportWa }: { supportWa: string | null }) {
           Você já usou sua busca gratuita
         </h2>
         <p id="quota-block-desc" className="mt-2 text-sm text-muted-foreground">
-          Fale com a gente para liberar acesso completo e continuar prospectando comércios.
+          Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando comércios.
         </p>
         {waHref ? (
           <a
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-bold text-white transition-all hover:brightness-110"
           >
             <MessageCircle className="h-4 w-4" />
-            Falar no WhatsApp
+            Ativar minha conta no WhatsApp
           </a>
         ) : (
           <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
             Contato de suporte ainda não configurado. Fale com o administrador.
           </p>
         )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+        >
+          Fechar
+        </button>
       </div>
     </div>
   );
 }
+
 
 function Home() {
   const nav = useNavigate();
@@ -976,7 +1002,7 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock supportWa={supportWa} />
+        <FreeQuotaBlock supportWa={supportWa} onClose={() => setQuotaBlocked(false)} />
       )}
     </div>
   );
