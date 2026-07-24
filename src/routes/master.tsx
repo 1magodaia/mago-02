@@ -11,10 +11,12 @@ import {
   KeyRound,
   Loader2,
   MessageCircle,
+  Monitor,
   RotateCcw,
   Save,
   Shield,
   ShieldCheck,
+  Smartphone,
   Users,
 } from "lucide-react";
 
