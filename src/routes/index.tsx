@@ -567,40 +567,12 @@ function Home() {
       </nav>
 
       <header className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
-        <div
-          className="relative overflow-hidden rounded-3xl bg-glass ring-1 ring-border shadow-elevated"
-          style={{ height: "var(--hero-h-mobile)" }}
-        >
-          <style>{`
-            :root{--hero-h-mobile:${heroHeightMobile}px;--hero-h-desktop:${heroHeightDesktop}px;}
-            @media (min-width:640px){.hero-banner{height:var(--hero-h-desktop) !important;}}
-          `}</style>
-          <div className="hero-banner absolute inset-0" style={{ height: "var(--hero-h-mobile)" }}>
-            {heroImageUrl && !heroError ? (
-              <img
-                src={heroImageUrl}
-                alt="Busca Mágica — o buscador inteligente que encontra clientes para você"
-                className="block h-full w-full"
-                style={{ objectFit: heroFit, objectPosition: "center" }}
-                loading="eager"
-                decoding="async"
-                onError={() => setHeroError(true)}
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 via-background to-accent/15">
-                <div className="flex items-center gap-3 text-center">
-                  <LogoIcon className="h-10 w-10 text-primary" />
-                  <div>
-                    <div className="text-lg font-black tracking-tight">Busca Mágica</div>
-                    <div className="text-xs text-muted-foreground">
-                      {heroError ? "Não foi possível carregar o banner." : "Configure um banner no painel master."}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <HeroBanner
+          url={heroImageUrl}
+          fit={heroFit}
+          heightMobile={heroHeightMobile}
+          heightDesktop={heroHeightDesktop}
+        />
 
 
         {gpsError && (
