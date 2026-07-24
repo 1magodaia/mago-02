@@ -169,6 +169,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const waLink = lead.audit?.whatsapp_link ?? (lead.phone
     ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
     : null);
+  // Fonte do WhatsApp: "site" = link real encontrado no HTML; "phone" = derivado do telefone (presunção).
+  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
+  const waVerified = waSource === "site";
 
   const collectedAgo = relTime(lead.collected_at);
   const lastReviewAgo = relTime(lead.latest_review_at);
@@ -369,9 +372,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-[11px] font-semibold text-primary-foreground hover:brightness-110"
+            title={waVerified
+              ? "Link de WhatsApp encontrado no site oficial"
+              : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
+            className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
           >
-            <MessageCircle className="h-3 w-3" /> Whats
+            <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
           </a>
         )}
       </div>

@@ -466,6 +466,9 @@ function Home() {
       "Endereço Completo": l.address,
       "Telefone": l.phone ?? "",
       "WhatsApp": l.audit?.whatsapp_link ?? whatsappFromPhone(l.phone),
+      "WhatsApp Fonte": l.audit?.whatsapp_source === "site"
+        ? "verificado no site"
+        : (l.audit?.whatsapp_source === "phone" || (!l.audit && l.phone)) ? "presumido do telefone" : "",
       "Website": l.website ?? "",
       "Google Maps Link": l.google_maps_uri ?? (l.lat != null && l.lng != null ? `https://maps.google.com/?q=${l.lat},${l.lng}` : ""),
       "Instagram": l.audit?.instagram ?? "",

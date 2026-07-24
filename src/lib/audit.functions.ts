@@ -20,6 +20,7 @@ export interface DigitalAudit {
   instagram: string | null;
   facebook: string | null;
   whatsapp_link: string | null;
+  whatsapp_source: "site" | "phone" | null; // "site" = link real no HTML; "phone" = derivado do telefone (presumido)
   sitemap_lastmod: string | null;
   domain_registered_at: string | null;
   domain_expires_at: string | null;
@@ -37,7 +38,13 @@ async function timedFetch(url: string, init?: RequestInit): Promise<Response | n
     return await fetch(url, {
       ...init,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      headers: { "User-Agent": "BuscaMagica-Audit/1.0", ...(init?.headers ?? {}) },
+      headers: {
+        // UA neutro reduz bloqueios em WAF/Cloudflare que rejeitam bots desconhecidos
+        "User-Agent": "Mozilla/5.0 (compatible; BuscaMagicaBot/1.0; +https://buscamagica.lovable.app)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+        ...(init?.headers ?? {}),
+      },
       redirect: "follow",
     });
   } catch {
@@ -69,12 +76,24 @@ function extractSocials(html: string): {
   facebook: string | null;
   whatsapp: string | null;
 } {
-  const ig = html.match(/https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9_.]{2,30})/i);
-  const fb = html.match(/https?:\/\/(?:www\.)?facebook\.com\/([A-Za-z0-9_.-]{2,50})/i);
+  // Handles genéricos que representam widget/share, não perfil da empresa
+  const IG_BLOCKLIST = new Set([
+    "p", "explore", "reel", "reels", "stories", "accounts", "sharer", "share",
+    "developer", "developers", "about", "help", "legal", "directory", "web",
+  ]);
+  const FB_BLOCKLIST = new Set([
+    "sharer", "share", "share.php", "dialog", "plugins", "tr", "intent",
+    "login", "help", "policies", "business", "watch", "gaming", "marketplace",
+  ]);
+  // Preferir <a href="..."> ou rel="me"
+  const igMatches = [...html.matchAll(/href=["']https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9_.]{2,30})\/?[^"']*["']/gi)];
+  const fbMatches = [...html.matchAll(/href=["']https?:\/\/(?:www\.)?facebook\.com\/([A-Za-z0-9_.-]{2,50})\/?[^"']*["']/gi)];
+  const igHandle = igMatches.map((m) => m[1]).find((h) => !IG_BLOCKLIST.has(h.toLowerCase()));
+  const fbHandle = fbMatches.map((m) => m[1]).find((h) => !FB_BLOCKLIST.has(h.toLowerCase()) && !h.includes("."));
   const wa = html.match(/https?:\/\/(?:wa\.me|api\.whatsapp\.com\/send)[^\s"'<>]+/i);
   return {
-    instagram: ig ? `https://instagram.com/${ig[1]}` : null,
-    facebook: fb ? `https://facebook.com/${fb[1]}` : null,
+    instagram: igHandle ? `https://instagram.com/${igHandle}` : null,
+    facebook: fbHandle ? `https://facebook.com/${fbHandle}` : null,
     whatsapp: wa ? wa[0] : null,
   };
 }
@@ -102,15 +121,24 @@ function formatCnpj(digits: string): string {
 
 function extractCnpjFromHtml(html: string): string | null {
   CNPJ_RE.lastIndex = 0;
+  const candidates: string[] = [];
   const seen = new Set<string>();
   let match: RegExpExecArray | null;
   while ((match = CNPJ_RE.exec(html)) !== null) {
     const digits = match[1].replace(/\D/g, "");
-    if (seen.has(digits)) continue;
+    if (seen.has(digits) || !isValidCnpj(digits)) continue;
     seen.add(digits);
-    if (isValidCnpj(digits)) return digits;
+    candidates.push(digits);
   }
-  return null;
+  if (candidates.length === 0) return null;
+  // Preferir CNPJ próximo às palavras "CNPJ", "razão social", "empresa" (janela de 80 caracteres antes)
+  const preferred = candidates.find((d) => {
+    const idx = html.indexOf(d) >= 0 ? html.indexOf(d) : html.indexOf(formatCnpj(d));
+    if (idx < 0) return false;
+    const window = html.slice(Math.max(0, idx - 80), idx).toLowerCase();
+    return /cnpj|raz[aã]o\s+social|inscri[cç][aã]o/.test(window);
+  });
+  return preferred ?? candidates[0];
 }
 
 async function fetchCnpjInfo(digits: string): Promise<CnpjInfo | null> {
@@ -185,6 +213,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
         site_reachable: false, site_status_code: null,
         instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
+        whatsapp_source: normalizeWhatsAppFromPhone(data.phone) ? "phone" : null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         audited_at: now, note: "URL inválida.",
@@ -219,6 +248,11 @@ export const auditWebsite = createServerFn({ method: "POST" })
 
     const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
     const whatsapp_link = socials.whatsapp ?? waFromPhone;
+    const whatsapp_source: DigitalAudit["whatsapp_source"] = socials.whatsapp
+      ? "site"
+      : waFromPhone
+        ? "phone"
+        : null;
 
     let approx_stale_days: number | null = null;
     if (sitemapLastMod) {
@@ -238,6 +272,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       instagram: socials.instagram,
       facebook: socials.facebook,
       whatsapp_link,
+      whatsapp_source,
       sitemap_lastmod: sitemapLastMod,
       domain_registered_at: rdap.registered,
       domain_expires_at: rdap.expires,
