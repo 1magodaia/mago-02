@@ -24,7 +24,7 @@ import {
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
-import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+import { getAppSettings, updateAppSettings, listWhatsappChangeLog, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
@@ -53,6 +53,7 @@ function MasterPanel() {
   const readSettings = useServerFn(getAppSettings);
   const writeSettings = useServerFn(updateAppSettings);
   const readCostStats = useServerFn(getCitationCostStats);
+  const readWaLog = useServerFn(listWhatsappChangeLog);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -69,6 +70,7 @@ function MasterPanel() {
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
   const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
+  const [waLog, setWaLog] = useState<WhatsappChangeLogEntry[]>([]);
 
 
 
@@ -108,6 +110,7 @@ function MasterPanel() {
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
+      readWaLog().then(setWaLog).catch(() => {});
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,6 +152,7 @@ function MasterPanel() {
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
       setNotice("Configurações atualizadas.");
+      readWaLog().then(setWaLog).catch(() => {});
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
     } finally {
@@ -363,6 +367,77 @@ function MasterPanel() {
           </p>
         )}
       </section>
+
+      {/* HISTÓRICO DE ALTERAÇÕES — WhatsApp de suporte */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/40">
+            <MessageCircle className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Histórico de alterações do WhatsApp</h2>
+            <p className="text-xs text-muted-foreground">
+              Últimas 50 mudanças do número ou da mensagem pré-preenchida, com autor e data.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-border">
+          {waLog.length === 0 ? (
+            <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+              Nenhuma alteração registrada ainda.
+            </div>
+          ) : (
+            <table className="w-full text-xs">
+              <thead className="bg-glass text-[10px] uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">Quando</th>
+                  <th className="px-3 py-2 text-left">Quem</th>
+                  <th className="px-3 py-2 text-left">WhatsApp (antes → depois)</th>
+                  <th className="px-3 py-2 text-left">Mensagem (antes → depois)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {waLog.map((e) => {
+                  const waChanged = (e.old_whatsapp ?? "") !== (e.new_whatsapp ?? "");
+                  const msgChanged = (e.old_message ?? "") !== (e.new_message ?? "");
+                  return (
+                    <tr key={e.id} className="border-t border-border/50">
+                      <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                        {new Date(e.created_at).toLocaleString("pt-BR")}
+                      </td>
+                      <td className="px-3 py-2">{e.changed_by_email ?? "—"}</td>
+                      <td className="px-3 py-2 font-mono">
+                        {waChanged ? (
+                          <>
+                            <span className="text-destructive line-through">{e.old_whatsapp ?? "∅"}</span>
+                            {" → "}
+                            <span className="text-primary">{e.new_whatsapp ?? "∅"}</span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {msgChanged ? (
+                          <>
+                            <span className="text-destructive line-through">{e.old_message ?? "∅"}</span>
+                            {" → "}
+                            <span className="text-primary">{e.new_message ?? "∅"}</span>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+
+
 
       {/* IMAGEM DO HERO — banner topo da home */}
       <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">

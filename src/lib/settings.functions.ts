@@ -78,6 +78,12 @@ export const updateAppSettings = createServerFn({ method: "POST" })
     const set = new Set((roles ?? []).map((r) => r.role as string));
     if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
 
+    const { data: prev } = await context.supabase
+      .from("app_settings")
+      .select("support_whatsapp, support_message")
+      .eq("id", 1)
+      .maybeSingle();
+
     const patch = {
       updated_by: context.userId,
       updated_at: new Date().toISOString(),
@@ -95,6 +101,25 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
       .single();
     if (error) throw new Error(error.message);
+
+    const newWa = row?.support_whatsapp ?? null;
+    const newMsg = row?.support_message ?? null;
+    const oldWa = prev?.support_whatsapp ?? null;
+    const oldMsg = prev?.support_message ?? null;
+    const waChanged = data.support_whatsapp !== undefined && newWa !== oldWa;
+    const msgChanged = data.support_message !== undefined && newMsg !== oldMsg;
+    if (waChanged || msgChanged) {
+      const email = (context.claims as { email?: string } | null)?.email ?? null;
+      await context.supabase.from("whatsapp_change_log").insert({
+        changed_by: context.userId,
+        changed_by_email: email,
+        old_whatsapp: oldWa,
+        new_whatsapp: newWa,
+        old_message: oldMsg,
+        new_message: newMsg,
+      });
+    }
+
     return {
       support_whatsapp: row?.support_whatsapp ?? null,
       support_message: row?.support_message ?? null,
@@ -105,4 +130,30 @@ export const updateAppSettings = createServerFn({ method: "POST" })
     };
 
   });
+
+export interface WhatsappChangeLogEntry {
+  id: string;
+  changed_by_email: string | null;
+  old_whatsapp: string | null;
+  new_whatsapp: string | null;
+  old_message: string | null;
+  new_message: string | null;
+  created_at: string;
+}
+
+export const listWhatsappChangeLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<WhatsappChangeLogEntry[]> => {
+    const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+    const set = new Set((roles ?? []).map((r) => r.role as string));
+    if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
+    const { data, error } = await context.supabase
+      .from("whatsapp_change_log")
+      .select("id, changed_by_email, old_whatsapp, new_whatsapp, old_message, new_message, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as WhatsappChangeLogEntry[];
+  });
+
 
