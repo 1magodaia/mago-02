@@ -2,11 +2,14 @@ import type { PlaceResult } from "./places.functions";
 import type { DigitalAudit } from "./audit.functions";
 
 export type LeadStatus = "hot" | "warm" | "cold";
+export type OpportunityTier = "high" | "medium" | "low";
 
 export interface ScoredLead extends PlaceResult {
   audit?: DigitalAudit;
   opportunity_score: number; // 0-100, maior = mais quente
   status: LeadStatus;
+  tier: OpportunityTier;
+  tier_suggestion: string;
   reasons: string[];
 }
 
