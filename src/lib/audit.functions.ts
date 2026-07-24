@@ -303,20 +303,30 @@ export const auditWebsite = createServerFn({ method: "POST" })
 
     let socials = { instagram: null as string | null, facebook: null as string | null, whatsapp: null as string | null };
     let cnpjDigits: string | null = null;
+    let email: string | null = null;
     if (pageRes.reachable && pageRes.html) {
       socials = extractSocials(pageRes.html);
       cnpjDigits = extractCnpjFromHtml(pageRes.html);
-      // Fallback: se homepage não tem CNPJ, tenta uma página institucional comum.
-      if (!cnpjDigits) {
+      email = extractEmail(pageRes.html);
+      // Fallback: se homepage não tem CNPJ ou e-mail, tenta uma página institucional comum.
+      if (!cnpjDigits || !email) {
         for (const path of ["/sobre", "/sobre-nos", "/institucional", "/contato", "/termos", "/politica-de-privacidade"]) {
           const alt = await fetchAndExtract(`${origin}${path}`);
           if (alt.reachable && alt.html) {
-            const found = extractCnpjFromHtml(alt.html);
-            if (found) { cnpjDigits = found; break; }
+            if (!cnpjDigits) {
+              const found = extractCnpjFromHtml(alt.html);
+              if (found) cnpjDigits = found;
+            }
+            if (!email) {
+              const foundEmail = extractEmail(alt.html);
+              if (foundEmail) email = foundEmail;
+            }
+            if (cnpjDigits && email) break;
           }
         }
       }
     }
+
 
     const cnpj_info = cnpjDigits ? await fetchCnpjInfo(cnpjDigits) : null;
 
