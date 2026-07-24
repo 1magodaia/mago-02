@@ -722,7 +722,7 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
+      <header className="relative z-40 mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
         <HeroBanner
           url={heroImageUrl}
           fit={heroFit}
