@@ -221,12 +221,15 @@ function Home() {
         nome: l.name,
         endereco: l.address,
         telefone: l.phone ?? "",
-        whatsapp: l.audit?.whatsapp_link ?? "",
+        whatsapp: l.audit?.whatsapp_link ?? (l.phone ? `https://wa.me/${(l.phone.startsWith("+") ? l.phone : `55${l.phone}`).replace(/\D/g, "")}` : ""),
+        tem_site: l.website ? "sim" : "nao",
         site: l.website ?? "",
         instagram: l.audit?.instagram ?? "",
         facebook: l.audit?.facebook ?? "",
-        avaliacoes: l.user_ratings_total ?? 0,
         nota: l.rating ?? "",
+        avaliacoes: l.user_ratings_total ?? 0,
+        ultima_avaliacao: l.latest_review_at ?? "",
+        coletado_em: l.collected_at ?? "",
         score_oportunidade: l.opportunity_score,
         status: l.status,
         google_maps: l.google_maps_uri ?? "",
@@ -243,7 +246,7 @@ function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* NAV */}
+      {/* NAV — botões padronizados: h-9 rounded-full px-3 text-xs font-semibold */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
           <LogoIcon className="h-9 w-9 sm:hidden" />
@@ -253,42 +256,46 @@ function Home() {
           {user && (
             <Link
               to="/leads"
-              className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
+              className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
             >
               <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
             </Link>
           )}
           <Link
             to="/planos"
-            className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ring-1 ${
+              isPro
+                ? "bg-glass text-foreground ring-border hover:bg-white/5"
+                : "bg-warn/15 text-warn ring-warn/40 hover:bg-warn/25"
+            }`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-warn" /> {isPro ? "Pro" : "Upgrade"}
+            <Sparkles className="h-3.5 w-3.5" /> {isPro ? "Pro" : "Upgrade"}
           </Link>
           <Link
             to="/novidades"
-            className="hidden items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:flex"
+            className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
           >
             <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
           </Link>
           {isAdmin && (
             <Link
               to="/master"
-              className="flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1.5 text-xs font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/20"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
             >
               <Shield className="h-3.5 w-3.5" /> {isMaster ? "Master" : "Admin"}
             </Link>
           )}
           {authLoading ? (
-            <span className="grid h-8 w-8 place-items-center">
+            <span className="grid h-9 w-9 place-items-center">
               <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
             </span>
           ) : user ? (
             <div className="group relative">
               <button
-                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
                 aria-label="Menu da conta"
               >
-                <UserIcon className="h-3.5 w-3.5" />
+                <UserIcon className="h-3.5 w-3.5 text-primary" />
                 <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
               </button>
               <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
@@ -310,7 +317,7 @@ function Home() {
           ) : (
             <Link
               to="/auth"
-              className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-bold text-primary-foreground hover:brightness-110"
             >
               <LogIn className="h-3.5 w-3.5" /> Entrar
             </Link>
@@ -318,7 +325,7 @@ function Home() {
         </div>
       </nav>
 
-      <header className="mx-auto max-w-7xl px-4 pb-10 pt-8 sm:px-6 sm:pt-14">
+      <header className="mx-auto max-w-7xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-10">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center sm:mx-0 sm:items-start sm:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Google Places + auditoria digital
@@ -492,9 +499,9 @@ function Home() {
           </div>
         )}
 
-        {/* BARRA DE RESUMO */}
+        {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}
         {(rawResults.length > 0 || loading) && (
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-extrabold tabular-nums text-foreground">{filtered.length}</span>
               <span className="text-muted-foreground">leads</span>
@@ -510,10 +517,11 @@ function Home() {
             <button
               onClick={doExport}
               disabled={filtered.length === 0}
-              title={!isPro ? "Exportação CSV é do plano Pro" : ""}
-              className="ml-auto flex items-center gap-1 rounded-full bg-glass px-3 py-1.5 font-semibold text-foreground ring-1 ring-border hover:bg-white/5 disabled:opacity-40"
+              title={!isPro ? "Exportação CSV é do plano Pro" : "Baixar todos os leads filtrados em CSV"}
+              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-elevated hover:brightness-110 disabled:opacity-40"
             >
-              <Download className="h-3 w-3" /> CSV {!isPro && <span className="text-warn">· Pro</span>}
+              <Download className="h-3.5 w-3.5" /> Baixar lista (CSV)
+              {!isPro && <span className="ml-1 rounded-full bg-warn/25 px-1.5 py-0.5 text-[9px] text-warn">Pro</span>}
             </button>
           </div>
         )}
@@ -553,7 +561,7 @@ function Home() {
 
       <main className="mx-auto grid max-w-7xl gap-4 px-4 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_1.1fr]">
         <section
-          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block`}
+          className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
           aria-label="Resultados"
         >
           {loading && (
