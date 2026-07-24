@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, GitBranch } from "lucide-react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/novidades")({
   head: () => ({
@@ -27,7 +29,15 @@ interface VersionEntry {
 }
 
 function Novidades() {
+  const { isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !isAdmin) navigate({ to: "/", replace: true });
+  }, [authLoading, isAdmin, navigate]);
+
   const { data, isLoading, error } = useQuery({
+    enabled: isAdmin,
     queryKey: ["version_log_all"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -38,6 +48,8 @@ function Novidades() {
       return data as VersionEntry[];
     },
   });
+
+  if (!isAdmin) return null;
 
   return (
     <div className="min-h-screen">

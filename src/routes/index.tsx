@@ -593,12 +593,14 @@ function Home() {
               <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
             </Link>
           )}
-          <Link
-            to="/novidades"
-            className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
-          >
-            <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/novidades"
+              className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
+            >
+              <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
+            </Link>
+          )}
           {isAdmin && (
             <Link
               to="/master"
@@ -626,7 +628,7 @@ function Home() {
                   <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
                 )}
                 <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
+                {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
                 <button
                   onClick={() => { resetTutorial(); setTutorialOpen(true); }}
                   className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
