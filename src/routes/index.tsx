@@ -401,6 +401,12 @@ function Home() {
                 <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
                 <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
                 <button
+                  onClick={() => { resetTutorial(); setTutorialOpen(true); }}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                >
+                  Ver tutorial novamente
+                </button>
+                <button
                   onClick={() => signOut().then(() => nav({ to: "/" }))}
                   className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
                 >
