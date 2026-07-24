@@ -67,6 +67,7 @@ const inputSchema = z.object({
     })
     .nullable()
     .optional(),
+  reason: z.string().trim().max(500).nullable().optional(),
 });
 
 
