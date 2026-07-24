@@ -35,7 +35,7 @@ import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
-import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
@@ -106,6 +106,51 @@ const SUGGESTIONS = [
   { label: "Advogado · Belo Horizonte", query: "advogado", region: "Belo Horizonte" },
 ];
 
+
+function FreeQuotaBlock({ supportWa }: { supportWa: string | null }) {
+  const digits = (supportWa ?? "").replace(/\D/g, "");
+  const msg = encodeURIComponent(
+    "Olá! Já usei minha busca gratuita no Busca Mágica e quero liberar acesso completo.",
+  );
+  const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
+  return (
+    <div
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="quota-block-title"
+      aria-describedby="quota-block-desc"
+      className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
+    >
+      <div className="glass-panel w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl">
+        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
+          <Search className="h-7 w-7 text-primary" aria-hidden />
+        </div>
+        <h2 id="quota-block-title" className="text-lg font-extrabold text-foreground">
+          Você já usou sua busca gratuita
+        </h2>
+        <p id="quota-block-desc" className="mt-2 text-sm text-muted-foreground">
+          Fale com a gente para liberar acesso completo e continuar prospectando comércios.
+        </p>
+        {waHref ? (
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Falar no WhatsApp
+          </a>
+        ) : (
+          <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
+            Contato de suporte ainda não configurado. Fale com o administrador.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Home() {
   const nav = useNavigate();
   const { user, profile, isPro, isMaster, isAdmin, signOut, loading: authLoading, refreshProfile } = useAuth();
@@ -131,6 +176,7 @@ function Home() {
   
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [quotaBlocked, setQuotaBlocked] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [citationsEnabled, setCitationsEnabled] = useState(false);
@@ -308,10 +354,12 @@ function Home() {
       const sMap: Record<string, string> = {};
       let lastRemaining: number | null = null;
       let firstError: string | null = null;
+      let quotaHit = false;
       for (const item of responses) {
         if (!item) continue;
         const { qi, r } = item;
         if (r.error && !firstError) firstError = r.error;
+        if ((r as { quotaExhausted?: boolean }).quotaExhausted) quotaHit = true;
         if (typeof r.remaining === "number") lastRemaining = r.remaining;
         for (const p of r.results) {
           if (seen.has(p.place_id)) continue;
@@ -321,6 +369,7 @@ function Home() {
         }
       }
       if (firstError && merged.length === 0) setSearchError(firstError);
+      if (quotaHit) setQuotaBlocked(true);
       if (lastRemaining != null) setRemaining(lastRemaining);
       setSportsMap(sMap);
       setRawResults(merged.map((p) => scoreLead(p)));
@@ -370,6 +419,7 @@ function Home() {
           },
         });
         if (resp.error) setSearchError(resp.error);
+        if ((resp as { quotaExhausted?: boolean }).quotaExhausted) setQuotaBlocked(true);
         if (typeof resp.remaining === "number") setRemaining(resp.remaining);
         places = resp.results;
         if (places.length) cacheSet(cacheKey, places);
@@ -512,7 +562,7 @@ function Home() {
   const searchUsage = profile
     ? isPro
       ? "Pro · buscas ilimitadas"
-      : `${profile.search_count_month}/${FREE_MONTHLY_SEARCH_LIMIT} buscas este mês`
+      : `${Math.min(profile.search_count_month, FREE_LIFETIME_SEARCH_LIMIT)}/${FREE_LIFETIME_SEARCH_LIMIT} busca grátis usada`
     : null;
 
   // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
@@ -862,7 +912,7 @@ function Home() {
               </div>
               {!user && (
                 <p className="mt-5 text-xs text-muted-foreground">
-                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free com {FREE_MONTHLY_SEARCH_LIMIT} buscas/mês.
+                  <Link to="/auth" className="font-bold text-primary underline">Entre</Link> para buscar — Free ganha {FREE_LIFETIME_SEARCH_LIMIT} busca de cortesia.
                 </p>
               )}
             </div>
@@ -923,6 +973,9 @@ function Home() {
         </section>
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
+      {quotaBlocked && !isPro && !isAdmin && !isMaster && (
+        <FreeQuotaBlock supportWa={supportWa} />
+      )}
     </div>
   );
 }

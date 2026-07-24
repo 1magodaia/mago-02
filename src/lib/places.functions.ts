@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 
@@ -173,12 +173,13 @@ async function handle403(response: Response): Promise<never> {
 export const searchPlaces = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => searchSchema.parse(input))
-  .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string }> => {
+  .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string; quotaExhausted?: boolean }> => {
     try {
-      // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users)
+      // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users).
+      // Free = 1 busca vitalícia (regra v5.7.3). Pro/master seguem inalterados.
       const { data: quotaRows, error: quotaErr } = await context.supabase.rpc("consume_search_quota", {
         _user_id: context.userId,
-        _free_limit: FREE_MONTHLY_SEARCH_LIMIT,
+        _free_limit: FREE_LIFETIME_SEARCH_LIMIT,
       });
       if (quotaErr) {
         console.error("[places] quota error", quotaErr.message);
@@ -189,10 +190,11 @@ export const searchPlaces = createServerFn({ method: "POST" })
         return {
           results: [],
           error: quota?.plan === "free"
-            ? `Limite mensal atingido (${FREE_MONTHLY_SEARCH_LIMIT} buscas). Faça upgrade para Pro.`
+            ? "Você já usou sua busca gratuita. Fale com a gente para liberar acesso completo."
             : "Conta bloqueada. Fale com o suporte.",
           remaining: 0,
           plan: quota?.plan,
+          quotaExhausted: quota?.plan === "free",
         };
       }
 
