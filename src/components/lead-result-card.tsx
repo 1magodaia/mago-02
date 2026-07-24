@@ -377,18 +377,24 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           </a>
         )}
         {waLink && (
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            title={waVerified
-              ? "Link de WhatsApp encontrado no site oficial"
-              : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-            className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
-          >
-            <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
-          </a>
+          <div className="flex items-center gap-0.5">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title={waVerified
+                ? "Link de WhatsApp encontrado no site oficial"
+                : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+            >
+              <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
+            </a>
+            <HelpTip
+              title={waVerified ? "WhatsApp confirmado" : "WhatsApp presumido"}
+              text="Quando vem do site do comércio, já testamos que é um link de WhatsApp real. Quando vem só do telefone, é uma suposição — pode não ter WhatsApp nesse número."
+            />
+          </div>
         )}
       </div>
 
