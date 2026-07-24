@@ -182,12 +182,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const collectedAgo = relTime(lead.collected_at);
   const lastReviewAgo = relTime(lead.latest_review_at);
   // Classifica a URL do "website" do Google Places — pode ser site real,
-  // Instagram ou Facebook. Isso evita rotular Instagram como "site".
-  const linkKind = classifyLink(lead.website);
-  const hasRealSite = linkKind === "site" || linkKind === "other";
+  // Instagram, Facebook, ou vir embrulhada em redirecionador/tracking.
+  // O módulo devolve o destino já normalizado (sem utm/redirects) e o tipo.
+  const classified = classifyLink(lead.website);
+  const linkKind = classified.kind;
+  const resolvedHref = classified.url ?? lead.website ?? null;
+  const hasRealSite = linkKind === "site";
   // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
-  const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? lead.website : null);
-  const fbUrl = linkKind === "facebook" ? lead.website : null;
+  const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? resolvedHref : null);
+  const fbUrl = linkKind === "facebook" ? resolvedHref : null;
 
   const permanentlyClosed = lead.business_status === "CLOSED_PERMANENTLY";
 
