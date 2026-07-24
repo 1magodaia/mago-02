@@ -196,6 +196,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
   const waVerified = waSource === "site";
 
+  const collectedAgo = relTime(lead.collected_at);
+  const lastReviewAgo = relTime(lead.latest_review_at);
   // Classifica a URL do "website" do Google Places — pode ser site real,
   // Instagram ou Facebook. Isso evita rotular Instagram como "site".
   const linkKind = classifyLink(lead.website);
