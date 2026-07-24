@@ -503,23 +503,25 @@ const PRICE_LABELS: Record<number, string> = {
 };
 
 function PriceLevelBadge({ level }: { level: number | null }) {
+  const helper = (
+    <HelpTip
+      title="Faixa de preço"
+      text="Classificação de preço feita pelo próprio Google, não é um valor exato em reais."
+    />
+  );
   if (level == null) {
     return (
-      <span
-        className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
-        title="O Google não classificou a faixa de preço deste local. Não estimamos esse valor."
-      >
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border">
         💰 Faixa de preço: não informada
+        {helper}
       </span>
     );
   }
   const symbols = level === 0 ? "Grátis" : "$".repeat(Math.max(1, level));
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30"
-      title={`Faixa de preço classificada pelo Google (${PRICE_LABELS[level]}). Não é um valor exato de ticket médio.`}
-    >
+    <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30">
       💰 {symbols} · {PRICE_LABELS[level]}
+      {helper}
     </span>
   );
 }
