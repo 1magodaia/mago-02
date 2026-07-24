@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const FREE_MONTHLY_SEARCH_LIMIT = 20;
+/** Plano Free: 1 busca vitalícia total (não é mensal). Vira Pro/master para liberar mais. */
+export const FREE_LIFETIME_SEARCH_LIMIT = 1;
+/** @deprecated use FREE_LIFETIME_SEARCH_LIMIT. Mantido apenas para retrocompatibilidade. */
+export const FREE_MONTHLY_SEARCH_LIMIT = FREE_LIFETIME_SEARCH_LIMIT;
 
 export interface Profile {
   id: string;
