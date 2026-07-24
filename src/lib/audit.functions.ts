@@ -100,6 +100,36 @@ function extractSocials(html: string): {
   };
 }
 
+const EMAIL_RE = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+const EMAIL_BLOCKED_DOMAINS = /(sentry\.io|wixpress\.com|example\.com|godaddy|domain\.com|whois|noreply|no-reply|donotreply|mailer-daemon)/i;
+const EMAIL_BLOCKED_EXT = /\.(png|jpg|jpeg|gif|webp|svg|css|js|woff2?|ttf|ico)$/i;
+
+/** Extrai o primeiro e-mail plausível do HTML (rodapé/contato). */
+function extractEmail(html: string): string | null {
+  // Prioriza mailto:
+  const mailto = html.match(/mailto:([^"'?\s>]+)/i);
+  if (mailto) {
+    const e = mailto[1].trim().toLowerCase();
+    if (!EMAIL_BLOCKED_DOMAINS.test(e) && !EMAIL_BLOCKED_EXT.test(e)) return e;
+  }
+  EMAIL_RE.lastIndex = 0;
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = EMAIL_RE.exec(html)) !== null) {
+    const e = m[0].toLowerCase();
+    if (seen.has(e)) continue;
+    seen.add(e);
+    if (EMAIL_BLOCKED_DOMAINS.test(e)) continue;
+    if (EMAIL_BLOCKED_EXT.test(e)) continue;
+    // Ignora textos como "image@2x.png" que já casam com o regex
+    if (/@\d/.test(e)) continue;
+    return e;
+  }
+  return null;
+}
+
+
+
 // Regex conservador: pega XX.XXX.XXX/XXXX-XX ou 14 dígitos "colados".
 const CNPJ_RE = /\b(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})\b/g;
 
