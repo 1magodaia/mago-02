@@ -92,7 +92,7 @@ export const grantProAccess = createServerFn({ method: "POST" })
       patch = { plan: "pro", pro_access_mode: "searches", pro_valid_until: null, pro_searches_remaining: data.searches_granted };
     }
 
-    const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
     if (error) throw new Error(error.message);
 
     await supabaseAdmin.from("plan_history").insert({
@@ -130,10 +130,10 @@ export const setUserPlan = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await assertMasterOrAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch = data.plan === "free"
+    const patch: Record<string, any> = data.plan === "free"
       ? { plan: "free", pro_access_mode: "none", pro_valid_until: null, pro_searches_remaining: null }
       : { plan: "pro" };
-    const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", data.userId);
+    const { error } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
     if (error) throw new Error(error.message);
     await supabaseAdmin.from("plan_history").insert({
       user_id: data.userId,
