@@ -464,9 +464,15 @@ import {
   upsertAiProviderKey,
   deleteAiProviderKey,
   testAiProviderKey,
+  testAllAiProviderKeys,
+  getAiSelection,
+  setAiSelection,
+  PROVIDERS,
+  PROVIDER_LABEL,
   type AiProviderKey,
+  type AiSelection,
 } from "@/lib/ai-keys.functions";
-import { Plus, Trash2, PlayCircle, KeySquare } from "lucide-react";
+import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2 } from "lucide-react";
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
   active:       "bg-emerald-500/15 text-emerald-300 ring-emerald-400/40",
@@ -482,13 +488,24 @@ const STATUS_LABEL: Record<AiProviderKey["status"], string> = {
   error: "Com erro",
   disabled: "Desativada",
 };
+const STATUS_DOT: Record<AiProviderKey["status"], string> = {
+  active: "bg-emerald-400",
+  untested: "bg-muted-foreground/40",
+  rate_limited: "bg-amber-400",
+  error: "bg-red-400",
+  disabled: "bg-muted-foreground/30",
+};
 
 function AiKeysPanel() {
   const list = useServerFn(listAiProviderKeys);
   const upsert = useServerFn(upsertAiProviderKey);
   const del = useServerFn(deleteAiProviderKey);
   const test = useServerFn(testAiProviderKey);
+  const testAll = useServerFn(testAllAiProviderKeys);
+  const getSel = useServerFn(getAiSelection);
+  const setSel = useServerFn(setAiSelection);
   const [rows, setRows] = useState<AiProviderKey[]>([]);
+  const [selection, setSelection] = useState<AiSelection>({ mode: "auto", manual_key_id: null });
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [form, setForm] = useState({ provider: "openai" as AiProviderKey["provider"], label: "", secret_name: "", priority: 100 });
@@ -496,8 +513,11 @@ function AiKeysPanel() {
 
   async function reload() {
     setErr(null);
-    try { setRows(await list()); }
-    catch (e: any) { setErr(String(e?.message ?? e)); }
+    try {
+      const [r, s] = await Promise.all([list(), getSel()]);
+      setRows(r);
+      setSelection(s);
+    } catch (e: any) { setErr(String(e?.message ?? e)); }
     finally { setLoading(false); }
   }
   useEffect(() => { reload(); /* eslint-disable-next-line */ }, []);
@@ -511,6 +531,17 @@ function AiKeysPanel() {
     finally { setBusy(null); }
   }
 
+  async function changeMode(mode: "auto" | "manual", manualId?: string | null) {
+    setBusy("mode");
+    try {
+      const next = await setSel({ data: { mode, manual_key_id: manualId ?? selection.manual_key_id ?? null } });
+      setSelection(next);
+    } catch (e: any) { setErr(String(e?.message ?? e)); }
+    finally { setBusy(null); }
+  }
+
+  const activeCount = rows.filter((r) => r.status === "active").length;
+
   return (
     <section className="mx-auto mt-6 max-w-7xl px-4 sm:px-6">
       <div className="glass-panel rounded-2xl p-4 sm:p-6">
@@ -518,25 +549,65 @@ function AiKeysPanel() {
           <KeySquare className="h-5 w-5 text-primary" />
           <h2 className="text-base font-extrabold text-foreground">Chaves de IA com failover</h2>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30">
-            v5.4.3 · Parte G
+            v5.5 · multi-provedor
+          </span>
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
+            <span className={`h-1.5 w-1.5 rounded-full ${activeCount > 0 ? "bg-emerald-400" : "bg-muted-foreground/40"}`} />
+            {activeCount} ativa{activeCount === 1 ? "" : "s"}
           </span>
         </header>
         <p className="mb-4 text-xs text-muted-foreground">
-          Cadastre múltiplas chaves por provedor (OpenAI, Gemini, Groq, Lovable). A ordem de <b>prioridade</b> define
-          o failover: a menor prioridade é tentada primeiro; se retornar erro ou limite, a próxima ativa entra em ação.
+          Cadastre múltiplas chaves por provedor. Provedores suportados: {Object.values(PROVIDER_LABEL).join(", ")}.
           Os valores das chaves ficam no cofre de secrets — aqui só ficam o nome do secret, prioridade e status.
         </p>
 
-        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[140px_1fr_1fr_90px_auto]">
+        {/* Selection mode */}
+        <div className="mb-4 grid gap-3 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => changeMode("auto")}
+            className={`flex items-start gap-2 rounded-lg p-3 text-left ring-1 transition ${
+              selection.mode === "auto"
+                ? "bg-primary/10 ring-primary/40"
+                : "bg-background/40 ring-border hover:bg-white/5"
+            }`}
+          >
+            <Zap className={`mt-0.5 h-4 w-4 ${selection.mode === "auto" ? "text-primary" : "text-muted-foreground"}`} />
+            <div>
+              <div className="text-sm font-bold">Automático (melhor disponível)</div>
+              <div className="text-[11px] text-muted-foreground">
+                Usa a chave ativa de menor prioridade. Se falhar (erro/limite), promove a próxima.
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => changeMode("manual", selection.manual_key_id ?? rows[0]?.id ?? null)}
+            className={`flex items-start gap-2 rounded-lg p-3 text-left ring-1 transition ${
+              selection.mode === "manual"
+                ? "bg-primary/10 ring-primary/40"
+                : "bg-background/40 ring-border hover:bg-white/5"
+            }`}
+          >
+            <CheckCircle2 className={`mt-0.5 h-4 w-4 ${selection.mode === "manual" ? "text-primary" : "text-muted-foreground"}`} />
+            <div>
+              <div className="text-sm font-bold">Manual (chave fixa)</div>
+              <div className="text-[11px] text-muted-foreground">
+                Sempre usa a chave marcada abaixo. Nada de failover automático.
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <form onSubmit={add} className="mb-4 grid gap-2 rounded-xl bg-glass p-3 ring-1 ring-border sm:grid-cols-[160px_1fr_1fr_90px_auto]">
           <select
             value={form.provider}
             onChange={(e) => setForm({ ...form, provider: e.target.value as any })}
             className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
           >
-            <option value="openai">OpenAI</option>
-            <option value="gemini">Gemini</option>
-            <option value="groq">Groq</option>
-            <option value="lovable">Lovable AI</option>
+            {PROVIDERS.map((p) => (
+              <option key={p} value={p}>{PROVIDER_LABEL[p]}</option>
+            ))}
           </select>
           <input
             placeholder="Rótulo (ex: OpenAI principal)"
@@ -545,7 +616,7 @@ function AiKeysPanel() {
             className="rounded-md bg-background px-2 py-1.5 text-sm ring-1 ring-border"
           />
           <input
-            placeholder="Nome do secret (ex: OPENAI_API_KEY_1)"
+            placeholder="Nome do secret (ex: NVIDIA_API_KEY)"
             value={form.secret_name}
             onChange={(e) => setForm({ ...form, secret_name: e.target.value.toUpperCase() })}
             className="rounded-md bg-background px-2 py-1.5 text-sm font-mono ring-1 ring-border"
@@ -565,9 +636,20 @@ function AiKeysPanel() {
             <Plus className="h-3.5 w-3.5" /> Cadastrar
           </button>
         </form>
-        <p className="mb-3 text-[11px] text-muted-foreground">
-          Depois de cadastrar, salve o valor da chave em <b>Configurações → Secrets</b> com exatamente o mesmo nome. Use <b>“Testar”</b> para validar.
-        </p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] text-muted-foreground">
+            Depois de cadastrar, salve o valor da chave em <b>Configurações → Secrets</b> com o mesmo nome. O status é atualizado ao clicar em <b>Testar</b>.
+          </p>
+          <button
+            type="button"
+            onClick={async () => { setBusy("all"); try { await testAll(); await reload(); } finally { setBusy(null); } }}
+            disabled={busy === "all" || rows.length === 0}
+            className="inline-flex items-center gap-1 rounded-full bg-glass px-3 py-1 text-[11px] font-bold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
+          >
+            {busy === "all" ? <Loader2 className="h-3 w-3 animate-spin" /> : <PlayCircle className="h-3 w-3" />}
+            Testar todas
+          </button>
+        </div>
 
         {err && <div className="mb-3 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
 
@@ -575,6 +657,7 @@ function AiKeysPanel() {
           <table className="w-full text-xs">
             <thead className="bg-glass text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr>
+                <th className="px-2 py-2 text-center">Usar</th>
                 <th className="px-3 py-2 text-left">Provedor</th>
                 <th className="px-3 py-2 text-left">Rótulo</th>
                 <th className="px-3 py-2 text-left">Secret</th>
@@ -586,16 +669,29 @@ function AiKeysPanel() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>
+                <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">Carregando…</td></tr>
               )}
               {!loading && rows.length === 0 && (
-                <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
+                <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">
                   Nenhuma chave cadastrada. Adicione ao menos <b>duas</b> para ativar o failover.
                 </td></tr>
               )}
-              {rows.map((r) => (
-                <tr key={r.id} className="border-t border-border">
-                  <td className="px-3 py-2 font-bold uppercase text-primary">{r.provider}</td>
+              {rows.map((r) => {
+                const isManualPick = selection.mode === "manual" && selection.manual_key_id === r.id;
+                return (
+                <tr key={r.id} className={`border-t border-border ${isManualPick ? "bg-primary/5" : ""}`}>
+                  <td className="px-2 py-2 text-center">
+                    <input
+                      type="radio"
+                      name="ai-manual"
+                      checked={isManualPick}
+                      disabled={selection.mode !== "manual" || busy === "mode"}
+                      onChange={() => changeMode("manual", r.id)}
+                      aria-label={`Usar ${r.label}`}
+                      className="h-3.5 w-3.5 accent-[oklch(var(--primary))]"
+                    />
+                  </td>
+                  <td className="px-3 py-2 font-bold uppercase text-primary">{PROVIDER_LABEL[r.provider] ?? r.provider}</td>
                   <td className="px-3 py-2">{r.label}</td>
                   <td className="px-3 py-2 font-mono text-[11px]">
                     {r.secret_name}{" "}
@@ -607,11 +703,12 @@ function AiKeysPanel() {
                   </td>
                   <td className="px-3 py-2 text-center tabular-nums">{r.priority}</td>
                   <td className="px-3 py-2">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${STATUS_STYLES[r.status]}`}>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${STATUS_STYLES[r.status]}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[r.status]} ${r.status === "active" ? "animate-pulse" : ""}`} />
                       {STATUS_LABEL[r.status]}
                     </span>
                     {r.last_error && (
-                      <div className="mt-0.5 text-[10px] text-red-300/80">{r.last_error}</div>
+                      <div className="mt-0.5 max-w-[220px] truncate text-[10px] text-red-300/80" title={r.last_error}>{r.last_error}</div>
                     )}
                   </td>
                   <td className="px-3 py-2 text-[11px] text-muted-foreground">
@@ -641,12 +738,13 @@ function AiKeysPanel() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>
       </div>
     </section>
+
   );
 }
 
