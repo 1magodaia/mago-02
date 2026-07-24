@@ -115,7 +115,7 @@ function Home() {
         .then((s) => {
           if (!alive) return;
           setCitationsEnabled(!!s.citations_enabled);
-          if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+          
           setSupportWa(s.support_whatsapp);
           setSupportUpdatedAt(s.updated_at);
         })
