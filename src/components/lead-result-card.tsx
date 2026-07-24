@@ -244,7 +244,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 <span className="font-semibold text-foreground">{lead.rating.toFixed(1)}</span>
                 <span>({lead.user_ratings_total ?? 0})</span>
                 {lastReviewAgo && (
-                  <span className="text-muted-foreground">· última avaliação {lastReviewAgo}</span>
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    · última avaliação {lastReviewAgo}
+                    <HelpTip
+                      title="Última avaliação"
+                      text="Data da avaliação mais recente feita no Google — nosso sinal mais confiável de que o comércio está ativo."
+                    />
+                  </span>
                 )}
               </span>
             )}
