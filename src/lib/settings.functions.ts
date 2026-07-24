@@ -30,7 +30,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("app_settings")
-    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
     .eq("id", 1)
     .maybeSingle();
   return {
@@ -39,7 +39,9 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
     citations_enabled: data?.citations_enabled ?? false,
     citations_daily_limit: data?.citations_daily_limit ?? 20,
     hero_image_url: (data as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
+    updated_at: (data as { updated_at?: string | null } | null)?.updated_at ?? null,
   };
+
 });
 
 const inputSchema = z.object({
