@@ -100,6 +100,8 @@ function Home() {
   const [heroImageUrl, setHeroImageUrl] = useState<string>(heroDefault.url);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [showTutorialBadge, setShowTutorialBadge] = useState(false);
+  const [supportWa, setSupportWa] = useState<string | null>(null);
+  const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const readSettings = useServerFn(getAppSettings);
   const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
 
@@ -113,10 +115,13 @@ function Home() {
       .then((s) => {
         setCitationsEnabled(!!s.citations_enabled);
         if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+        setSupportWa(s.support_whatsapp);
+        setSupportUpdatedAt(s.updated_at);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
 
   // Auto-solicita GPS ao montar (opt-in): reaproveita coordenadas em cache
