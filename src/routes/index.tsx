@@ -906,6 +906,7 @@ function Home() {
                 leads={filtered}
                 selectedId={selected}
                 onSelect={setSelected}
+                onMapClick={onMapPin}
               />
             </Suspense>
           </ClientOnly>
