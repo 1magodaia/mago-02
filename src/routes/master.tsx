@@ -18,7 +18,7 @@ import { useAuth } from "@/lib/auth-context";
 import {
   listUsers,
   sendPasswordReset,
-  setUserPlan,
+  grantProAccess,
   setUserStatus,
   type AdminUserRow,
 } from "@/lib/admin.functions";
@@ -45,7 +45,7 @@ function MasterPanel() {
   const { loading, user, isAdmin, isMaster } = useAuth();
   const nav = useNavigate();
   const list = useServerFn(listUsers);
-  const setPlan = useServerFn(setUserPlan);
+  const grantAccess = useServerFn(grantProAccess);
   const setStatus = useServerFn(setUserStatus);
   const resetPwd = useServerFn(sendPasswordReset);
   const readSettings = useServerFn(getAppSettings);
@@ -147,11 +147,21 @@ function MasterPanel() {
   };
 
 
-  const togglePlan = async (u: AdminUserRow) => {
+  type GrantPayload =
+    | { userId: string; mode: "free"; reason?: string }
+    | { userId: string; mode: "date"; valid_until: string; reason?: string }
+    | { userId: string; mode: "searches"; searches_granted: number; reason?: string };
+
+  const grant = async (u: AdminUserRow, payload: GrantPayload) => {
     setBusy(u.id);
     try {
-      await setPlan({ data: { userId: u.id, plan: u.plan === "pro" ? "free" : "pro" } });
-      setNotice(`Plano de ${u.email} atualizado.`);
+      await grantAccess({ data: payload });
+      const nice = payload.mode === "free"
+        ? `${u.email} voltou para Free.`
+        : payload.mode === "date"
+          ? `${u.email} é Pro até ${new Date(payload.valid_until).toLocaleDateString("pt-BR")}.`
+          : `${u.email} é Pro com ${payload.searches_granted} buscas.`;
+      setNotice(nice);
       await load();
     } catch (e) {
       setNotice(e instanceof Error ? e.message : "Erro.");
@@ -380,9 +390,7 @@ function MasterPanel() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${u.plan === "pro" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {u.plan.toUpperCase()}
-                    </span>
+                    <PlanCell u={u} />
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${u.status === "active" ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>
@@ -395,13 +403,7 @@ function MasterPanel() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex flex-wrap justify-end gap-1.5">
-                      <button
-                        onClick={() => togglePlan(u)}
-                        disabled={busy === u.id}
-                        className="rounded-full bg-glass px-3 py-1 text-xs font-semibold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
-                      >
-                        {u.plan === "pro" ? "Voltar Free" : "Tornar Pro"}
-                      </button>
+                      <GrantMenu u={u} busy={busy === u.id} onGrant={(p) => grant(u, p)} />
                       <button
                         onClick={() => toggleStatus(u)}
                         disabled={busy === u.id || isSelf}
@@ -647,3 +649,110 @@ function AiKeysPanel() {
     </section>
   );
 }
+
+type GrantPayload =
+  | { userId: string; mode: "free"; reason?: string }
+  | { userId: string; mode: "date"; valid_until: string; reason?: string }
+  | { userId: string; mode: "searches"; searches_granted: number; reason?: string };
+
+function PlanCell({ u }: { u: AdminUserRow }) {
+  const mode = (u as unknown as { pro_access_mode?: "none" | "date" | "searches" }).pro_access_mode ?? "none";
+  const until = (u as unknown as { pro_valid_until?: string | null }).pro_valid_until ?? null;
+  const remaining = (u as unknown as { pro_searches_remaining?: number | null }).pro_searches_remaining ?? null;
+  const isPro = u.plan === "pro";
+  return (
+    <div className="flex flex-col gap-1">
+      <span className={`inline-block w-fit rounded-full px-2 py-0.5 text-xs font-bold ${isPro ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+        {u.plan.toUpperCase()}
+      </span>
+      {isPro && mode === "date" && until && (
+        <span className="text-[10px] text-muted-foreground">até {new Date(until).toLocaleDateString("pt-BR")}</span>
+      )}
+      {isPro && mode === "searches" && remaining != null && (
+        <span className="text-[10px] text-muted-foreground">{remaining} buscas restantes</span>
+      )}
+    </div>
+  );
+}
+
+function GrantMenu({ u, busy, onGrant }: { u: AdminUserRow; busy: boolean; onGrant: (p: GrantPayload) => void }) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"date" | "searches">("date");
+  const defaultDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const [validUntil, setValidUntil] = useState(defaultDate);
+  const [searches, setSearches] = useState(100);
+  const isPro = u.plan === "pro";
+
+  if (!open) {
+    return (
+      <div className="inline-flex gap-1.5">
+        <button
+          onClick={() => setOpen(true)}
+          disabled={busy}
+          className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/25 disabled:opacity-50"
+        >
+          {isPro ? "Ajustar Pro" : "Conceder Pro"}
+        </button>
+        {isPro && (
+          <button
+            onClick={() => onGrant({ userId: u.id, mode: "free" })}
+            disabled={busy}
+            className="rounded-full bg-glass px-3 py-1 text-xs font-semibold ring-1 ring-border hover:bg-white/5 disabled:opacity-50"
+          >
+            Voltar Free
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-panel flex flex-wrap items-center gap-1.5 rounded-xl p-2 text-xs">
+      <select
+        value={mode}
+        onChange={(e) => setMode(e.target.value as "date" | "searches")}
+        className="rounded bg-glass px-2 py-1 ring-1 ring-border"
+      >
+        <option value="date">Por data</option>
+        <option value="searches">Por buscas</option>
+      </select>
+      {mode === "date" ? (
+        <input
+          type="date"
+          value={validUntil}
+          onChange={(e) => setValidUntil(e.target.value)}
+          className="rounded bg-glass px-2 py-1 ring-1 ring-border"
+        />
+      ) : (
+        <input
+          type="number"
+          min={1}
+          value={searches}
+          onChange={(e) => setSearches(Number(e.target.value))}
+          className="w-20 rounded bg-glass px-2 py-1 ring-1 ring-border"
+        />
+      )}
+      <button
+        onClick={() => {
+          onGrant(
+            mode === "date"
+              ? { userId: u.id, mode: "date", valid_until: new Date(validUntil).toISOString() }
+              : { userId: u.id, mode: "searches", searches_granted: searches },
+          );
+          setOpen(false);
+        }}
+        disabled={busy}
+        className="rounded-full bg-primary px-3 py-1 font-bold text-primary-foreground hover:brightness-110 disabled:opacity-50"
+      >
+        Aplicar
+      </button>
+      <button
+        onClick={() => setOpen(false)}
+        className="rounded-full bg-glass px-3 py-1 ring-1 ring-border hover:bg-white/5"
+      >
+        Cancelar
+      </button>
+    </div>
+  );
+}
+

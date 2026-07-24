@@ -6,16 +6,25 @@ const auditSchema = z.object({
   phone: z.string().max(50).optional(),
 });
 
+export interface CnpjInfo {
+  cnpj: string;                 // formatted XX.XXX.XXX/XXXX-XX
+  razao_social: string | null;
+  data_abertura: string | null; // ISO date (YYYY-MM-DD)
+  situacao_cadastral: string | null; // "Ativa"|"Baixada"|"Suspensa"|"Inapta"|...
+  source: "site+brasilapi";
+}
+
 export interface DigitalAudit {
   site_reachable: boolean;
   site_status_code: number | null;
   instagram: string | null;
   facebook: string | null;
   whatsapp_link: string | null;
-  sitemap_lastmod: string | null; // ISO date
-  domain_registered_at: string | null; // ISO date via RDAP
+  sitemap_lastmod: string | null;
+  domain_registered_at: string | null;
   domain_expires_at: string | null;
-  approx_stale_days: number | null; // heurística
+  approx_stale_days: number | null;
+  cnpj_info: CnpjInfo | null;
   audited_at: string;
   note: string;
 }
@@ -70,6 +79,54 @@ function extractSocials(html: string): {
   };
 }
 
+// Regex conservador: pega XX.XXX.XXX/XXXX-XX ou 14 dígitos "colados".
+const CNPJ_RE = /\b(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})\b/g;
+
+function isValidCnpj(digits: string): boolean {
+  if (digits.length !== 14 || /^(\d)\1{13}$/.test(digits)) return false;
+  const calc = (base: string, weights: number[]) => {
+    const s = base.split("").reduce((acc, d, i) => acc + Number(d) * weights[i], 0);
+    const r = s % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  const w1 = [5,4,3,2,9,8,7,6,5,4,3,2];
+  const w2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
+  const d1 = calc(digits.slice(0,12), w1);
+  const d2 = calc(digits.slice(0,12) + d1, w2);
+  return d1 === Number(digits[12]) && d2 === Number(digits[13]);
+}
+
+function formatCnpj(digits: string): string {
+  return `${digits.slice(0,2)}.${digits.slice(2,5)}.${digits.slice(5,8)}/${digits.slice(8,12)}-${digits.slice(12,14)}`;
+}
+
+function extractCnpjFromHtml(html: string): string | null {
+  CNPJ_RE.lastIndex = 0;
+  const seen = new Set<string>();
+  let match: RegExpExecArray | null;
+  while ((match = CNPJ_RE.exec(html)) !== null) {
+    const digits = match[1].replace(/\D/g, "");
+    if (seen.has(digits)) continue;
+    seen.add(digits);
+    if (isValidCnpj(digits)) return digits;
+  }
+  return null;
+}
+
+async function fetchCnpjInfo(digits: string): Promise<CnpjInfo | null> {
+  const res = await timedFetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
+  if (!res || !res.ok) return null;
+  const data = await res.json().catch(() => null) as any;
+  if (!data) return null;
+  return {
+    cnpj: formatCnpj(digits),
+    razao_social: data.razao_social ?? null,
+    data_abertura: data.data_inicio_atividade ?? null,
+    situacao_cadastral: data.descricao_situacao_cadastral ?? null,
+    source: "site+brasilapi",
+  };
+}
+
 async function fetchSitemapLastMod(origin: string): Promise<string | null> {
   const res = await timedFetch(`${origin}/sitemap.xml`);
   if (!res || !res.ok) return null;
@@ -105,6 +162,17 @@ function normalizeWhatsAppFromPhone(phone: string | undefined): string | null {
   return `https://wa.me/${withCountry}`;
 }
 
+async function fetchAndExtract(url: string): Promise<{
+  html: string;
+  status: number | null;
+  reachable: boolean;
+}> {
+  const res = await timedFetch(url);
+  if (!res) return { html: "", status: null, reachable: false };
+  const html = res.ok ? await readCapped(res) : "";
+  return { html, status: res.status, reachable: res.ok };
+}
+
 export const auditWebsite = createServerFn({ method: "POST" })
   .inputValidator((input) => auditSchema.parse(input))
   .handler(async ({ data }): Promise<DigitalAudit> => {
@@ -114,43 +182,43 @@ export const auditWebsite = createServerFn({ method: "POST" })
       url = new URL(data.website);
     } catch {
       return {
-        site_reachable: false,
-        site_status_code: null,
-        instagram: null,
-        facebook: null,
+        site_reachable: false, site_status_code: null,
+        instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
-        sitemap_lastmod: null,
-        domain_registered_at: null,
-        domain_expires_at: null,
-        approx_stale_days: null,
-        audited_at: now,
-        note: "URL inválida.",
+        sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
+        approx_stale_days: null, cnpj_info: null,
+        audited_at: now, note: "URL inválida.",
       };
     }
 
     const origin = `${url.protocol}//${url.host}`;
     const [pageRes, sitemapLastMod, rdap] = await Promise.all([
-      timedFetch(data.website),
+      fetchAndExtract(data.website),
       fetchSitemapLastMod(origin),
       fetchRdap(url.hostname),
     ]);
 
     let socials = { instagram: null as string | null, facebook: null as string | null, whatsapp: null as string | null };
-    let statusCode: number | null = null;
-    let reachable = false;
-
-    if (pageRes) {
-      statusCode = pageRes.status;
-      reachable = pageRes.ok;
-      if (pageRes.ok) {
-        const html = await readCapped(pageRes);
-        socials = extractSocials(html);
+    let cnpjDigits: string | null = null;
+    if (pageRes.reachable && pageRes.html) {
+      socials = extractSocials(pageRes.html);
+      cnpjDigits = extractCnpjFromHtml(pageRes.html);
+      // Fallback: se homepage não tem CNPJ, tenta uma página institucional comum.
+      if (!cnpjDigits) {
+        for (const path of ["/sobre", "/sobre-nos", "/institucional", "/contato", "/termos", "/politica-de-privacidade"]) {
+          const alt = await fetchAndExtract(`${origin}${path}`);
+          if (alt.reachable && alt.html) {
+            const found = extractCnpjFromHtml(alt.html);
+            if (found) { cnpjDigits = found; break; }
+          }
+        }
       }
     }
 
-    const waFromPage = socials.whatsapp;
+    const cnpj_info = cnpjDigits ? await fetchCnpjInfo(cnpjDigits) : null;
+
     const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
-    const whatsapp_link = waFromPage ?? waFromPhone;
+    const whatsapp_link = socials.whatsapp ?? waFromPhone;
 
     let approx_stale_days: number | null = null;
     if (sitemapLastMod) {
@@ -160,11 +228,13 @@ export const auditWebsite = createServerFn({ method: "POST" })
     const notes: string[] = [];
     if (!sitemapLastMod) notes.push("sitemap.xml indisponível");
     if (!rdap.registered) notes.push("WHOIS/RDAP sem dados públicos");
-    if (!reachable) notes.push(`site retornou ${statusCode ?? "erro de rede"}`);
+    if (!pageRes.reachable) notes.push(`site retornou ${pageRes.status ?? "erro de rede"}`);
+    if (cnpjDigits && !cnpj_info) notes.push("CNPJ localizado no site, mas BrasilAPI não respondeu");
+    if (!cnpjDigits && pageRes.reachable) notes.push("CNPJ não encontrado no site");
 
     return {
-      site_reachable: reachable,
-      site_status_code: statusCode,
+      site_reachable: pageRes.reachable,
+      site_status_code: pageRes.status,
       instagram: socials.instagram,
       facebook: socials.facebook,
       whatsapp_link,
@@ -172,6 +242,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       domain_registered_at: rdap.registered,
       domain_expires_at: rdap.expires,
       approx_stale_days,
+      cnpj_info,
       audited_at: now,
       note: notes.length ? notes.join(" · ") : "dados obtidos com sucesso",
     };

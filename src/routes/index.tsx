@@ -225,7 +225,7 @@ function Home() {
 
   const doExport = () => {
     if (!isPro) {
-      nav({ to: "/planos" });
+      setSearchError("Exportação CSV está disponível apenas no plano Pro. Fale com o administrador para liberar seu acesso.");
       return;
     }
     exportToCsv(
@@ -243,6 +243,11 @@ function Home() {
         ultima_avaliacao: l.latest_review_at ?? "",
         coletado_em: l.collected_at ?? "",
         faixa_preco_google: l.price_level == null ? "nao_informado" : "$".repeat(Math.max(1, l.price_level)),
+        status_google: l.business_status ?? "",
+        cnpj: l.audit?.cnpj_info?.cnpj ?? "nao_localizado",
+        razao_social: l.audit?.cnpj_info?.razao_social ?? "",
+        data_abertura: l.audit?.cnpj_info?.data_abertura ?? "",
+        situacao_cadastral: l.audit?.cnpj_info?.situacao_cadastral ?? "",
         score_oportunidade: l.opportunity_score,
         status: l.status,
         google_maps: l.google_maps_uri ?? "",
@@ -274,16 +279,6 @@ function Home() {
               <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
             </Link>
           )}
-          <Link
-            to="/planos"
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ring-1 ${
-              isPro
-                ? "bg-glass text-foreground ring-border hover:bg-white/5"
-                : "bg-warn/15 text-warn ring-warn/40 hover:bg-warn/25"
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" /> {isPro ? "Pro" : "Upgrade"}
-          </Link>
           <Link
             to="/novidades"
             className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
@@ -317,7 +312,6 @@ function Home() {
                   <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
                 )}
                 <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                <Link to="/planos" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Planos</Link>
                 <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>
                 <button
                   onClick={() => signOut().then(() => nav({ to: "/" }))}
@@ -542,12 +536,7 @@ function Home() {
         {searchError && (
           <div className="mt-3 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2 text-xs text-destructive" role="alert">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              {searchError}{" "}
-              {searchError.includes("Limite") && (
-                <Link to="/planos" className="font-bold underline">Ver planos</Link>
-              )}
-            </span>
+            <span>{searchError}</span>
           </div>
         )}
       </header>

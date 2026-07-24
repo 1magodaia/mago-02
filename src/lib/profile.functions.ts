@@ -13,6 +13,9 @@ export interface Profile {
   month_reset_at: string;
   last_login_at: string | null;
   created_at: string;
+  pro_access_mode: "none" | "date" | "searches";
+  pro_valid_until: string | null;
+  pro_searches_remaining: number | null;
 }
 
 export const getMyProfile = createServerFn({ method: "GET" })
@@ -23,7 +26,6 @@ export const getMyProfile = createServerFn({ method: "GET" })
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
-    // update last_login_at (best-effort)
     supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", userId).then(() => {});
     return {
       profile: (profile as Profile | null) ?? null,

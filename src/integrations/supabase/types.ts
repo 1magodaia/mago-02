@@ -220,28 +220,37 @@ export type Database = {
       }
       plan_history: {
         Row: {
+          access_mode: string | null
           changed_by: string | null
           created_at: string
           id: string
           plan: Database["public"]["Enums"]["user_plan"]
           reason: string | null
+          searches_granted: number | null
           user_id: string
+          valid_until: string | null
         }
         Insert: {
+          access_mode?: string | null
           changed_by?: string | null
           created_at?: string
           id?: string
           plan: Database["public"]["Enums"]["user_plan"]
           reason?: string | null
+          searches_granted?: number | null
           user_id: string
+          valid_until?: string | null
         }
         Update: {
+          access_mode?: string | null
           changed_by?: string | null
           created_at?: string
           id?: string
           plan?: Database["public"]["Enums"]["user_plan"]
           reason?: string | null
+          searches_granted?: number | null
           user_id?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -254,6 +263,9 @@ export type Database = {
           last_login_at: string | null
           month_reset_at: string
           plan: Database["public"]["Enums"]["user_plan"]
+          pro_access_mode: string
+          pro_searches_remaining: number | null
+          pro_valid_until: string | null
           search_count_month: number
           status: Database["public"]["Enums"]["user_status"]
           updated_at: string
@@ -266,6 +278,9 @@ export type Database = {
           last_login_at?: string | null
           month_reset_at?: string
           plan?: Database["public"]["Enums"]["user_plan"]
+          pro_access_mode?: string
+          pro_searches_remaining?: number | null
+          pro_valid_until?: string | null
           search_count_month?: number
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
@@ -278,6 +293,9 @@ export type Database = {
           last_login_at?: string | null
           month_reset_at?: string
           plan?: Database["public"]["Enums"]["user_plan"]
+          pro_access_mode?: string
+          pro_searches_remaining?: number | null
+          pro_valid_until?: string | null
           search_count_month?: number
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
