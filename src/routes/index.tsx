@@ -27,6 +27,8 @@ import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
+import { supabase } from "@/integrations/supabase/client";
+
 import { useServerFn } from "@tanstack/react-start";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
@@ -112,16 +114,35 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    readSettings()
-      .then((s) => {
-        setCitationsEnabled(!!s.citations_enabled);
-        if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
-        setSupportWa(s.support_whatsapp);
-        setSupportUpdatedAt(s.updated_at);
-      })
-      .catch(() => {});
+    let alive = true;
+    const load = () => {
+      readSettings()
+        .then((s) => {
+          if (!alive) return;
+          setCitationsEnabled(!!s.citations_enabled);
+          if (s.hero_image_url) setHeroImageUrl(s.hero_image_url);
+          setSupportWa(s.support_whatsapp);
+          setSupportUpdatedAt(s.updated_at);
+        })
+        .catch(() => {});
+    };
+    load();
+    const channel = supabase
+      .channel("app_settings:home")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_settings", filter: "id=eq.1" },
+        () => load(),
+      )
+      .subscribe();
+    return () => {
+      alive = false;
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
 
 
 
