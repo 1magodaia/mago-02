@@ -37,7 +37,7 @@ export interface AiProviderKey {
   id: string;
   provider: Provider;
   label: string;
-  secret_name: string;
+  secret_name: string | null;
   model: string | null;
   priority: number;
   status: "active" | "error" | "rate_limited" | "untested" | "disabled";
@@ -45,7 +45,9 @@ export interface AiProviderKey {
   last_tested_at: string | null;
   last_used_at: string | null;
   secret_present: boolean;
+  has_inline_key: boolean;
 }
+
 
 /**
  * Default chat model per provider (used when the user does not choose one)
@@ -94,27 +96,34 @@ export const listAiProviderKeys = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AiProviderKey[]> => {
     await ensurePrivileged(context);
-    const { data, error } = await context.supabase
+    // Uses supabaseAdmin to read `secret_value` presence (column is revoked
+    // from authenticated/anon). We only expose a boolean flag, never the value.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
       .from("ai_provider_keys")
       .select("*")
       .order("priority", { ascending: true })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
-      ...r,
-      secret_present: !!process.env[r.secret_name],
-    }));
+    return (data ?? []).map((r: any) => {
+      const hasInline = typeof r.secret_value === "string" && r.secret_value.length > 0;
+      const hasEnv = r.secret_name ? !!process.env[r.secret_name] : false;
+      const { secret_value, ...safe } = r;
+      return { ...safe, secret_present: hasInline || hasEnv, has_inline_key: hasInline };
+    });
   });
 
 const UpsertSchema = z.object({
   id: z.string().uuid().optional(),
   provider: z.enum(PROVIDERS),
   label: z.string().min(1).max(60),
-  secret_name: z.string().regex(/^[A-Z_][A-Z0-9_]*$/, "Nome de secret inválido"),
+  secret_name: z.string().regex(/^[A-Z_][A-Z0-9_]*$/, "Nome de secret inválido").optional().nullable(),
+  secret_value: z.string().trim().min(1).max(4000).optional().nullable(),
   model: z.string().trim().max(120).optional().nullable(),
   priority: z.number().int().min(1).max(999),
   status: z.enum(["active", "error", "rate_limited", "untested", "disabled"]).optional(),
 });
+
 
 export const upsertAiProviderKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -125,11 +134,16 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
     const row: any = {
       provider: data.provider,
       label: data.label,
-      secret_name: data.secret_name,
+      secret_name: data.secret_name ?? null,
       model: data.model?.trim() || null,
       priority: data.priority,
       status: data.status ?? "untested",
     };
+    // Only patch secret_value when a non-empty value is supplied — keeps
+    // existing inline keys intact when the wizard is used to edit metadata.
+    if (typeof data.secret_value === "string" && data.secret_value.trim().length > 0) {
+      row.secret_value = data.secret_value.trim();
+    }
     if (data.id) {
       const { error } = await supabaseAdmin.from("ai_provider_keys").update(row).eq("id", data.id);
       if (error) throw new Error(error.message);
@@ -143,6 +157,7 @@ export const upsertAiProviderKey = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: inserted!.id };
   });
+
 
 
 export const deleteAiProviderKey = createServerFn({ method: "POST" })
@@ -361,6 +376,25 @@ async function probeProvider(
 
 
 /**
+ * Retorna o valor da chave para uma linha — prioriza o inline `secret_value`
+ * (salvo pelo assistente do painel) e cai no secret de ambiente quando existir.
+ */
+function resolveKeyValue(row: any): string | null {
+  if (typeof row?.secret_value === "string" && row.secret_value.length > 0) return row.secret_value;
+  const name = row?.secret_name;
+  if (typeof name === "string" && name.length > 0) {
+    const v = process.env[name];
+    if (typeof v === "string" && v.length > 0) return v;
+  }
+  return null;
+}
+
+function missingKeyMessage(row: any): string {
+  if (row?.secret_name) return `Secret '${row.secret_name}' vazio e nenhuma chave salva no assistente.`;
+  return "Nenhuma chave salva para este provedor — use o assistente para colar a chave.";
+}
+
+/**
  * Testa uma chave chamando o endpoint mais leve do provedor (list models quando existe).
  * Marca status = active | rate_limited | error com mensagem.
  */
@@ -377,17 +411,14 @@ export const testAiProviderKey = createServerFn({ method: "POST" })
       .single();
     if (error || !row) throw new Error(error?.message ?? "Chave não encontrada");
 
-    const key = process.env[row.secret_name];
+    const key = resolveKeyValue(row);
     if (!key) {
+      const msg = missingKeyMessage(row);
       await supabaseAdmin
         .from("ai_provider_keys")
-        .update({
-          status: "error",
-          last_error: `Secret '${row.secret_name}' não configurado`,
-          last_tested_at: new Date().toISOString(),
-        })
+        .update({ status: "error", last_error: msg, last_tested_at: new Date().toISOString() })
         .eq("id", data.id);
-      return { status: "error", message: `Secret '${row.secret_name}' vazio` };
+      return { status: "error" as const, message: msg };
     }
 
     const probe = await probeProvider(row.provider as Provider, key, (row as any).model);
@@ -410,14 +441,14 @@ export const testAllAiProviderKeys = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await ensurePrivileged(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("id, provider, secret_name, model");
-    const list = (rows ?? []) as Array<{ id: string; provider: Provider; secret_name: string; model: string | null }>;
+    const { data: rows } = await supabaseAdmin.from("ai_provider_keys").select("*");
+    const list = (rows ?? []) as Array<any>;
     await Promise.all(
       list.map(async (row) => {
-        const key = process.env[row.secret_name];
+        const key = resolveKeyValue(row);
         const probe = key
-          ? await probeProvider(row.provider, key, row.model)
-          : { status: "error" as const, message: `Secret '${row.secret_name}' vazio` };
+          ? await probeProvider(row.provider as Provider, key, row.model)
+          : { status: "error" as const, message: missingKeyMessage(row) };
 
         await supabaseAdmin
           .from("ai_provider_keys")
@@ -428,6 +459,7 @@ export const testAllAiProviderKeys = createServerFn({ method: "POST" })
           })
           .eq("id", row.id);
       }),
+
     );
     return { tested: list.length };
   });
@@ -497,11 +529,11 @@ export async function getNextAvailableAiKey(): Promise<{ id: string; provider: P
   if (mode === "manual" && manualId) {
     const { data: row } = await supabaseAdmin
       .from("ai_provider_keys")
-      .select("id, provider, secret_name, model, status")
+      .select("id, provider, secret_name, secret_value, model, status")
       .eq("id", manualId)
       .maybeSingle();
     if (row && (row as any).status !== "disabled") {
-      const value = process.env[(row as any).secret_name];
+      const value = resolveKeyValue(row);
       if (value) return { id: (row as any).id, provider: (row as any).provider, value, model: (row as any).model ?? null };
     }
     return null;
@@ -509,13 +541,90 @@ export async function getNextAvailableAiKey(): Promise<{ id: string; provider: P
 
   const { data } = await supabaseAdmin
     .from("ai_provider_keys")
-    .select("id, provider, secret_name, model, status, priority")
+    .select("id, provider, secret_name, secret_value, model, status, priority")
     .in("status", ["active", "untested"])
     .order("priority", { ascending: true });
   for (const row of data ?? []) {
-    const value = process.env[(row as any).secret_name];
+    const value = resolveKeyValue(row);
     if (value) return { id: (row as any).id, provider: (row as any).provider, value, model: (row as any).model ?? null };
   }
-  return null;
 
+  return null;
 }
+
+// ---------------------------------------------------------------------------
+// Assistente "poucos cliques": salva a chave inline + roda o probe atômico.
+// ---------------------------------------------------------------------------
+const WizardSchema = z.object({
+  id: z.string().uuid().optional(),
+  provider: z.enum(PROVIDERS),
+  label: z.string().trim().min(1).max(60).optional(),
+  api_key: z.string().trim().min(4).max(4000),
+  model: z.string().trim().max(120).optional().nullable(),
+  priority: z.number().int().min(1).max(999).optional(),
+});
+
+export interface WizardResult {
+  id: string;
+  status: "active" | "rate_limited" | "error";
+  message: string;
+  provider: Provider;
+  model: string | null;
+  tested_at: string;
+}
+
+export const saveAndTestProvider = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => WizardSchema.parse(d))
+  .handler(async ({ data, context }): Promise<WizardResult> => {
+    await ensurePrivileged(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const label = data.label?.trim() || `${PROVIDER_LABEL[data.provider]} principal`;
+    const model = data.model?.trim() || PROVIDER_MODELS[data.provider]?.default || null;
+    const priority = data.priority ?? 10;
+
+    const row: any = {
+      provider: data.provider,
+      label,
+      model,
+      priority,
+      secret_value: data.api_key.trim(),
+      status: "untested",
+    };
+
+    let id: string | null = data.id ?? null;
+    if (id) {
+      const { error } = await supabaseAdmin.from("ai_provider_keys").update(row).eq("id", id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { data: ins, error } = await supabaseAdmin
+        .from("ai_provider_keys")
+        .insert(row)
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      id = ins!.id as string;
+    }
+
+    const probe = await probeProvider(data.provider, data.api_key.trim(), model);
+    const tested_at = new Date().toISOString();
+    await supabaseAdmin
+      .from("ai_provider_keys")
+      .update({
+        status: probe.status,
+        last_error: probe.status === "active" ? null : probe.message,
+        last_tested_at: tested_at,
+      })
+      .eq("id", id!);
+
+    return {
+      id: id!,
+      status: probe.status,
+      message: probe.message,
+      provider: data.provider,
+      model,
+      tested_at,
+    };
+  });
+
+

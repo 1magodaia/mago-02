@@ -52,7 +52,8 @@ export type Database = {
           model: string | null
           priority: number
           provider: string
-          secret_name: string
+          secret_name: string | null
+          secret_value: string | null
           status: string
           updated_at: string
         }
@@ -66,7 +67,8 @@ export type Database = {
           model?: string | null
           priority?: number
           provider: string
-          secret_name: string
+          secret_name?: string | null
+          secret_value?: string | null
           status?: string
           updated_at?: string
         }
@@ -80,7 +82,8 @@ export type Database = {
           model?: string | null
           priority?: number
           provider?: string
-          secret_name?: string
+          secret_name?: string | null
+          secret_value?: string | null
           status?: string
           updated_at?: string
         }
