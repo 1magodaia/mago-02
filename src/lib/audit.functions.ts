@@ -201,6 +201,23 @@ async function fetchAndExtract(url: string): Promise<{
   return { html, status: res.status, reachable: res.ok };
 }
 
+function extractSocialHandleFromUrl(u: URL): { instagram: string | null; facebook: string | null } {
+  const host = u.hostname.replace(/^www\./, "").toLowerCase();
+  const seg = u.pathname.split("/").filter(Boolean)[0]?.toLowerCase();
+  if (!seg) return { instagram: null, facebook: null };
+  if (host === "instagram.com" || host.endsWith(".instagram.com")) {
+    const IG_BAD = new Set(["p","explore","reel","reels","stories","accounts","sharer","share","about","help","legal","directory","web","developer","developers"]);
+    if (IG_BAD.has(seg)) return { instagram: null, facebook: null };
+    return { instagram: `https://instagram.com/${seg}`, facebook: null };
+  }
+  if (host === "facebook.com" || host === "fb.com" || host.endsWith(".facebook.com")) {
+    const FB_BAD = new Set(["sharer","share","share.php","dialog","plugins","tr","intent","login","help","policies","business","watch","gaming","marketplace"]);
+    if (FB_BAD.has(seg) || seg.includes(".")) return { instagram: null, facebook: null };
+    return { instagram: null, facebook: `https://facebook.com/${seg}` };
+  }
+  return { instagram: null, facebook: null };
+}
+
 export const auditWebsite = createServerFn({ method: "POST" })
   .inputValidator((input) => auditSchema.parse(input))
   .handler(async ({ data }): Promise<DigitalAudit> => {
@@ -220,12 +237,33 @@ export const auditWebsite = createServerFn({ method: "POST" })
       };
     }
 
+    // Caso especial: o "site" cadastrado no Google Places é, na verdade, um perfil
+    // social (Instagram/Facebook). Não faz sentido tratar como site — extraímos
+    // o handle diretamente e marcamos o site como não aplicável (evita falso
+    // alarme de WAF/429 e preenche corretamente a coluna social).
+    const directSocial = extractSocialHandleFromUrl(url);
+    if (directSocial.instagram || directSocial.facebook) {
+      const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
+      return {
+        site_reachable: false, site_status_code: null,
+        instagram: directSocial.instagram,
+        facebook: directSocial.facebook,
+        whatsapp_link: waFromPhone,
+        whatsapp_source: waFromPhone ? "phone" : null,
+        sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
+        approx_stale_days: null, cnpj_info: null,
+        audited_at: now,
+        note: `sem site próprio — perfil ${directSocial.instagram ? "Instagram" : "Facebook"} usado como site no Google`,
+      };
+    }
+
     const origin = `${url.protocol}//${url.host}`;
     const [pageRes, sitemapLastMod, rdap] = await Promise.all([
       fetchAndExtract(data.website),
       fetchSitemapLastMod(origin),
       fetchRdap(url.hostname),
     ]);
+
 
     let socials = { instagram: null as string | null, facebook: null as string | null, whatsapp: null as string | null };
     let cnpjDigits: string | null = null;
