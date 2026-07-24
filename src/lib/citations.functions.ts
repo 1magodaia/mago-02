@@ -160,7 +160,7 @@ Comércio: ${query}`;
       lead_name: data.name,
       lead_address: data.address ?? null,
       query,
-      result: { summary, items, elapsed_ms: elapsedMs },
+      result: { summary, items, elapsed_ms: elapsedMs } as unknown as never,
       cost_cents: COST_PER_CALL_CENTS,
       model: MODEL,
     });
@@ -178,16 +178,13 @@ Comércio: ${query}`;
     };
   });
 
-async function countRemaining(
-  supabase: { from: (t: string) => { select: (c: string, o?: unknown) => { eq: (k: string, v: string) => { gte: (k: string, v: string) => Promise<{ count: number | null }> } } } },
-  userId: string,
-  limit: number,
-): Promise<number> {
+async function countRemainingToday(userId: string, limit: number): Promise<number> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
-  const { count } = await supabase
+  const { count } = await supabaseAdmin
     .from("citation_lookups")
-    .select("id", { count: "exact", head: true } as unknown as string)
+    .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .gte("created_at", startOfDay.toISOString());
   return Math.max(0, limit - (count ?? 0));
