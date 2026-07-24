@@ -9,7 +9,9 @@ export interface AppSettings {
   citations_enabled: boolean;
   citations_daily_limit: number;
   hero_image_url: string | null;
+  updated_at: string | null;
 }
+
 
 
 /** Public read — used by the floating support widget on every page. */
