@@ -34,19 +34,24 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("public_app_settings")
-    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
     .eq("id", 1)
     .maybeSingle();
+  const d = data as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string }) | null;
   return {
-    support_whatsapp: data?.support_whatsapp ?? null,
-    support_message: data?.support_message ?? null,
-    citations_enabled: data?.citations_enabled ?? false,
-    citations_daily_limit: data?.citations_daily_limit ?? 20,
-    hero_image_url: (data as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
-    updated_at: (data as { updated_at?: string | null } | null)?.updated_at ?? null,
+    support_whatsapp: d?.support_whatsapp ?? null,
+    support_message: d?.support_message ?? null,
+    citations_enabled: d?.citations_enabled ?? false,
+    citations_daily_limit: d?.citations_daily_limit ?? 20,
+    hero_image_url: d?.hero_image_url ?? null,
+    hero_height_desktop: d?.hero_height_desktop ?? 320,
+    hero_height_mobile: d?.hero_height_mobile ?? 200,
+    hero_fit: (d?.hero_fit === "contain" ? "contain" : "cover"),
+    updated_at: d?.updated_at ?? null,
   };
 
 });
+
 
 const inputSchema = z.object({
   support_whatsapp: z
