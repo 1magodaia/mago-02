@@ -53,6 +53,7 @@ function MasterPanel() {
   const readSettings = useServerFn(getAppSettings);
   const writeSettings = useServerFn(updateAppSettings);
   const readCostStats = useServerFn(getCitationCostStats);
+  const readWaLog = useServerFn(listWhatsappChangeLog);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
