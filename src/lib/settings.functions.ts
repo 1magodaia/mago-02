@@ -92,7 +92,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url")
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, updated_at")
       .single();
     if (error) throw new Error(error.message);
     return {
@@ -101,6 +101,8 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       citations_enabled: row?.citations_enabled ?? false,
       citations_daily_limit: row?.citations_daily_limit ?? 20,
       hero_image_url: (row as { hero_image_url?: string | null } | null)?.hero_image_url ?? null,
+      updated_at: (row as { updated_at?: string | null } | null)?.updated_at ?? null,
     };
+
   });
 
