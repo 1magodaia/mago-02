@@ -131,6 +131,7 @@ function RootComponent() {
         <Outlet />
         <SupportChat />
         <SupportWidget />
+        <Toaster />
       </AuthProvider>
 
     </QueryClientProvider>
