@@ -38,7 +38,13 @@ async function timedFetch(url: string, init?: RequestInit): Promise<Response | n
     return await fetch(url, {
       ...init,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      headers: { "User-Agent": "BuscaMagica-Audit/1.0", ...(init?.headers ?? {}) },
+      headers: {
+        // UA neutro reduz bloqueios em WAF/Cloudflare que rejeitam bots desconhecidos
+        "User-Agent": "Mozilla/5.0 (compatible; BuscaMagicaBot/1.0; +https://buscamagica.lovable.app)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+        ...(init?.headers ?? {}),
+      },
       redirect: "follow",
     });
   } catch {
