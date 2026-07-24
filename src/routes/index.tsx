@@ -38,6 +38,8 @@ import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
+import heroDefault from "@/assets/hero-banner.png.asset.json";
+
 
 
 
