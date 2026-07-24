@@ -76,12 +76,24 @@ function extractSocials(html: string): {
   facebook: string | null;
   whatsapp: string | null;
 } {
-  const ig = html.match(/https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9_.]{2,30})/i);
-  const fb = html.match(/https?:\/\/(?:www\.)?facebook\.com\/([A-Za-z0-9_.-]{2,50})/i);
+  // Handles genéricos que representam widget/share, não perfil da empresa
+  const IG_BLOCKLIST = new Set([
+    "p", "explore", "reel", "reels", "stories", "accounts", "sharer", "share",
+    "developer", "developers", "about", "help", "legal", "directory", "web",
+  ]);
+  const FB_BLOCKLIST = new Set([
+    "sharer", "share", "share.php", "dialog", "plugins", "tr", "intent",
+    "login", "help", "policies", "business", "watch", "gaming", "marketplace",
+  ]);
+  // Preferir <a href="..."> ou rel="me"
+  const igMatches = [...html.matchAll(/href=["']https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9_.]{2,30})\/?[^"']*["']/gi)];
+  const fbMatches = [...html.matchAll(/href=["']https?:\/\/(?:www\.)?facebook\.com\/([A-Za-z0-9_.-]{2,50})\/?[^"']*["']/gi)];
+  const igHandle = igMatches.map((m) => m[1]).find((h) => !IG_BLOCKLIST.has(h.toLowerCase()));
+  const fbHandle = fbMatches.map((m) => m[1]).find((h) => !FB_BLOCKLIST.has(h.toLowerCase()) && !h.includes("."));
   const wa = html.match(/https?:\/\/(?:wa\.me|api\.whatsapp\.com\/send)[^\s"'<>]+/i);
   return {
-    instagram: ig ? `https://instagram.com/${ig[1]}` : null,
-    facebook: fb ? `https://facebook.com/${fb[1]}` : null,
+    instagram: igHandle ? `https://instagram.com/${igHandle}` : null,
+    facebook: fbHandle ? `https://facebook.com/${fbHandle}` : null,
     whatsapp: wa ? wa[0] : null,
   };
 }
