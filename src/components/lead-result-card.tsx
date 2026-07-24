@@ -564,15 +564,24 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
+        <button
+          type="button"
+          aria-label="Origem dos dados de CNPJ"
+          title="Dados públicos consultados na BrasilAPI (Receita Federal) a partir do CNPJ localizado no site. A data de abertura e a situação cadastral referem-se à empresa como pessoa jurídica — não representam necessariamente o tempo de operação neste endereço específico."
+          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <HelpCircle className="h-3 w-3" />
+        </button>
         <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${
           isAtiva ? "bg-emerald-500/10 text-emerald-300 ring-emerald-400/30" : "bg-red-500/15 text-red-300 ring-red-400/40"
         }`}>{situacao}</span>
       </div>
       {info.data_abertura && (
-        <div className="mt-1 text-[10px] text-muted-foreground/80" title="Data de abertura da empresa na Receita Federal. Pode não coincidir exatamente com o tempo neste endereço específico.">
+        <div className="mt-1 text-[10px] text-muted-foreground/80" title="Data de abertura da empresa na Receita Federal (via BrasilAPI). Refere-se à criação da pessoa jurídica e pode não coincidir com o tempo de operação neste endereço específico.">
           Abertura: {new Date(info.data_abertura).toLocaleDateString("pt-BR")} · dado da empresa, não do endereço.
         </div>
       )}
     </div>
   );
 }
+
