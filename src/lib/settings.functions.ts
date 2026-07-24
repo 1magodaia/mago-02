@@ -6,6 +6,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export interface AppSettings {
   support_whatsapp: string | null;
   support_message: string | null;
+  citations_enabled: boolean;
+  citations_daily_limit: number;
 }
 
 /** Public read — used by the floating support widget on every page. */
@@ -24,16 +26,17 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("app_settings")
-    .select("support_whatsapp, support_message")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit")
     .eq("id", 1)
     .maybeSingle();
   return {
     support_whatsapp: data?.support_whatsapp ?? null,
     support_message: data?.support_message ?? null,
+    citations_enabled: data?.citations_enabled ?? false,
+    citations_daily_limit: data?.citations_daily_limit ?? 20,
   };
 });
 
-/** Admin/master write. Digits-only phone (10-15 chars) — allows optional leading +. */
 const inputSchema = z.object({
   support_whatsapp: z
     .string()
@@ -46,13 +49,14 @@ const inputSchema = z.object({
     .nullable()
     .optional(),
   support_message: z.string().trim().max(280).nullable().optional(),
+  citations_enabled: z.boolean().optional(),
+  citations_daily_limit: z.number().int().min(0).max(1000).optional(),
 });
 
 export const updateAppSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => inputSchema.parse(raw))
   .handler(async ({ data, context }): Promise<AppSettings> => {
-    // Authorization: must be admin or master
     const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
     const set = new Set((roles ?? []).map((r) => r.role as string));
     if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
@@ -62,18 +66,21 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
       ...(data.support_whatsapp !== undefined ? { support_whatsapp: data.support_whatsapp || null } : {}),
       ...(data.support_message !== undefined ? { support_message: data.support_message || null } : {}),
+      ...(data.citations_enabled !== undefined ? { citations_enabled: data.citations_enabled } : {}),
+      ...(data.citations_daily_limit !== undefined ? { citations_daily_limit: data.citations_daily_limit } : {}),
     };
-
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message")
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit")
       .single();
     if (error) throw new Error(error.message);
     return {
       support_whatsapp: row?.support_whatsapp ?? null,
       support_message: row?.support_message ?? null,
+      citations_enabled: row?.citations_enabled ?? false,
+      citations_daily_limit: row?.citations_daily_limit ?? 20,
     };
   });
