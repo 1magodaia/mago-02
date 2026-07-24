@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Bookmark,
   BookmarkCheck,
@@ -13,6 +14,7 @@ import {
   MessageCircle,
   Phone,
   RefreshCw,
+  Search,
   Star,
   Zap,
 } from "lucide-react";
@@ -20,6 +22,7 @@ import type { ScoredLead } from "@/lib/scoring";
 import { auditWebsite } from "@/lib/audit.functions";
 import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
+import { lookupCitations, type CitationItem } from "@/lib/citations.functions";
 import {
   isContacted as chkContacted,
   isFavorite as chkFav,
@@ -39,6 +42,8 @@ interface Props {
   selected?: boolean;
   onSelect?: () => void;
   onUpdate?: (updated: ScoredLead) => void;
+  /** true quando o kill switch está ON e o usuário atual é Pro (ou admin/master). */
+  citationsAvailable?: boolean;
 }
 
 function toSaved(lead: ScoredLead): SavedLead {
@@ -70,7 +75,7 @@ function relTime(iso: string | null | undefined): string | null {
   return `há ${y} ano${y > 1 ? "s" : ""}`;
 }
 
-export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
+export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -78,6 +83,35 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
   const [done, setDone] = useState(() => chkContacted(lead.place_id));
   const [copied, setCopied] = useState<"phone" | "wa" | null>(null);
+  const [citations, setCitations] = useState<{
+    items: CitationItem[];
+    summary: string;
+    cached: boolean;
+    remaining?: number;
+  } | null>(null);
+  const [citLoading, setCitLoading] = useState(false);
+  const [citError, setCitError] = useState<string | null>(null);
+  const runCitations = useServerFn(lookupCitations);
+
+  const doCitations = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCitLoading(true);
+    setCitError(null);
+    try {
+      const r = await runCitations({
+        data: {
+          place_id: lead.place_id,
+          name: lead.name,
+          address: lead.address ?? null,
+        },
+      });
+      setCitations({ items: r.items, summary: r.summary, cached: r.cached, remaining: r.remaining_today });
+    } catch (err) {
+      setCitError(err instanceof Error ? err.message : "Falha ao buscar citações.");
+    } finally {
+      setCitLoading(false);
+    }
+  };
 
   const runAudit = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -335,6 +369,58 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate }: Props) {
           </a>
         )}
       </div>
+
+      {citationsAvailable && (
+        <div className="rounded-xl bg-glass p-2.5 ring-1 ring-border">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+              <Search className="h-3 w-3 text-warn" /> Citações na web (IA)
+            </div>
+            <button
+              onClick={doCitations}
+              disabled={citLoading}
+              className="inline-flex items-center gap-1 rounded-lg bg-warn/15 px-2 py-1 text-[11px] font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/25 disabled:opacity-60"
+            >
+              {citLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Search className="h-3 w-3" />}
+              {citations ? "Buscar novamente" : "Buscar citações"}
+            </button>
+          </div>
+          {citError && <p className="mt-1.5 text-[11px] text-warn">{citError}</p>}
+          {citations && (
+            <div className="mt-2 space-y-1.5">
+              {citations.summary && <p className="text-[11px] text-muted-foreground">{citations.summary}</p>}
+              <ul className="space-y-1">
+                {citations.items.map((it, i) => (
+                  <li key={i} className="flex items-start justify-between gap-2 rounded-md bg-white/5 px-2 py-1 text-[11px]">
+                    <div className="min-w-0">
+                      <div className="truncate font-semibold text-foreground">{it.source}</div>
+                      {it.snippet && <div className="truncate text-muted-foreground">{it.snippet}</div>}
+                    </div>
+                    {it.url && (
+                      <a
+                        href={it.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="shrink-0 text-primary hover:underline"
+                      >
+                        abrir
+                      </a>
+                    )}
+                  </li>
+                ))}
+                {citations.items.length === 0 && (
+                  <li className="text-[11px] text-muted-foreground">Nenhuma citação relevante encontrada.</li>
+                )}
+              </ul>
+              <p className="text-[10px] text-muted-foreground">
+                {citations.cached ? "resultado em cache (7 dias)" : "resultado novo"}
+                {typeof citations.remaining === "number" && ` · restam ${citations.remaining} hoje`}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       <footer className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
         <div className="flex gap-1.5">

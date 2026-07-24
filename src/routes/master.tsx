@@ -23,6 +23,7 @@ import {
   type AdminUserRow,
 } from "@/lib/admin.functions";
 import { getAppSettings, updateAppSettings } from "@/lib/settings.functions";
+import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
 
 
 export const Route = createFileRoute("/master")({
@@ -49,6 +50,7 @@ function MasterPanel() {
   const resetPwd = useServerFn(sendPasswordReset);
   const readSettings = useServerFn(getAppSettings);
   const writeSettings = useServerFn(updateAppSettings);
+  const readCostStats = useServerFn(getCitationCostStats);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
@@ -58,8 +60,11 @@ function MasterPanel() {
 
   const [supportWa, setSupportWa] = useState("");
   const [supportMsg, setSupportMsg] = useState("");
+  const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const [citationsLimit, setCitationsLimit] = useState(20);
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [costStats, setCostStats] = useState<CitationCostStats | null>(null);
 
 
   useEffect(() => {
@@ -92,8 +97,11 @@ function MasterPanel() {
         .then((s) => {
           setSupportWa(s.support_whatsapp ?? "");
           setSupportMsg(s.support_message ?? "");
+          setCitationsEnabled(s.citations_enabled);
+          setCitationsLimit(s.citations_daily_limit);
         })
         .catch(() => {});
+      readCostStats().then(setCostStats).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
@@ -104,13 +112,35 @@ function MasterPanel() {
     setSettingsError(null);
     try {
       const r = await writeSettings({
-        data: { support_whatsapp: supportWa || null, support_message: supportMsg || null },
+        data: {
+          support_whatsapp: supportWa || null,
+          support_message: supportMsg || null,
+          citations_enabled: citationsEnabled,
+          citations_daily_limit: citationsLimit,
+        },
       });
       setSupportWa(r.support_whatsapp ?? "");
       setSupportMsg(r.support_message ?? "");
-      setNotice("Configurações de suporte atualizadas.");
+      setCitationsEnabled(r.citations_enabled);
+      setCitationsLimit(r.citations_daily_limit);
+      setNotice("Configurações atualizadas.");
     } catch (err) {
       setSettingsError(err instanceof Error ? err.message : "Erro ao salvar.");
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
+  const toggleCitations = async (next: boolean) => {
+    setCitationsEnabled(next);
+    setSettingsBusy(true);
+    try {
+      const r = await writeSettings({ data: { citations_enabled: next } });
+      setCitationsEnabled(r.citations_enabled);
+      setNotice(next ? "Busca de citações ATIVADA para usuários Pro." : "Busca de citações DESLIGADA.");
+    } catch (err) {
+      setCitationsEnabled(!next);
+      setSettingsError(err instanceof Error ? err.message : "Erro ao alternar.");
     } finally {
       setSettingsBusy(false);
     }
@@ -265,6 +295,61 @@ function MasterPanel() {
         )}
       </section>
 
+      {/* CITAÇÕES WEB — Kill switch + limite diário + custo */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-warn/15 ring-1 ring-warn/40">
+              <Shield className="h-4 w-4 text-warn" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Busca de citações web (IA)</h2>
+              <p className="max-w-xl text-xs text-muted-foreground">
+                Kill switch global. Nasce <strong>desligado</strong>. Ative apenas depois de validar o custo real
+                por busca com dados abaixo. Admin e master ignoram o interruptor para testes.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => toggleCitations(!citationsEnabled)}
+            disabled={settingsBusy}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ring-1 transition ${
+              citationsEnabled
+                ? "bg-primary/15 text-primary ring-primary/40"
+                : "bg-muted text-muted-foreground ring-border"
+            }`}
+          >
+            <span className={`h-2 w-2 rounded-full ${citationsEnabled ? "bg-primary" : "bg-muted-foreground"}`} />
+            {citationsEnabled ? "Ativado para Pro" : "Desligado"}
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr]">
+          <label className="block">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">Limite diário por usuário</span>
+            <input
+              type="number"
+              min={0}
+              max={1000}
+              value={citationsLimit}
+              onChange={(e) => setCitationsLimit(Math.max(0, Math.min(1000, Number(e.target.value) || 0)))}
+              onBlur={() =>
+                writeSettings({ data: { citations_daily_limit: citationsLimit } }).catch(() => {})
+              }
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm tabular-nums outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <CostTile label="Hoje" calls={costStats?.today_calls} cents={costStats?.today_cost_cents} />
+            <CostTile label="7 dias" calls={costStats?.last7_calls} cents={costStats?.last7_cost_cents} />
+            <CostTile label="30 dias" calls={costStats?.last30_calls} cents={costStats?.last30_cost_cents} sub={costStats ? `${costStats.distinct_users_30d} usuários` : undefined} />
+          </div>
+        </div>
+      </section>
+
+
+
 
 
       <div className="glass-panel mx-auto mt-6 max-w-7xl overflow-x-auto rounded-2xl">
@@ -351,6 +436,18 @@ function MasterPanel() {
       <p className="mx-auto mt-4 max-w-7xl text-xs text-muted-foreground">
         Rota oculta. Acesso restrito a papéis <code>master</code> e <code>admin</code>. Todas as ações são registradas em <code>admin_audit_log</code>.
       </p>
+    </div>
+  );
+}
+
+function CostTile({ label, calls, cents, sub }: { label: string; calls?: number; cents?: number; sub?: string }) {
+  const brl = cents == null ? "—" : `R$ ${(cents / 100).toFixed(2)}`;
+  return (
+    <div className="rounded-xl bg-glass p-3 ring-1 ring-border">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-1 text-lg font-extrabold tabular-nums text-foreground">{calls ?? 0}</div>
+      <div className="text-[11px] tabular-nums text-primary">{brl}</div>
+      {sub && <div className="mt-0.5 text-[10px] text-muted-foreground">{sub}</div>}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   BookmarkCheck,
@@ -25,6 +25,8 @@ import {
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
+import { getAppSettings } from "@/lib/settings.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
@@ -87,6 +89,16 @@ function Home() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [citationsEnabled, setCitationsEnabled] = useState(false);
+  const readSettings = useServerFn(getAppSettings);
+  const citationsAvailable = (isPro || isAdmin || isMaster) && (citationsEnabled || isAdmin || isMaster);
+
+  useEffect(() => {
+    readSettings()
+      .then((s) => setCitationsEnabled(!!s.citations_enabled))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const requireAuth = (): boolean => {
     if (!user) {
@@ -608,6 +620,7 @@ function Home() {
               selected={selected === lead.place_id}
               onSelect={() => setSelected(lead.place_id)}
               onUpdate={updateOne}
+              citationsAvailable={citationsAvailable}
             />
           ))}
           {filtered.length > 0 && (
