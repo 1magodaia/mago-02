@@ -27,6 +27,7 @@ import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
 import { scoreLead, type ScoredLead } from "@/lib/scoring";
 import { LeadResultCard } from "@/components/lead-result-card";
 import { getAppSettings } from "@/lib/settings.functions";
+import { reverseGeocode } from "@/lib/geocode.functions";
 
 
 import { useServerFn } from "@tanstack/react-start";
