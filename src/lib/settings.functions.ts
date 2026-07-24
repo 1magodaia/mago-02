@@ -160,11 +160,12 @@ export interface WhatsappChangeLogPage {
   pageSize: number;
 }
 
-async function assertAdmin(context: { supabase: { from: (t: string) => { select: (c: string) => { eq: (col: string, val: string) => Promise<{ data: { role: string }[] | null }> } } }; userId: string }) {
-  const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
-  const set = new Set((roles ?? []).map((r) => r.role as string));
+async function assertAdmin(supabase: Awaited<ReturnType<typeof requireSupabaseAuth.server>>["context"]["supabase"] extends infer S ? S : never, userId: string) {
+  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const set = new Set(((roles ?? []) as { role: string }[]).map((r) => r.role));
   if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
 }
+
 
 export const listWhatsappChangeLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
