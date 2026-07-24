@@ -132,7 +132,7 @@ function ConsentPage() {
                 Permissões solicitadas
               </p>
               <ul className="mt-2 space-y-1.5">
-                {scopes.map((s) => (
+                {scopes.map((s: string) => (
                   <li key={s} className="flex items-start gap-2 text-sm">
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <span>{scopeLabel(s)}</span>
