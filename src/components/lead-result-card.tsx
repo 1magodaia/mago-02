@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
+import { HelpTip } from "@/components/help-tip";
 import { auditWebsite } from "@/lib/audit.functions";
 import { refreshPlace } from "@/lib/places.functions";
 import { scoreLead } from "@/lib/scoring";
@@ -229,9 +230,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {igStatus === "unverifiable" && (
               <span
                 className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
-                title="Sem site conhecido — não conseguimos confirmar Instagram por fonte pública."
               >
                 <HelpCircle className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> não verificável
+                <HelpTip
+                  title="Não verificável"
+                  text="Não temos como confirmar esse dado com uma fonte confiável — não significa que o comércio não tenha, só que não conseguimos checar."
+                />
               </span>
             )}
             {lead.rating != null && (
@@ -240,7 +244,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 <span className="font-semibold text-foreground">{lead.rating.toFixed(1)}</span>
                 <span>({lead.user_ratings_total ?? 0})</span>
                 {lastReviewAgo && (
-                  <span className="text-muted-foreground">· última avaliação {lastReviewAgo}</span>
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    · última avaliação {lastReviewAgo}
+                    <HelpTip
+                      title="Última avaliação"
+                      text="Data da avaliação mais recente feita no Google — nosso sinal mais confiável de que o comércio está ativo."
+                    />
+                  </span>
                 )}
               </span>
             )}
@@ -367,18 +377,24 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           </a>
         )}
         {waLink && (
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            title={waVerified
-              ? "Link de WhatsApp encontrado no site oficial"
-              : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-            className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
-          >
-            <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
-          </a>
+          <div className="flex items-center gap-0.5">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title={waVerified
+                ? "Link de WhatsApp encontrado no site oficial"
+                : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+            >
+              <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
+            </a>
+            <HelpTip
+              title={waVerified ? "WhatsApp confirmado" : "WhatsApp presumido"}
+              text="Quando vem do site do comércio, já testamos que é um link de WhatsApp real. Quando vem só do telefone, é uma suposição — pode não ter WhatsApp nesse número."
+            />
+          </div>
         )}
       </div>
 
@@ -487,23 +503,25 @@ const PRICE_LABELS: Record<number, string> = {
 };
 
 function PriceLevelBadge({ level }: { level: number | null }) {
+  const helper = (
+    <HelpTip
+      title="Faixa de preço"
+      text="Classificação de preço feita pelo próprio Google, não é um valor exato em reais."
+    />
+  );
   if (level == null) {
     return (
-      <span
-        className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
-        title="O Google não classificou a faixa de preço deste local. Não estimamos esse valor."
-      >
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border">
         💰 Faixa de preço: não informada
+        {helper}
       </span>
     );
   }
   const symbols = level === 0 ? "Grátis" : "$".repeat(Math.max(1, level));
   return (
-    <span
-      className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30"
-      title={`Faixa de preço classificada pelo Google (${PRICE_LABELS[level]}). Não é um valor exato de ticket médio.`}
-    >
+    <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30">
       💰 {symbols} · {PRICE_LABELS[level]}
+      {helper}
     </span>
   );
 }
@@ -521,6 +539,10 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
       <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/20 shrink-0`}>
         <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
         {m.label}
+        <HelpTip
+          title="Como lemos o score"
+          text="Verde = comércio sem presença digital, mais fácil de converter. Amarelo = tem algo, mas incompleto. Laranja = já tem bastante presença digital, oportunidade menor."
+        />
       </span>
       <p className={`text-[11px] leading-snug ${m.text}`}>
         <span className="font-semibold">Sugestão:</span> {suggestion}
@@ -530,24 +552,33 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
 }
 
 function BusinessStatusBadge({ status }: { status: string | null }) {
+  const helper = (
+    <HelpTip
+      title="Status do comércio"
+      text="Informação direta do Google, atualizada quando você clica em 'Atualizar agora' no card."
+    />
+  );
   if (!status || status === "OPERATIONAL") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30" title="Google Places reporta este local como em operação.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operando
+        {helper}
       </span>
     );
   }
   if (status === "CLOSED_TEMPORARILY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40" title="Google Places: fechado temporariamente.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40">
         ⏸ Fechado temporariamente
+        {helper}
       </span>
     );
   }
   if (status === "CLOSED_PERMANENTLY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-red-300 ring-1 ring-red-400/40" title="Google Places: fechado permanentemente. Não perca tempo abordando este lead.">
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-red-300 ring-1 ring-red-400/40">
         ✕ Fechado permanentemente
+        {helper}
       </span>
     );
   }
@@ -570,14 +601,10 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
-        <button
-          type="button"
-          aria-label="Origem dos dados de CNPJ"
-          title="Dados públicos consultados na BrasilAPI (Receita Federal) a partir do CNPJ localizado no site. A data de abertura e a situação cadastral referem-se à empresa como pessoa jurídica — não representam necessariamente o tempo de operação neste endereço específico."
-          className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <HelpCircle className="h-3 w-3" />
-        </button>
+        <HelpTip
+          title="CNPJ / Razão social"
+          text="Dado oficial da Receita Federal, encontrado no site do comércio. Pode, em raros casos, pertencer à agência que fez o site em vez do comércio em si — vale conferir se tiver dúvida."
+        />
         <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${
           isAtiva ? "bg-emerald-500/10 text-emerald-300 ring-emerald-400/30" : "bg-red-500/15 text-red-300 ring-red-400/40"
         }`}>{situacao}</span>

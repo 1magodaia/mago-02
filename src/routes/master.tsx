@@ -31,6 +31,7 @@ import {
 } from "@/lib/admin.functions";
 import { getAppSettings, updateAppSettings, listWhatsappChangeLog, exportWhatsappChangeLogCsv, type WhatsappChangeLogEntry } from "@/lib/settings.functions";
 import { getCitationCostStats, type CitationCostStats } from "@/lib/citations.functions";
+import { HelpTip } from "@/components/help-tip";
 
 
 function HeroPlaceholder({ tone }: { tone: "empty" | "warn" | "error" }) {
@@ -542,8 +543,12 @@ function MasterPanel() {
             />
           </label>
           <label className="block sm:col-span-2">
-            <span className="text-[11px] font-semibold uppercase text-muted-foreground">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
               Motivo da alteração <span className="text-muted-foreground/70">(opcional, aparece no histórico)</span>
+              <HelpTip
+                title="Motivo da alteração"
+                text="Fica registrado no histórico — ajuda a lembrar por que uma configuração foi trocada, útil se precisar reverter depois."
+              />
             </span>
             <input
               type="text"
@@ -933,7 +938,13 @@ function MasterPanel() {
               <Shield className="h-4 w-4 text-warn" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Busca de citações web (IA)</h2>
+              <h2 className="text-lg font-bold inline-flex items-center gap-1.5">
+                Busca de citações web (IA)
+                <HelpTip
+                  title="Kill switch de citações web"
+                  text="Desligado por padrão de propósito, para você validar o custo real antes de liberar para os usuários. Master e admin conseguem testar mesmo com ele desligado."
+                />
+              </h2>
               <p className="max-w-xl text-xs text-muted-foreground">
                 Kill switch global. Nasce <strong>desligado</strong>. Ative apenas depois de validar o custo real
                 por busca com dados abaixo. Admin e master ignoram o interruptor para testes.
@@ -957,7 +968,13 @@ function MasterPanel() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr]">
           <label className="block">
-            <span className="text-[11px] font-semibold uppercase text-muted-foreground">Limite diário por usuário</span>
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
+              Limite diário por usuário
+              <HelpTip
+                title="Limite diário por usuário"
+                text="Quantidade máxima de buscas de citação que cada usuário pode fazer por dia — protege contra custo alto se muita gente usar ao mesmo tempo."
+              />
+            </span>
             <input
               type="number"
               min={0}
@@ -1167,7 +1184,13 @@ function AiKeysPanel() {
       <div className="glass-panel rounded-2xl p-4 sm:p-6">
         <header className="mb-4 flex flex-wrap items-center gap-2">
           <KeySquare className="h-5 w-5 text-primary" />
-          <h2 className="text-base font-extrabold text-foreground">Chaves de IA com failover</h2>
+          <h2 className="text-base font-extrabold text-foreground inline-flex items-center gap-1.5">
+            Chaves de IA com failover
+            <HelpTip
+              title="Failover de IA"
+              text="O app tenta as chaves em ordem de prioridade. Se uma falha ou está fora, cai automaticamente na próxima — assim o chat de suporte e a busca de citações não param."
+            />
+          </h2>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30">
             v5.5 · multi-provedor
           </span>
@@ -1241,16 +1264,22 @@ function AiKeysPanel() {
             onChange={(e) => setForm({ ...form, secret_name: e.target.value.toUpperCase() })}
             className="rounded-md bg-background px-2 py-1.5 text-sm font-mono ring-1 ring-border"
           />
-          <input
-            type="number"
-            min={1}
-            max={999}
-            value={form.priority}
-            onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
-            title="Prioridade de failover — menor número é tentado primeiro (padrão: 100)"
-            placeholder="Prioridade"
-            className="rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
-          />
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min={1}
+              max={999}
+              value={form.priority}
+              onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })}
+              title="Prioridade de failover — menor número é tentado primeiro (padrão: 100)"
+              placeholder="Prioridade"
+              className="w-full rounded-md bg-background px-2 py-1.5 text-sm tabular-nums ring-1 ring-border"
+            />
+            <HelpTip
+              title="Prioridade de failover"
+              text="Menor número é tentado primeiro. Use 10 para a chave principal, 20/30 para reservas. Se todas empatarem em 100, a ordem fica aleatória."
+            />
+          </div>
           <button
             disabled={busy === "new"}
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110 disabled:opacity-50"
