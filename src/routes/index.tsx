@@ -35,9 +35,10 @@ import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { FREE_MONTHLY_SEARCH_LIMIT } from "@/lib/profile.functions";
-import { TutorialModal, TutorialBadge, hasSeenTutorial, markTutorialSeen, resetTutorial } from "@/components/tutorial-modal";
-import { SPORT_CATEGORIES, SPORT_BY_ID, type SportCategory } from "@/lib/sports-categories";
-import heroDefault from "@/assets/hero-banner.png.asset.json";
+import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
+import { SPORT_BY_ID } from "@/lib/sports-categories";
+import type { SportCategory } from "@/lib/sports-categories";
+
 
 
 const MapView = lazy(() => import("@/components/google-map-view"));
