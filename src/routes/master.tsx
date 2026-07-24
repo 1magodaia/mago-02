@@ -1184,7 +1184,13 @@ function AiKeysPanel() {
       <div className="glass-panel rounded-2xl p-4 sm:p-6">
         <header className="mb-4 flex flex-wrap items-center gap-2">
           <KeySquare className="h-5 w-5 text-primary" />
-          <h2 className="text-base font-extrabold text-foreground">Chaves de IA com failover</h2>
+          <h2 className="text-base font-extrabold text-foreground inline-flex items-center gap-1.5">
+            Chaves de IA com failover
+            <HelpTip
+              title="Failover de IA"
+              text="O app tenta as chaves em ordem de prioridade. Se uma falha ou está fora, cai automaticamente na próxima — assim o chat de suporte e a busca de citações não param."
+            />
+          </h2>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30">
             v5.5 · multi-provedor
           </span>
