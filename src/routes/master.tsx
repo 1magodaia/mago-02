@@ -295,6 +295,61 @@ function MasterPanel() {
         )}
       </section>
 
+      {/* CITAÇÕES WEB — Kill switch + limite diário + custo */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-warn/15 ring-1 ring-warn/40">
+              <Shield className="h-4 w-4 text-warn" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Busca de citações web (IA)</h2>
+              <p className="max-w-xl text-xs text-muted-foreground">
+                Kill switch global. Nasce <strong>desligado</strong>. Ative apenas depois de validar o custo real
+                por busca com dados abaixo. Admin e master ignoram o interruptor para testes.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => toggleCitations(!citationsEnabled)}
+            disabled={settingsBusy}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ring-1 transition ${
+              citationsEnabled
+                ? "bg-primary/15 text-primary ring-primary/40"
+                : "bg-muted text-muted-foreground ring-border"
+            }`}
+          >
+            <span className={`h-2 w-2 rounded-full ${citationsEnabled ? "bg-primary" : "bg-muted-foreground"}`} />
+            {citationsEnabled ? "Ativado para Pro" : "Desligado"}
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr]">
+          <label className="block">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground">Limite diário por usuário</span>
+            <input
+              type="number"
+              min={0}
+              max={1000}
+              value={citationsLimit}
+              onChange={(e) => setCitationsLimit(Math.max(0, Math.min(1000, Number(e.target.value) || 0)))}
+              onBlur={() =>
+                writeSettings({ data: { citations_daily_limit: citationsLimit } }).catch(() => {})
+              }
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm tabular-nums outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <CostTile label="Hoje" calls={costStats?.today_calls} cents={costStats?.today_cost_cents} />
+            <CostTile label="7 dias" calls={costStats?.last7_calls} cents={costStats?.last7_cost_cents} />
+            <CostTile label="30 dias" calls={costStats?.last30_calls} cents={costStats?.last30_cost_cents} sub={costStats ? `${costStats.distinct_users_30d} usuários` : undefined} />
+          </div>
+        </div>
+      </section>
+
+
+
 
 
       <div className="glass-panel mx-auto mt-6 max-w-7xl overflow-x-auto rounded-2xl">
