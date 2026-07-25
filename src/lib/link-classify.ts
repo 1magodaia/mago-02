@@ -13,6 +13,16 @@
 
 export type LinkKind = "site" | "instagram" | "facebook" | "other";
 
+/**
+ * "confirmed" — a URL de entrada apontava diretamente para o destino final,
+ *   sem redirecionadores. A classificação é um dado observado.
+ * "inferred" — precisamos desembrulhar 1+ redirecionadores para chegar ao
+ *   destino real. Ainda é o destino correto, mas a UI deve deixar claro que
+ *   houve inferência.
+ * "unknown" — link vazio/inválido.
+ */
+export type LinkConfidence = "confirmed" | "inferred" | "unknown";
+
 export interface ClassifiedLink {
   /** Tipo lógico do destino. "other" = string vazia/URL inválida. */
   kind: LinkKind;
@@ -20,6 +30,12 @@ export interface ClassifiedLink {
   url: string | null;
   /** Host final (sem www.), útil para exibir "instagram.com/foo". */
   host: string | null;
+  /** Confiança da classificação — ver `LinkConfidence`. */
+  confidence: LinkConfidence;
+  /** true quando pelo menos um redirecionador foi desembrulhado. */
+  wasUnwrapped: boolean;
+  /** true quando pelo menos um parâmetro de tracking foi removido. */
+  hadTracking: boolean;
 }
 
 const IG_HOSTS = new Set(["instagram.com", "instagr.am"]);
@@ -66,33 +82,31 @@ function unwrapRedirector(u: URL): string | null {
 
 /**
  * Remove parâmetros de tracking (utm_*, fbclid, gclid, igshid, etc.) sem
- * quebrar params legítimos. Retorna nova URL.
+ * quebrar params legítimos. Retorna { url, stripped }.
  */
-function stripTracking(u: URL): URL {
+function stripTracking(u: URL): { url: URL; stripped: boolean } {
   const clean = new URL(u.toString());
   const toDelete: string[] = [];
   clean.searchParams.forEach((_, key) => {
     if (TRACKING_PARAMS.test(key)) toDelete.push(key);
   });
   toDelete.forEach((k) => clean.searchParams.delete(k));
-  // Remove fragmento vazio "#"
   if (clean.hash === "#") clean.hash = "";
-  return clean;
+  return { url: clean, stripped: toDelete.length > 0 };
 }
 
-/**
- * Normaliza uma string de link em URL absoluta:
- * - Aceita "instagram.com/foo", "www.foo.com" e adiciona https://.
- * - Segue redirecionadores conhecidos (até 3 níveis) para chegar ao destino real.
- * - Remove parâmetros de tracking.
- * Retorna null se não for possível derivar uma URL http(s) válida.
- */
-export function normalizeUrl(raw: string | null | undefined): URL | null {
+/** Resultado interno de normalize — carrega metadados usados por classifyLink. */
+interface NormalizedResult {
+  url: URL;
+  wasUnwrapped: boolean;
+  hadTracking: boolean;
+}
+
+function normalizeInternal(raw: string | null | undefined): NormalizedResult | null {
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
 
-  // Adiciona esquema se faltar. Rejeita esquemas não-http (mailto:, tel:, javascript:).
   let candidate = trimmed;
   if (!/^https?:\/\//i.test(candidate)) {
     if (/^[a-z][a-z0-9+.-]*:/i.test(candidate)) return null;
@@ -106,12 +120,13 @@ export function normalizeUrl(raw: string | null | undefined): URL | null {
     return null;
   }
 
-  // Segue redirecionadores conhecidos, com limite para evitar loops.
+  let wasUnwrapped = false;
   for (let hops = 0; hops < 3; hops++) {
     const inner = unwrapRedirector(url);
     if (!inner) break;
     try {
       url = new URL(inner);
+      wasUnwrapped = true;
     } catch {
       break;
     }
@@ -119,23 +134,111 @@ export function normalizeUrl(raw: string | null | undefined): URL | null {
 
   if (url.protocol !== "http:" && url.protocol !== "https:") return null;
 
-  return stripTracking(url);
+  const { url: clean, stripped } = stripTracking(url);
+  return { url: clean, wasUnwrapped, hadTracking: stripped };
+}
+
+/**
+ * Normaliza uma string de link em URL absoluta:
+ * - Aceita "instagram.com/foo", "www.foo.com" e adiciona https://.
+ * - Segue redirecionadores conhecidos (até 3 níveis) para chegar ao destino real.
+ * - Remove parâmetros de tracking.
+ * Retorna null se não for possível derivar uma URL http(s) válida.
+ */
+export function normalizeUrl(raw: string | null | undefined): URL | null {
+  return normalizeInternal(raw)?.url ?? null;
+}
+
+// --- Telemetria (agregação em memória, opcional) -----------------------------
+
+interface ClassifyMetrics {
+  total: number;
+  byKind: Record<LinkKind, number>;
+  byConfidence: Record<LinkConfidence, number>;
+  redirectsUnwrapped: number;
+  trackingStripped: number;
+}
+
+const metrics: ClassifyMetrics = {
+  total: 0,
+  byKind: { site: 0, instagram: 0, facebook: 0, other: 0 },
+  byConfidence: { confirmed: 0, inferred: 0, unknown: 0 },
+  redirectsUnwrapped: 0,
+  trackingStripped: 0,
+};
+
+function recordMetric(result: ClassifiedLink): void {
+  metrics.total += 1;
+  metrics.byKind[result.kind] += 1;
+  metrics.byConfidence[result.confidence] += 1;
+  if (result.wasUnwrapped) metrics.redirectsUnwrapped += 1;
+  if (result.hadTracking) metrics.trackingStripped += 1;
+
+  // Modo debug opcional: `window.__bmClassifyDebug = true` no console
+  // para inspecionar classificações "estranhas" (site declarado que na real
+  // é rede social, redirect unwrapping, etc.). Nunca loga em produção por
+  // padrão para não poluir o console de usuários finais.
+  if (typeof window !== "undefined" && (window as unknown as { __bmClassifyDebug?: boolean }).__bmClassifyDebug) {
+    // eslint-disable-next-line no-console
+    console.debug("[classifyLink]", {
+      kind: result.kind,
+      confidence: result.confidence,
+      wasUnwrapped: result.wasUnwrapped,
+      hadTracking: result.hadTracking,
+      host: result.host,
+    });
+  }
+}
+
+/** Snapshot imutável das métricas acumuladas nesta sessão. */
+export function getClassifyMetrics(): Readonly<ClassifyMetrics> {
+  return {
+    ...metrics,
+    byKind: { ...metrics.byKind },
+    byConfidence: { ...metrics.byConfidence },
+  };
+}
+
+/** Zera métricas (uso em testes). */
+export function resetClassifyMetrics(): void {
+  metrics.total = 0;
+  metrics.redirectsUnwrapped = 0;
+  metrics.trackingStripped = 0;
+  (Object.keys(metrics.byKind) as LinkKind[]).forEach((k) => { metrics.byKind[k] = 0; });
+  (Object.keys(metrics.byConfidence) as LinkConfidence[]).forEach((k) => { metrics.byConfidence[k] = 0; });
 }
 
 /**
  * Classifica uma string de link em site real, Instagram ou Facebook,
  * já devolvendo a URL normalizada pronta para uso no href do botão.
+ *
+ * O campo `confidence` indica se o resultado é "confirmed" (URL direta) ou
+ * "inferred" (foi preciso desembrulhar redirecionador). UIs devem sinalizar
+ * inferências para não apresentar dado inferido como confirmado.
  */
 export function classifyLink(raw: string | null | undefined): ClassifiedLink {
-  const url = normalizeUrl(raw);
-  if (!url) return { kind: "other", url: null, host: null };
+  const norm = normalizeInternal(raw);
+  if (!norm) {
+    const r: ClassifiedLink = {
+      kind: "other", url: null, host: null,
+      confidence: "unknown", wasUnwrapped: false, hadTracking: false,
+    };
+    recordMetric(r);
+    return r;
+  }
 
+  const { url, wasUnwrapped, hadTracking } = norm;
   const host = url.hostname.toLowerCase().replace(/^www\./, "");
   const href = url.toString();
+  const confidence: LinkConfidence = wasUnwrapped ? "inferred" : "confirmed";
 
-  if (isInstagramHost(host)) return { kind: "instagram", url: href, host };
-  if (isFacebookHost(host)) return { kind: "facebook", url: href, host };
-  return { kind: "site", url: href, host };
+  let kind: LinkKind = "site";
+  if (isInstagramHost(host)) kind = "instagram";
+  else if (isFacebookHost(host)) kind = "facebook";
+
+  const r: ClassifiedLink = { kind, url: href, host, confidence, wasUnwrapped, hadTracking };
+  recordMetric(r);
+  return r;
 }
 
 /**

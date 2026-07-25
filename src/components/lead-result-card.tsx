@@ -183,10 +183,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   const lastReviewAgo = relTime(lead.latest_review_at);
   // Classifica a URL do "website" do Google Places — pode ser site real,
   // Instagram, Facebook, ou vir embrulhada em redirecionador/tracking.
-  // O módulo devolve o destino já normalizado (sem utm/redirects) e o tipo.
+  // O módulo devolve o destino já normalizado (sem utm/redirects), o tipo
+  // e a confiança (confirmed = URL direta; inferred = precisou desembrulhar).
   const classified = classifyLink(lead.website);
   const linkKind = classified.kind;
   const resolvedHref = classified.url ?? lead.website ?? null;
+  const linkInferred = classified.confidence === "inferred";
   const hasRealSite = linkKind === "site";
   // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
   const igUrl = lead.audit?.instagram ?? (linkKind === "instagram" ? resolvedHref : null);
@@ -388,8 +390,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
-            title={linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"}
+            className={`flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 hover:bg-white/5 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            title={
+              linkInferred
+                ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
+                : linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"
+            }
           >
             {linkKind === "instagram" ? (
               <><Instagram className="h-3 w-3" /> Instagram</>
@@ -398,6 +404,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             ) : (
               <><Globe className="h-3 w-3" /> Site</>
             )}
+            {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
         )}
         {lead.phone && (

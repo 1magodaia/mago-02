@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { classifyLink, normalizeUrl, isRealSite } from "../link-classify";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  classifyLink,
+  normalizeUrl,
+  isRealSite,
+  getClassifyMetrics,
+  resetClassifyMetrics,
+} from "../link-classify";
 
 describe("classifyLink", () => {
   describe("Instagram", () => {
@@ -118,5 +124,47 @@ describe("isRealSite", () => {
     expect(isRealSite("https://instagram.com/foo")).toBe(false);
     expect(isRealSite("https://facebook.com/foo")).toBe(false);
     expect(isRealSite(null)).toBe(false);
+  });
+});
+
+describe("confidence + metrics", () => {
+  beforeEach(() => resetClassifyMetrics());
+
+  it("marks direct URLs as confirmed", () => {
+    const r = classifyLink("https://pizzariabella.com.br");
+    expect(r.confidence).toBe("confirmed");
+    expect(r.wasUnwrapped).toBe(false);
+  });
+
+  it("marks unwrapped redirector URLs as inferred", () => {
+    const r = classifyLink("https://l.facebook.com/l.php?u=https%3A%2F%2Fpizzariabella.com.br%2F");
+    expect(r.confidence).toBe("inferred");
+    expect(r.wasUnwrapped).toBe(true);
+  });
+
+  it("flags tracking removal on hadTracking", () => {
+    const r = classifyLink("https://foo.com/x?utm_source=ig&fbclid=abc");
+    expect(r.hadTracking).toBe(true);
+    expect(r.confidence).toBe("confirmed");
+  });
+
+  it("returns unknown confidence for empty/invalid", () => {
+    expect(classifyLink("").confidence).toBe("unknown");
+    expect(classifyLink("mailto:x@y.com").confidence).toBe("unknown");
+  });
+
+  it("accumulates metrics per classification", () => {
+    classifyLink("https://instagram.com/foo");
+    classifyLink("https://pizzariabella.com.br");
+    classifyLink("https://l.facebook.com/l.php?u=https%3A%2F%2Freal.com");
+    classifyLink("https://foo.com/?utm_source=ig");
+    const m = getClassifyMetrics();
+    expect(m.total).toBe(4);
+    expect(m.byKind.instagram).toBe(1);
+    expect(m.byKind.site).toBe(3);
+    expect(m.redirectsUnwrapped).toBe(1);
+    expect(m.trackingStripped).toBe(1);
+    expect(m.byConfidence.confirmed).toBe(3);
+    expect(m.byConfidence.inferred).toBe(1);
   });
 });
