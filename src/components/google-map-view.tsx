@@ -1,6 +1,7 @@
 /// <reference types="google.maps" />
 import { useEffect, useRef } from "react";
 import type { ScoredLead } from "@/lib/scoring";
+import { useDevice } from "@/hooks/use-mobile";
 
 declare global {
   interface Window {
