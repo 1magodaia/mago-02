@@ -789,7 +789,8 @@ function Home() {
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
             placeholder="Categoria (padaria, pet shop, advogado...)"
             aria-label="Categoria de comércio"
-            autocomplete={false}
+            staticList={CATEGORY_SUGGESTIONS}
+            minChars={1}
             leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
           />
           <SmartAutocomplete
