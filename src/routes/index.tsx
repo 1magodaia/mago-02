@@ -183,7 +183,24 @@ function Home() {
   const { user, profile, isPro, isMaster, isAdmin, signOut, loading: authLoading, refreshProfile } = useAuth();
 
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState("São Paulo");
+  const [region, setRegion] = useState<string>(() => {
+    if (typeof window === "undefined") return "São Paulo";
+    try {
+      return localStorage.getItem("bm.lastRegion") || "São Paulo";
+    } catch {
+      return "São Paulo";
+    }
+  });
+
+  // Persist last searched region so it pré-preenche na próxima visita.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const v = region.trim();
+    if (!v) return;
+    try {
+      localStorage.setItem("bm.lastRegion", v);
+    } catch {}
+  }, [region]);
   const [radiusKm, setRadiusKm] = useState(5);
   const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: -23.5613, lng: -46.6558 });
   const [usingGps, setUsingGps] = useState(false);
