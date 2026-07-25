@@ -208,58 +208,59 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
-            {hasRealSite ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site confirmado no Google Places">
-                <CheckCircle2 className="h-2.5 w-2.5" /> Com site
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40">
-                <Flame className="h-2.5 w-2.5" /> Sem site
-              </span>
-            )}
-            {igUrl && (
-              <a
-                href={igUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
-                title="Instagram do comércio"
-              >
-                <Instagram className="h-2.5 w-2.5" /> Instagram
-              </a>
-            )}
-            {!igUrl && lead.audit && hasRealSite && (
-              <span
-                className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-warn ring-1 ring-warn/30"
-                title="Site auditado — nenhum link para Instagram encontrado."
-              >
-                <Instagram className="h-2.5 w-2.5" /> sem IG no site
-              </span>
-            )}
-            {!igUrl && !lead.audit && !fbUrl && (
-              <span
-                className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border"
-              >
-                <HelpCircle className="h-2.5 w-2.5" /> <Instagram className="h-2.5 w-2.5" /> não verificável
-                <HelpTip
-                  title="Não verificável"
-                  text="Não temos como confirmar esse dado com uma fonte confiável — não significa que o comércio não tenha, só que não conseguimos checar."
-                />
-              </span>
-            )}
-            {fbUrl && (
-              <a
-                href={fbUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
-                title="Facebook do comércio"
-              >
-                Facebook
-              </a>
-            )}
+            {(() => {
+              // Presença digital unificada — evita contradição entre "sem site"
+              // e "Instagram não verificável" quando o campo `website` do Google
+              // é, na verdade, um link direto para Instagram/Facebook.
+              const realSite = hasRealSite ? resolvedHref : null;
+              const social = igUrl
+                ? { kind: "instagram" as const, url: igUrl, label: "Instagram" }
+                : fbUrl
+                  ? { kind: "facebook" as const, url: fbUrl, label: "Facebook" }
+                  : null;
+              const badges: JSX.Element[] = [];
+              if (realSite) {
+                badges.push(
+                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
+                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
+                  </span>
+                );
+              }
+              if (social) {
+                badges.push(
+                  <a
+                    key="social"
+                    href={social.url!}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
+                    title={realSite ? `Também possui ${social.label}` : `Possui página no ${social.label}`}
+                  >
+                    {social.kind === "instagram" ? <Instagram className="h-2.5 w-2.5" /> : null}
+                    {realSite ? social.label : `Possui página (${social.label})`}
+                  </a>
+                );
+              }
+              if (badges.length === 0) {
+                // Só marca "não verificável" quando rodou auditoria e não achou nada.
+                // Sem auditoria = "sem presença digital encontrada" (baseado no Google Places).
+                if (lead.audit) {
+                  badges.push(
+                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Nem site nem redes sociais encontradas na auditoria">
+                      <Flame className="h-2.5 w-2.5" /> Sem presença digital
+                    </span>
+                  );
+                } else {
+                  badges.push(
+                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Google Places não retornou site nem rede social">
+                      <Flame className="h-2.5 w-2.5" /> Sem presença digital encontrada
+                    </span>
+                  );
+                }
+              }
+              return <>{badges}</>;
+            })()}
             {lead.rating != null && (
               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                 <Star className="h-3 w-3 text-warn" fill="currentColor" />
