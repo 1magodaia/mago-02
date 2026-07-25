@@ -390,8 +390,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
-            title={linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"}
+            className={`flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 hover:bg-white/5 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            title={
+              linkInferred
+                ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
+                : linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"
+            }
           >
             {linkKind === "instagram" ? (
               <><Instagram className="h-3 w-3" /> Instagram</>
@@ -400,6 +404,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             ) : (
               <><Globe className="h-3 w-3" /> Site</>
             )}
+            {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
         )}
         {lead.phone && (
