@@ -153,3 +153,28 @@ body {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/* Ajustes por device/pointer/orientação                              */
+/* Estes atributos são preenchidos por useDevice() em src/hooks/use-mobile */
+/* ------------------------------------------------------------------ */
+
+/* Mobile em paisagem: empilha os widgets flutuantes (WhatsApp/Chat/FAB)
+   à esquerda para não sobrepor o conteúdo principal em telas curtas. */
+html[data-device="mobile"][data-orientation="landscape"] .bm-fab-stack,
+html[data-device="mobile"][data-orientation="landscape"] [data-floating="support"] {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;
+}
+
+/* Tablet: alvos de toque um pouco maiores que desktop */
+html[data-device="tablet"] button,
+html[data-device="tablet"] a[role="button"] {
+  min-height: 40px;
+}
+
+/* Ponteiro touch: aumenta hit-area em elementos interativos pequenos */
+html[data-pointer="touch"] .touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+

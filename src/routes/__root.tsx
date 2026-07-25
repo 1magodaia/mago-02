@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
 import { SupportWidget } from "../components/support-widget";
 import { SupportChat } from "../components/support-chat";
+import { useDevice } from "../hooks/use-mobile";
 import { Toaster } from "../components/ui/sonner";
 import favicon from "../assets/favicon.png.asset.json";
 
@@ -139,6 +140,8 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useDevice(); // publica data-device / data-pointer / data-orientation em <html>
+
 
   return (
     <QueryClientProvider client={queryClient}>
