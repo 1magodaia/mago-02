@@ -232,13 +232,16 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                     key="social"
                     href={social.url!}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 hover:bg-primary/25"
+                    onTouchStart={(e) => e.stopPropagation()}
+                    aria-label={`Abrir ${social.label} em nova aba`}
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 touch-manipulation hover:bg-primary/25 active:bg-primary/30"
                     title={realSite ? `Também possui ${social.label}` : `Possui página no ${social.label}`}
                   >
                     {social.kind === "instagram" ? <Instagram className="h-2.5 w-2.5" /> : null}
                     {realSite ? social.label : `Possui página (${social.label})`}
+                    <ExternalLink className="h-2.5 w-2.5 opacity-70" aria-hidden />
                   </a>
                 );
               }
@@ -389,9 +392,11 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <a
             href={resolvedHref}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className={`flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 hover:bg-white/5 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            onTouchStart={(e) => e.stopPropagation()}
+            aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
