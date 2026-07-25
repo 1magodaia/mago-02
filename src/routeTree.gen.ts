@@ -15,6 +15,7 @@ import { Route as NovidadesRouteImport } from './routes/novidades'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MasterRouteImport } from './routes/master'
 import { Route as LeadsRouteImport } from './routes/leads'
+import { Route as AvaliacaoRouteImport } from './routes/avaliacao'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevLeadPreviewRouteImport } from './routes/dev.lead-preview'
@@ -52,6 +53,11 @@ const MasterRoute = MasterRouteImport.update({
 const LeadsRoute = LeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvaliacaoRoute = AvaliacaoRouteImport.update({
+  id: '/avaliacao',
+  path: '/avaliacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -101,6 +107,7 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/leads': typeof LeadsRoute
   '/master': typeof MasterRoute
   '/mcp': typeof McpRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/leads': typeof LeadsRoute
   '/master': typeof MasterRoute
   '/mcp': typeof McpRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/leads': typeof LeadsRoute
   '/master': typeof MasterRoute
   '/mcp': typeof McpRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/avaliacao'
     | '/leads'
     | '/master'
     | '/mcp'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/avaliacao'
     | '/leads'
     | '/master'
     | '/mcp'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/avaliacao'
     | '/leads'
     | '/master'
     | '/mcp'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  AvaliacaoRoute: typeof AvaliacaoRoute
   LeadsRoute: typeof LeadsRoute
   MasterRoute: typeof MasterRoute
   McpRoute: typeof McpRoute
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/leads'
       fullPath: '/leads'
       preLoaderRoute: typeof LeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avaliacao': {
+      id: '/avaliacao'
+      path: '/avaliacao'
+      fullPath: '/avaliacao'
+      preLoaderRoute: typeof AvaliacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -321,6 +341,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  AvaliacaoRoute: AvaliacaoRoute,
   LeadsRoute: LeadsRoute,
   MasterRoute: MasterRoute,
   McpRoute: McpRoute,
