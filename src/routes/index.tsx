@@ -647,7 +647,10 @@ function Home() {
     <div className="min-h-screen">
 
       {/* NAV — botões padronizados: h-9 rounded-full px-3 text-xs font-semibold */}
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+      <nav
+        className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+      >
         <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
           <LogoIcon className="h-9 w-9 sm:hidden" />
           <span className="hidden sm:block"><LogoWordmark /></span>
