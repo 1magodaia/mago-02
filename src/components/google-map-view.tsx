@@ -94,6 +94,18 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
     loadMapsApi()
       .then(() => {
         if (cancelled || !containerRef.current || mapRef.current) return;
+        // Interaction tuning per device:
+        // - touch (mobile/tablet): use one-finger pan+cooperative gesture handling to
+        //   avoid hijacking page scroll; two-finger to pan while page scrolls.
+        // - mouse (desktop): greedy handling — drag freely, wheel zoom.
+        // In mobile portrait we prefer "cooperative" to reduce accidental map grabs
+        // while the user scrolls the result list; landscape/tablet gets "greedy".
+        const gestureHandling: google.maps.GestureHandlingOptions | string =
+          pointer === "touch"
+            ? device === "mobile" && orientation === "portrait"
+              ? "cooperative"
+              : "greedy"
+            : "auto";
         mapRef.current = new google.maps.Map(containerRef.current, {
           center,
           zoom: 13,
@@ -102,7 +114,8 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
           styles: DARK_STYLE,
           backgroundColor: "#000",
           clickableIcons: false,
-          draggableCursor: "crosshair",
+          gestureHandling,
+          draggableCursor: pointer === "mouse" ? "crosshair" : undefined,
           draggingCursor: "grabbing",
         });
         infoRef.current = new google.maps.InfoWindow();
