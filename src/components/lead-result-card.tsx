@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bookmark,
@@ -218,7 +218,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 : fbUrl
                   ? { kind: "facebook" as const, url: fbUrl, label: "Facebook" }
                   : null;
-              const badges: React.ReactElement[] = [];
+              const badges: ReactElement[] = [];
               if (realSite) {
                 badges.push(
                   <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
