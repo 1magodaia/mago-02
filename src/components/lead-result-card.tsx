@@ -230,6 +230,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 badges.push(
                   <a
                     key="social"
+                    data-testid="social-badge"
                     href={social.url!}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -390,6 +391,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         )}
         {resolvedHref && (
           <a
+            data-testid="social-button"
             href={resolvedHref}
             target="_blank"
             rel="noopener noreferrer"
