@@ -1,6 +1,7 @@
 /// <reference types="google.maps" />
 import { useEffect, useRef } from "react";
 import type { ScoredLead } from "@/lib/scoring";
+import { useDevice } from "@/hooks/use-mobile";
 
 declare global {
   interface Window {
@@ -83,6 +84,8 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
 
+  const { pointer, orientation, device } = useDevice();
+
   const onMapClickRef = useRef(onMapClick);
   useEffect(() => { onMapClickRef.current = onMapClick; }, [onMapClick]);
 
@@ -91,6 +94,18 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
     loadMapsApi()
       .then(() => {
         if (cancelled || !containerRef.current || mapRef.current) return;
+        // Interaction tuning per device:
+        // - touch (mobile/tablet): use one-finger pan+cooperative gesture handling to
+        //   avoid hijacking page scroll; two-finger to pan while page scrolls.
+        // - mouse (desktop): greedy handling — drag freely, wheel zoom.
+        // In mobile portrait we prefer "cooperative" to reduce accidental map grabs
+        // while the user scrolls the result list; landscape/tablet gets "greedy".
+        const gestureHandling: "cooperative" | "greedy" | "auto" | "none" =
+          pointer === "touch"
+            ? device === "mobile" && orientation === "portrait"
+              ? "cooperative"
+              : "greedy"
+            : "auto";
         mapRef.current = new google.maps.Map(containerRef.current, {
           center,
           zoom: 13,
@@ -99,7 +114,8 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
           styles: DARK_STYLE,
           backgroundColor: "#000",
           clickableIcons: false,
-          draggableCursor: "crosshair",
+          gestureHandling,
+          draggableCursor: pointer === "mouse" ? "crosshair" : undefined,
           draggingCursor: "grabbing",
         });
         infoRef.current = new google.maps.InfoWindow();

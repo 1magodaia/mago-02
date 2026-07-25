@@ -7,7 +7,7 @@ export type DeviceKind = "mobile" | "tablet" | "desktop";
 export type PointerKind = "touch" | "mouse";
 export type Orientation = "portrait" | "landscape";
 
-function readSnapshot() {
+export function readSnapshot() {
   if (typeof window === "undefined") {
     return {
       device: "desktop" as DeviceKind,
