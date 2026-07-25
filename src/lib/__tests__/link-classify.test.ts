@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { classifyLink, normalizeUrl, isRealSite } from "../link-classify";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  classifyLink,
+  normalizeUrl,
+  isRealSite,
+  getClassifyMetrics,
+  resetClassifyMetrics,
+} from "../link-classify";
 
 describe("classifyLink", () => {
   describe("Instagram", () => {
