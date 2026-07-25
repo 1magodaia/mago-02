@@ -646,84 +646,101 @@ function Home() {
   return (
     <div className="min-h-screen">
 
-      {/* NAV — botões padronizados: h-9 rounded-full px-3 text-xs font-semibold */}
+      {/* NAV — sticky com safe-area; alvos de toque ≥44px no mobile */}
       <nav
-        className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+        className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
-          <LogoIcon className="h-9 w-9 sm:hidden" />
-          <span className="hidden sm:block"><LogoWordmark /></span>
-        </Link>
-        <div className="flex items-center gap-2">
-          {user && (
-            <Link
-              to="/leads"
-              className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
-            >
-              <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              to="/novidades"
-              className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
-            >
-              <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              to="/master"
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary/10 px-3 text-xs font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/20"
-            >
-              <Shield className="h-3.5 w-3.5" /> {isMaster ? "Master" : "Admin"}
-            </Link>
-          )}
-          {authLoading ? (
-            <span className="grid h-9 w-9 place-items-center">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-            </span>
-          ) : user ? (
-            <div className="group relative">
-              <button
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
-                aria-label="Menu da conta"
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
+          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
+            <LogoIcon className="h-10 w-10 sm:hidden" />
+            <span className="hidden sm:block"><LogoWordmark /></span>
+          </Link>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {user && (
+              <Link
+                to="/leads"
+                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
               >
-                <UserIcon className="h-3.5 w-3.5 text-primary" />
-                <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
-              </button>
-              <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
-                <div className="px-3 py-2 text-[11px] text-muted-foreground">{user.email}</div>
-                {searchUsage && (
-                  <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
-                )}
-                <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
+                <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/novidades"
+                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
+              >
+                <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/master"
+                aria-label={isMaster ? "Abrir painel Master" : "Abrir painel Admin"}
+                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary/15 px-4 text-sm font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/25 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+              >
+                <Shield className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                <span>{isMaster ? "Master" : "Admin"}</span>
+              </Link>
+            )}
+            {authLoading ? (
+              <span className="grid h-11 w-11 place-items-center sm:h-9 sm:w-9">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </span>
+            ) : user ? (
+              <div className="group relative">
                 <button
-                  onClick={() => { resetTutorial(); setTutorialOpen(true); }}
-                  className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-glass px-4 text-sm font-semibold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                  aria-label="Menu da conta"
                 >
-                  Ver tutorial novamente
+                  <UserIcon className="h-4 w-4 text-primary sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
                 </button>
-                <button
-                  onClick={() => signOut().then(() => nav({ to: "/" }))}
-                  className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
-                >
-                  <LogOut className="h-3.5 w-3.5" /> Sair
-                </button>
+                <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
+                  <div className="px-3 py-2 text-[11px] text-muted-foreground">{user.email}</div>
+                  {searchUsage && (
+                    <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
+                  )}
+                  <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
+                  {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
+                  <button
+                    onClick={() => { resetTutorial(); setTutorialOpen(true); }}
+                    className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                  >
+                    Ver tutorial novamente
+                  </button>
+                  <button
+                    onClick={() => signOut().then(() => nav({ to: "/" }))}
+                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-3.5 w-3.5" /> Sair
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <Link
-              to="/auth"
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-bold text-primary-foreground hover:brightness-110"
-            >
-              <LogIn className="h-3.5 w-3.5" /> Entrar
-            </Link>
-          )}
+            ) : (
+              <Link
+                to="/auth"
+                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+              >
+                <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
+
+      {/* FAB Master — acesso rápido no mobile para admins */}
+      {isAdmin && (
+        <Link
+          to="/master"
+          aria-label="Acesso rápido ao painel Master"
+          className="fixed right-4 z-40 inline-flex h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-elevated ring-2 ring-primary/40 transition hover:brightness-110 active:scale-95 sm:hidden"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5.5rem)" }}
+        >
+          <Shield className="h-5 w-5" /> Master
+        </Link>
+      )}
+
 
       <header className="relative z-40 mx-auto max-w-7xl px-4 pb-6 pt-4 sm:px-6 sm:pb-8 sm:pt-6">
         <HeroBanner
