@@ -67,6 +67,26 @@ const STATUS_COLOR: Record<ScoredLead["status"], string> = {
   cold: "#6b7280",
 };
 
+/**
+ * Decisão pura de `gestureHandling` do Google Maps por plataforma.
+ * Exportado para permitir testes unitários sem carregar a API real.
+ *
+ * - Mouse (desktop/tablet com trackpad) → `auto`: pan/zoom via clique+drag e scroll wheel.
+ * - Touch em mobile portrait → `cooperative`: exige 2 dedos p/ pan e não sequestra
+ *   o scroll vertical da lista de leads.
+ * - Touch em tablet ou paisagem → `greedy`: pan/zoom natural, tela grande o
+ *   suficiente para não conflitar com scroll.
+ */
+export function pickGestureHandling(
+  pointer: "touch" | "mouse",
+  device: "mobile" | "tablet" | "desktop",
+  orientation: "portrait" | "landscape",
+): "cooperative" | "greedy" | "auto" | "none" {
+  if (pointer !== "touch") return "auto";
+  if (device === "mobile" && orientation === "portrait") return "cooperative";
+  return "greedy";
+}
+
 interface Props {
   center: { lat: number; lng: number };
   radiusKm: number;
