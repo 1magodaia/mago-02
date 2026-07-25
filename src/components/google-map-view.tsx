@@ -100,7 +100,7 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
         // - mouse (desktop): greedy handling — drag freely, wheel zoom.
         // In mobile portrait we prefer "cooperative" to reduce accidental map grabs
         // while the user scrolls the result list; landscape/tablet gets "greedy".
-        const gestureHandling: google.maps.GestureHandlingOptions | string =
+        const gestureHandling: "cooperative" | "greedy" | "auto" | "none" =
           pointer === "touch"
             ? device === "mobile" && orientation === "portrait"
               ? "cooperative"
