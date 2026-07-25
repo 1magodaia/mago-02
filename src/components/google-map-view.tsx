@@ -84,6 +84,8 @@ export default function GoogleMapView({ center, radiusKm, leads, selectedId, onS
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const infoRef = useRef<google.maps.InfoWindow | null>(null);
 
+  const { pointer, orientation, device } = useDevice();
+
   const onMapClickRef = useRef(onMapClick);
   useEffect(() => { onMapClickRef.current = onMapClick; }, [onMapClick]);
 
