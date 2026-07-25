@@ -1,4 +1,5 @@
 import * as React from "react";
+import { recordDeviceChange, type TelemetrySource } from "@/lib/device-telemetry";
 
 const MOBILE_MAX = 767;   // < 768 → mobile
 const TABLET_MAX = 1024;  // 768–1024 → tablet, > 1024 → desktop
@@ -34,16 +35,24 @@ export function useDevice() {
   const [snap, setSnap] = React.useState(readSnapshot);
 
   React.useEffect(() => {
-    const update = () => setSnap(readSnapshot());
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("orientationchange", update);
+    const update = (source: TelemetrySource) => {
+      const next = readSnapshot();
+      recordDeviceChange(source, next);
+      setSnap(next);
+    };
+    // Initial record so telemetry has a baseline.
+    recordDeviceChange("initial", readSnapshot());
+    const onResize = () => update("resize");
+    const onOrientation = () => update("orientationchange");
+    const onPointer = () => update("matchmedia");
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onOrientation);
     const mqPointer = window.matchMedia("(pointer: coarse)");
-    mqPointer.addEventListener?.("change", update);
+    mqPointer.addEventListener?.("change", onPointer);
     return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", update);
-      mqPointer.removeEventListener?.("change", update);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onOrientation);
+      mqPointer.removeEventListener?.("change", onPointer);
     };
   }, []);
 
