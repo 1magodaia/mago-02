@@ -11,7 +11,7 @@
  * pura, sem dependência de React ou I/O, para ser 100% testável.
  */
 
-export type LinkKind = "site" | "instagram" | "facebook" | "other";
+export type LinkKind = "site" | "instagram" | "facebook" | "whatsapp" | "other";
 
 /**
  * "confirmed" — a URL de entrada apontava diretamente para o destino final,
@@ -40,6 +40,7 @@ export interface ClassifiedLink {
 
 const IG_HOSTS = new Set(["instagram.com", "instagr.am"]);
 const FB_HOSTS = new Set(["facebook.com", "fb.com", "fb.me", "m.facebook.com"]);
+const WA_HOSTS = new Set(["wa.me", "api.whatsapp.com", "whatsapp.com", "chat.whatsapp.com"]);
 const TRACKING_PARAMS = /^(utm_|fbclid$|gclid$|mc_|_hs|hsCtaTracking$|igshid$|share$|ref$|ref_src$|si$)/i;
 
 /** True quando o host (ou subdomínio) pertence ao Instagram. */
@@ -52,6 +53,12 @@ function isInstagramHost(host: string): boolean {
 function isFacebookHost(host: string): boolean {
   if (FB_HOSTS.has(host)) return true;
   return host.endsWith(".facebook.com") || host.endsWith(".fb.com");
+}
+
+/** True quando o host pertence ao WhatsApp (link direto, não é "site próprio"). */
+function isWhatsappHost(host: string): boolean {
+  if (WA_HOSTS.has(host)) return true;
+  return host.endsWith(".whatsapp.com");
 }
 
 /**
@@ -161,7 +168,7 @@ interface ClassifyMetrics {
 
 const metrics: ClassifyMetrics = {
   total: 0,
-  byKind: { site: 0, instagram: 0, facebook: 0, other: 0 },
+  byKind: { site: 0, instagram: 0, facebook: 0, whatsapp: 0, other: 0 },
   byConfidence: { confirmed: 0, inferred: 0, unknown: 0 },
   redirectsUnwrapped: 0,
   trackingStripped: 0,
@@ -235,6 +242,7 @@ export function classifyLink(raw: string | null | undefined): ClassifiedLink {
   let kind: LinkKind = "site";
   if (isInstagramHost(host)) kind = "instagram";
   else if (isFacebookHost(host)) kind = "facebook";
+  else if (isWhatsappHost(host)) kind = "whatsapp";
 
   const r: ClassifiedLink = { kind, url: href, host, confidence, wasUnwrapped, hadTracking };
   recordMetric(r);
