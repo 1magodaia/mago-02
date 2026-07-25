@@ -168,7 +168,7 @@ interface ClassifyMetrics {
 
 const metrics: ClassifyMetrics = {
   total: 0,
-  byKind: { site: 0, instagram: 0, facebook: 0, other: 0 },
+  byKind: { site: 0, instagram: 0, facebook: 0, whatsapp: 0, other: 0 },
   byConfidence: { confirmed: 0, inferred: 0, unknown: 0 },
   redirectsUnwrapped: 0,
   trackingStripped: 0,
@@ -242,6 +242,7 @@ export function classifyLink(raw: string | null | undefined): ClassifiedLink {
   let kind: LinkKind = "site";
   if (isInstagramHost(host)) kind = "instagram";
   else if (isFacebookHost(host)) kind = "facebook";
+  else if (isWhatsappHost(host)) kind = "whatsapp";
 
   const r: ClassifiedLink = { kind, url: href, host, confidence, wasUnwrapped, hadTracking };
   recordMetric(r);
