@@ -50,6 +50,9 @@ beforeEach(() => {
   listeners.clear();
   installMatchMedia();
   setViewport(1280, 800);
+  // Force no-touch fallback so pointer is driven only by matchMedia
+  Object.defineProperty(navigator, "maxTouchPoints", { configurable: true, value: 0 });
+  delete (window as unknown as Record<string, unknown>).ontouchstart;
   // Reset html dataset between tests
   document.documentElement.removeAttribute("data-device");
   document.documentElement.removeAttribute("data-pointer");
