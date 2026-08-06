@@ -12,8 +12,9 @@ export function MembershipBadge({ className, showBenefits }: MembershipBadgeProp
   const isPaid = isPro || isAdmin || isMaster;
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div id="membership-badge" className={cn("flex items-center gap-2", className)}>
       <div 
+
         className={cn(
           "flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 transition-all",
           isPaid 
