@@ -25,6 +25,7 @@ import {
   X,
   Star,
   User as UserIcon,
+  Zap,
 } from "lucide-react";
 
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
@@ -1125,6 +1126,7 @@ function Home() {
         >
           <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
             <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+              <MapOverlay />
               <MapView
                 center={center}
                 radiusKm={radiusKm}
