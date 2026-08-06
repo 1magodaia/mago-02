@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAppSettings } from "@/lib/settings.functions";
 import logoIcon from "../assets/logo-icon.png.asset.json";
-import logoFixed from "../assets/logo-fixed.png.asset.json";
+import logoWizard from "../assets/logo-wizard.png.asset.json";
 import logoFull from "../assets/logo-full.png.asset.json";
 
 interface LogoProps {
@@ -32,7 +32,7 @@ export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
   }, []);
 
   // Fallback para a URL do asset carregado se nenhuma outra estiver disponível no DB/Local
-  const defaultLogoUrl = logoFixed.url;
+  const defaultLogoUrl = logoWizard.url;
   
   const finalLogoUrl = logoUrl || defaultLogoUrl;
 
@@ -59,19 +59,19 @@ export function LogoWordmark({
 }) {
   if (variant === "full") {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <LogoIcon className="h-24 w-24 sm:h-32 sm:w-32" />
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm">Busca</span>
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary drop-shadow-glow-primary">Mágica</span>
+      <div className="flex flex-col items-center gap-2">
+        <LogoIcon className="h-40 w-40 sm:h-56 sm:w-56" />
+        <div className="flex items-baseline gap-2 mt-2">
+          <span className="text-4xl sm:text-6xl font-black tracking-tighter text-foreground drop-shadow-sm">Busca</span>
+          <span className="text-4xl sm:text-6xl font-black tracking-tighter text-primary drop-shadow-glow-primary">Mágica</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
-      <LogoIcon className="h-12 w-12 sm:h-16 sm:w-16" />
+    <div className={`flex items-center gap-3 ${className}`}>
+      <LogoIcon className="h-10 w-10 sm:h-12 sm:w-12" />
       <div className="flex items-baseline gap-1">
         <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">Busca</span>
         <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-primary drop-shadow-glow-primary">Mágica</span>
