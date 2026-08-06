@@ -129,12 +129,30 @@ function AuthPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0A0B1F] px-4 py-8">
-      {/* Premium Background Blurs & Texture */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 animate-noise mix-blend-overlay" />
-        <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-primary/10 blur-[100px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0B1F]/50 to-[#0A0B1F]" />
+      {/* Dynamic Magical & IA Background */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        {/* Deep Night Base with Noise */}
+        <div className="absolute inset-0 bg-[#0A0B1F] animate-noise mix-blend-overlay opacity-40" />
+        
+        {/* Animated Cyber Grid */}
+        <div className="absolute inset-0 particle-bg opacity-30" />
+
+        {/* Floating Magical Orbs */}
+        <div className="absolute top-[-10%] left-[-5%] h-[60%] w-[60%] rounded-full bg-primary/25 blur-[120px] animate-float-slow" />
+        <div className="absolute bottom-[-15%] right-[-5%] h-[60%] w-[60%] rounded-full bg-warn/15 blur-[120px] animate-float-slow" style={{ animationDelay: '-5s' }} />
+        <div className="absolute top-[20%] right-[10%] h-[30%] w-[30%] rounded-full bg-primary/10 blur-[80px] animate-pulse-subtle" />
+        
+        {/* IA Scanning Effect Overlay */}
+        <div className="absolute inset-0 scan-effect opacity-10" />
+
+        {/* Abstract Business Connections (Decorative SVGs) */}
+        <svg className="absolute inset-0 h-full w-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="currentColor" className="text-primary" />
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-primary" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
       </div>
 
       <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-700">

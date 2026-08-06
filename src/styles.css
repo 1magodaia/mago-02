@@ -80,14 +80,25 @@
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(2%, 4%) scale(1.1); }
-  66% { transform: translate(-3%, -2%) scale(0.95); }
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(3%, 5%) scale(1.1) rotate(2deg); }
+  66% { transform: translate(-4%, -3%) scale(0.9) rotate(-2deg); }
 }
 
 @keyframes slide-up-fade {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
 }
 
 @utility magical-pulse {
@@ -116,12 +127,37 @@
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle at 50% 50%, var(--primary) 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.1;
+    background-image: 
+      radial-gradient(circle at 50% 50%, var(--primary) 1px, transparent 1px),
+      linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px, 80px 80px, 80px 80px;
+    opacity: 0.2;
     pointer-events: none;
     z-index: -1;
   }
+}
+
+@utility scan-effect {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    height: 2px;
+    width: 100%;
+    opacity: 0;
+    animation: scan-line 4s linear infinite;
+  }
+}
+
+@utility magic-gradient-bg {
+  background: radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--primary) 15%, transparent), transparent 50%),
+              radial-gradient(circle at 100% 0%, color-mix(in oklab, var(--warn) 10%, transparent), transparent 50%),
+              radial-gradient(circle at 50% 100%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 50%),
+              var(--background);
 }
 
 @utility scrollbar-magical {
