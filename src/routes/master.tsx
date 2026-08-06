@@ -104,6 +104,7 @@ function MasterPanel() {
   const [supportMsg, setSupportMsg] = useState("");
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [citationsLimit, setCitationsLimit] = useState(20);
+  const [unlockLink, setUnlockLink] = useState("");
   const [heroImageUrl, setHeroImageUrl] = useState("");
   const [heroHeightDesktop, setHeroHeightDesktop] = useState(320);
   const [heroHeightMobile, setHeroHeightMobile] = useState(200);
