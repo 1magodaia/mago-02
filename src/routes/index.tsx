@@ -360,6 +360,7 @@ function Home() {
           writeHeroCache({ url: nextUrl, hd: nextHd, hm: nextHm, fit: nextFit });
 
           setSupportWa(s.support_whatsapp);
+          setUnlockLink(s.unlock_link);
           setSupportUpdatedAt(s.updated_at);
         })
         .catch(() => {});
