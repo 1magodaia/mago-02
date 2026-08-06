@@ -46,18 +46,18 @@ function loadMapsApi(): Promise<void> {
 }
 
 const DARK_STYLE: google.maps.MapTypeStyle[] = [
-  { elementType: "geometry", stylers: [{ color: "#0a0a0a" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#000" }] },
+  { elementType: "geometry", stylers: [{ color: "#050512" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
   // Hide administrative labels to avoid duplicated city names overlapping
   // the native locality label (Google renders both at some zoom levels in dark styles).
   { featureType: "administrative", elementType: "labels", stylers: [{ visibility: "off" }] },
   { featureType: "administrative.locality", elementType: "labels", stylers: [{ visibility: "on" }] },
-  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1c1c1c" }] },
-  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#6b6b6b" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#050505" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#64748b" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
 ];
 
