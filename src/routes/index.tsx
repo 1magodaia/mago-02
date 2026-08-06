@@ -53,7 +53,10 @@ import heroDefault from "@/assets/hero-banner.png.asset.json";
 import { HeroBanner } from "@/components/hero-banner";
 import { MembershipBadge } from "@/components/membership-badge";
 
+import { OnboardingTour } from "@/components/onboarding-tour";
+
 const HERO_CACHE_KEY = "bm.heroSettings.v1";
+
 type HeroCache = {
   url: string;
   hd: number;
@@ -191,6 +194,8 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
         {actionHref ? (
           <a
             href={actionHref}
+
+
             target="_blank"
             rel="noopener noreferrer"
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-sm font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
@@ -760,6 +765,8 @@ function Home() {
 
   return (
     <div className="min-h-screen">
+      <OnboardingTour />
+
 
       {/* NAV — sticky com safe-area; alvos de toque ≥44px no mobile */}
       <nav
@@ -833,8 +840,11 @@ function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 {!isPro && !isMaster && !isAdmin && (
-                  <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
+                  <div id="pro-upgrade-link">
+                    <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
+                  </div>
                 )}
+
                 <Link
                   to="/auth"
                   className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
@@ -884,8 +894,9 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
+        <div id="search-input" className="glass-panel relative z-50 mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
           <SmartAutocomplete
+
             value={query}
             onChange={setQuery}
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
