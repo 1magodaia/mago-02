@@ -32,7 +32,7 @@ export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
   }, []);
 
   // Fallback para a URL do asset carregado se nenhuma outra estiver disponível no DB/Local
-  const defaultLogoUrl = logoFixed.url;
+  const defaultLogoUrl = logoWizard.url;
   
   const finalLogoUrl = logoUrl || defaultLogoUrl;
 
