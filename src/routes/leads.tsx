@@ -22,7 +22,11 @@ export const Route = createFileRoute("/leads")({
       { property: "og:description", content: "Painel de leads favoritos, contatados e histórico de buscas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
+    links: [
+      { rel: "canonical", href: "https://buscamagica.lovable.app/leads" }
+    ]
   }),
   component: LeadsPage,
 });
