@@ -1135,7 +1135,7 @@ function Home() {
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
         {rawResults.length > 0 && (
           <section
-            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
+            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 scrollbar-magical content-auto`}
             aria-label="Resultados"
           >
             {loading ? (
