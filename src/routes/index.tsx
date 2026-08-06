@@ -131,11 +131,11 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
     <div
       role="alertdialog"
       aria-modal="true"
-      className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] grid place-items-center bg-black/60 p-4 backdrop-blur-2xl"
       onClick={onClose}
     >
       <div
-        className="glass-panel relative w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl"
+        className="glass-panel relative w-full max-w-md rounded-3xl border border-primary/30 p-8 text-center shadow-elevated slide-up-fade"
         onClick={(e) => e.stopPropagation()}
       >
         <button
