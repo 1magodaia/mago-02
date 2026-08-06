@@ -743,12 +743,26 @@ function Home() {
   // a home para evitar flash da tela de busca a usuários deslogados.
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-6">
-          <LogoIcon className="h-16 w-16 magical-pulse" />
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sincronizando Magia...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0B1F]">
+        {/* Immersive Loading Background */}
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-[#0A0B1F] animate-noise mix-blend-overlay opacity-40" />
+          <div className="absolute top-[-10%] left-[-5%] h-[60%] w-[60%] rounded-full bg-primary/20 blur-[120px] animate-float-slow" />
+          <div className="absolute bottom-[-15%] right-[-5%] h-[60%] w-[60%] rounded-full bg-warn/10 blur-[120px] animate-float-slow" style={{ animationDelay: '-5s' }} />
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center gap-8 animate-in fade-in duration-1000">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full animate-pulse" />
+            <LogoIcon className="h-24 w-24 relative z-10 animate-float-magical" />
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-1 w-48 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+              <div className="h-full w-1/3 animate-shimmer bg-gradient-to-r from-transparent via-primary to-transparent" />
+            </div>
+            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-primary glow-text animate-pulse">
+              Sincronizando Magia...
+            </span>
           </div>
         </div>
       </div>
@@ -1129,8 +1143,15 @@ function Home() {
                 {Array.from({ length: 4 }).map((_, i) => <LeadSkeleton key={i} />)}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              <div className="glass-card p-10 text-center relative overflow-hidden group">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-white/5 text-muted-foreground/50">
+                  <Filter className="h-6 w-6" />
+                </div>
+                <p className="text-sm font-bold text-foreground mb-1">Nenhum lead encontrado</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Tente ampliar o raio de busca ou ajustar os filtros de avaliação e site.
+                </p>
               </div>
             ) : null}
             {filtered.map((lead) => {
@@ -1176,7 +1197,7 @@ function Home() {
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
         <section
-          className={`glass-panel relative overflow-hidden rounded-2xl ${
+          className={`glass-card relative overflow-hidden ${
             rawResults.length > 0
               ? `${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
               : "block h-[65svh] max-h-[calc(100dvh-10rem)] lg:h-[calc(100vh-14rem)]"
@@ -1184,8 +1205,8 @@ function Home() {
           style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
         >
-          <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
-            <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+          <ClientOnly fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
+            <Suspense fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
               <MapOverlay />
               <MapView
                 center={center}

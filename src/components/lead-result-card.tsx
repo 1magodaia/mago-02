@@ -352,18 +352,25 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
       {lead.audit && <EmailBlock email={lead.audit.email} />}
       
       {!lead.audit && (
-        <div className="group/pro relative overflow-hidden rounded-xl bg-glass p-3 ring-1 ring-border/50">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent blur-sm" />
-          <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
-                <ShieldCheck className="h-3 w-3" />
+        <div className="group/pro relative overflow-hidden rounded-2xl bg-[#0A0B1F]/40 p-5 ring-1 ring-white/10 transition-all hover:bg-[#0A0B1F]/60">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover/pro:opacity-100 transition-opacity duration-500" />
+          <div className="relative z-10 flex items-center justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-primary glow-text">
+                <ShieldCheck className="h-3.5 w-3.5" />
                 DADOS EXCLUSIVOS PRO
               </div>
-              <div className="h-2 w-32 rounded bg-white/5 animate-pulse" />
-              <div className="h-2 w-24 rounded bg-white/5 animate-pulse" />
+              <div className="h-2.5 w-full max-w-[180px] rounded-full bg-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              </div>
+              <div className="h-2.5 w-full max-w-[120px] rounded-full bg-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              </div>
             </div>
-            <Sparkles className="h-5 w-5 text-primary/20" />
+            <div className="flex flex-col items-center gap-1">
+              <Sparkles className="h-6 w-6 text-primary/30 animate-pulse" />
+              <span className="text-[9px] font-bold text-primary/40 uppercase">Bloqueado</span>
+            </div>
           </div>
         </div>
       )}
