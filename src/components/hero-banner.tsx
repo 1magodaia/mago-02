@@ -60,6 +60,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
               className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-500"
               style={{
                 objectPosition: "center",
+                padding: "1rem",
                 opacity: ready ? 1 : 0,
               }}
               loading="eager"
