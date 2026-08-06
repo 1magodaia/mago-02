@@ -697,7 +697,7 @@ function Home() {
               <Link
                 to="/master"
                 aria-label={isMaster ? "Abrir painel Master" : "Abrir painel Admin"}
-                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary/15 px-4 text-sm font-semibold text-primary ring-1 ring-primary/40 hover:bg-primary/25 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary/15 px-5 text-sm font-bold text-primary ring-1 ring-primary/40 hover:bg-primary/25 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
               >
                 <Shield className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 <span>{isMaster ? "Master" : "Admin"}</span>
