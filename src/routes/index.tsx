@@ -669,9 +669,8 @@ function Home() {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
-          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
-            <LogoIcon className="h-10 w-10 sm:hidden" />
-            <span className="hidden sm:block"><LogoWordmark /></span>
+          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0 transition-transform hover:scale-105 active:scale-95">
+            <LogoWordmark />
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
             {user && (
