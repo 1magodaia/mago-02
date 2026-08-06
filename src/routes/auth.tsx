@@ -18,7 +18,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "IA PLAY — Acesso" },
+      { title: "MAGO BUSCA — Acesso" },
       { name: "description", content: "Sua Central de Agentes Inteligentes." },
     ],
   }),
@@ -139,8 +139,8 @@ function AuthPage() {
             <LogoIcon className="h-24 md:h-32 w-auto drop-shadow-[0_0_20px_rgba(107,70,224,0.6)]" />
           </Link>
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
-              IA <span className="text-primary">PLAY</span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase">
+              MAGO <span className="text-primary">BUSCA</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl font-medium mt-1">Sua Central de Agentes Inteligentes</p>
           </div>
@@ -204,7 +204,7 @@ function AuthPage() {
 
                 {loginSuccess && (
                   <a
-                    href="https://wa.me/55?text=Olá, acabei de fazer login no IA PLAY e gostaria de ativar meu acesso PRO. Segue o comprovante."
+                    href="https://wa.me/55?text=Olá, acabei de fazer login no MAGO BUSCA e gostaria de ativar meu acesso PRO. Segue o comprovante."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 text-base font-bold text-white transition-all hover:brightness-110 hover:-translate-y-1 active:translate-y-0 shadow-lg animate-in fade-in zoom-in duration-500"
