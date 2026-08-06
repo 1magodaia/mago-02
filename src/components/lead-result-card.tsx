@@ -572,7 +572,7 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
       </footer>
     </article>
   );
-}
+});
 
 const PRICE_LABELS: Record<number, string> = {
   0: "Grátis",
