@@ -461,11 +461,21 @@ function MasterPanel() {
   return (
     <div className="min-h-screen px-4 py-6 sm:px-6">
       <nav className="mx-auto flex max-w-7xl items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> App
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> App
+          </Link>
+          <button 
+            onClick={() => setHistoryOpen(true)}
+            className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-primary ring-1 ring-primary/30 transition hover:bg-primary/20"
+          >
+            <History className="h-3.5 w-3.5" /> Histórico
+          </button>
+        </div>
         <LogoWordmark />
       </nav>
+
+      <SystemHistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
 
       <header className="mx-auto mt-6 flex max-w-7xl flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
