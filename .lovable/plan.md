@@ -1,42 +1,40 @@
 ---
-name: UX & Interface Hardening Plan (v6.2)
-description: Modernize the initial UI and login flow with smooth animations, performance optimizations, and enhanced branding.
+name: Strategic Explainability & Fluidity Hardening (v6.3)
+description: Enhance the UI to clearly explain Pro vs Free benefits, improve fluidity, and align visually with the new brand video/logo.
 type: feature
 ---
 
-# Implementation Plan — UX & Interface Hardening (v6.2)
+# Implementation Plan — Strategic Explainability & Fluidity (v6.3)
 
-This plan details the implementation of a more modern, responsive, and ultra-fluid interface, with a specific focus on the login experience and initial interactions.
+This plan focuses on making the app more intuitive for users (Free and Pro) and improving the perceived speed (fluidity) while aligning with the magical wizard theme shown in the provided logo and video.
 
-## 1. Visual Aesthetics & Branding (Mago IA Integration)
-- **Palette Refinement**: Reinforce the use of Magic Purple (`#6B46E0`) and Brand Gold (`#EF9F27`) across the app.
-- **Animated Backgrounds**: Implement subtle, GPU-accelerated "blobs" or animated gradients in the background of auth/landing pages for a "magical" feel.
-- **Enhanced Logo Interactions**: Add a pulse and rotation effect to the wizard logo in `src/components/logo.tsx` during loading states or specific interactions.
+## 1. Membership Explainability & UX
+- **Membership Status Badge**: Add a floating or header-integrated badge in `src/routes/index.tsx` that shows the user's current plan (Free/Pro) and a "Benefits" button.
+- **Enhanced Quota Block**: Refactor `FreeQuotaBlock` in `src/routes/index.tsx` to include a visual comparison table (Free vs Pro) to clearly explain the value proposition.
+- **Pro Teaser Enhancements**: Improve the `ProTeaser` component to show "Locked" features (like citations or full emails) with a "magical" blur effect and a clear upgrade CTA.
+- **Feature Highlighting**: Add subtle "Pro" icons next to features that are exclusive to paying members.
 
-## 2. Ultra-Fluid Login Flow (`src/routes/auth.tsx`)
-- **GPU-Accelerated Transitions**: Replace standard transitions with high-performance CSS transforms (`translateY`, `opacity`, `scale`).
-- **Modal Logic Optimization**:
-  - Implement a `slideUp` animation for the auth container when it enters.
-  - Add a `fadeIn` overlay effect.
-- **Input Micro-interactions**:
-  - Add a "subtle glow" neon effect when input fields are focused.
-  - Implement a dedicated password visibility toggle with smooth icon transitions.
-- **Loading UX**:
-  - Use a refined "magical" spinner that matches the branding.
-  - Ensure zero delay in tab switching (Login / Signup / Forgot) by pre-calculating layouts.
+## 2. Visual Alignment (Mago IA Theme)
+- **Video Background/Teaser**: Integrate the provided wizard video (`Anime_mago_globe_business...`) as a "How it works" teaser in the `HeroBanner` or a dedicated section.
+- **Magical Particles & Glows**:
+    - Add a `MagicalParticles` background component for auth and landing pages.
+    - Enhance `EnhancedLogoImg` with even smoother, more mystical transitions.
+    - Use more "Magic Purple" and "Brand Gold" gradients for buttons and active states.
 
-## 3. Global Interface Refinement
-- **Performance Optimization**: 
-  - Ensure animations use `will-change: transform, opacity` to leverage GPU.
-  - Minimize JavaScript-heavy animations in favor of CSS transitions.
-- **Accessibility & Touch**:
-  - Ensure all tap targets are at least 44px (consistent with previous hardening).
-  - Implement a custom scrollbar that matches the Magic Purple theme.
-- **Skeleton & Loading States**:
-  - Refine the `LeadSkeleton` and other loading components to be smoother and more visually integrated.
+## 3. Interaction Fluidity & Performance
+- **Instant Result Actions**: 
+    - Optimize `LeadResultCard` link handling to open external sites immediately while the app records the interaction in the background.
+    - Replace the "Zap" audit button with a more integrated "Magical Scan" animation that feels faster.
+- **Optimized Loading States**: 
+    - Implement better skeleton loaders for the entire result list to prevent layout shifts.
+    - Add a "Pre-caching" layer for common search categories to make initial loads feel instant.
+- **Safe-Area Polish**: Ensure all new UI elements respect mobile safe areas and notch constraints.
 
 ## 4. Technical Roadmap
-1. **Logo & Assets**: Update `src/components/logo.tsx` with enhanced animation states.
-2. **Auth Page**: Refactor `src/routes/auth.tsx` with the new performance-first animation stack and visual tweaks.
-3. **Global Styles**: Update `src/styles.css` (Tailwind v4) with new utility classes for "magical" effects (blobs, custom scrollbars).
-4. **Testing**: Validate performance and responsiveness on mobile (iPhone/Android) via Playwright or device simulation.
+1. **DB/Schema**: No changes required (leverages existing `unlock_link` and `search_count`).
+2. **Components**:
+    - Create `MembershipBadge.tsx`.
+    - Update `HeroBanner.tsx` to support the video teaser.
+    - Refactor `LeadResultCard.tsx` for interaction speed.
+3. **Styles**: Add `magical-glow` and `particle-bg` utility classes in `src/styles.css`.
+4. **Validation**: Test the "upgrade flow" to ensure it's frictionless for Free users.
