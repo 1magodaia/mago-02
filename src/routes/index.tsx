@@ -1236,3 +1236,44 @@ function MapOverlay() {
   );
 }
 
+function LeadSkeleton() {
+  return (
+    <div className="glass-panel relative flex flex-col gap-3 rounded-2xl p-4 animate-pulse">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-4 w-24 rounded bg-white/10" />
+          <div className="h-5 w-48 rounded bg-white/10" />
+          <div className="h-3 w-32 rounded bg-white/10" />
+        </div>
+        <div className="h-12 w-12 rounded-xl bg-white/10" />
+      </div>
+      <div className="h-8 w-full rounded-lg bg-white/10" />
+      <div className="flex gap-2">
+        <div className="h-4 w-16 rounded-full bg-white/10" />
+        <div className="h-4 w-16 rounded-full bg-white/10" />
+      </div>
+    </div>
+  );
+}
+
+function ProTeaser() {
+  return (
+    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center ring-1 ring-primary/20">
+      <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10">
+        <Zap className="h-6 w-6 text-primary" />
+      </div>
+      <h3 className="text-sm font-black uppercase tracking-widest text-primary">Seja PRO</h3>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Auditoria completa, extração de e-mails, exportação CSV e buscas ilimitadas para escalar sua prospecção.
+      </p>
+      <Link
+        to="/auth"
+        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground transition hover:brightness-110"
+      >
+        Conhecer Planos
+      </Link>
+    </div>
+  );
+}
+
+
