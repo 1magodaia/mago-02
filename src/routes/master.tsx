@@ -548,6 +548,22 @@ function MasterPanel() {
           </label>
           <label className="block sm:col-span-2">
             <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
+              Link de Desbloqueio (Checkout/WhatsApp)
+              <HelpTip
+                title="Link de Desbloqueio"
+                text="URL para onde o usuário Free será enviado quando atingir a cota (ex: link do Stripe ou WhatsApp direto). Se vazio, usa o WhatsApp de suporte padrão."
+              />
+            </span>
+            <input
+              type="url"
+              placeholder="https://checkout.stripe.com/... ou https://wa.me/..."
+              value={unlockLink}
+              onChange={(e) => setUnlockLink(e.target.value)}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
               Motivo da alteração <span className="text-muted-foreground/70">(opcional, aparece no histórico)</span>
               <HelpTip
                 title="Motivo da alteração"
