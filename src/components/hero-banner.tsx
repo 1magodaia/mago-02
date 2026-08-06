@@ -26,16 +26,16 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
 
   return (
     <section
-      className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-primary/25 via-background to-accent/20 ring-1 ring-border shadow-elevated"
+      className="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br from-primary/25 via-background to-accent/20 ring-1 ring-border shadow-elevated transition-transform duration-500 hover:scale-[1.005]"
       style={{
         ["--hero-h-mobile" as string]: `${heightMobile}px`,
         ["--hero-h-desktop" as string]: `${heightDesktop}px`,
         ["--hero-fit-desktop" as string]: fit,
       }}
     >
-      {/* Visual Hardening: subtle gradient overlay for better text readability and blending */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background/60 via-transparent to-background/20 pointer-events-none" />
       <div className="absolute inset-x-0 bottom-0 z-[1] h-24 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-primary/5 animate-pulse mix-blend-overlay" />
 
       {/*
         Mobile: força object-fit:contain — em telas estreitas "cover" corta
