@@ -1,36 +1,42 @@
 ---
-name: Busca Mágica v6.1 Implementation Plan
-description: Strategic visual and UX improvements for conversion and user retention.
+name: UX & Interface Hardening Plan (v6.2)
+description: Modernize the initial UI and login flow with smooth animations, performance optimizations, and enhanced branding.
 type: feature
 ---
 
-# Busca Mágica v6.1 — Strategic UX & Visual Hardening
+# Implementation Plan — UX & Interface Hardening (v6.2)
 
-This plan outlines visual and interaction improvements for the landing page (`src/routes/index.tsx`) and core components to enhance the experience for both Free (trial) and Pro (paid) users.
+This plan details the implementation of a more modern, responsive, and ultra-fluid interface, with a specific focus on the login experience and initial interactions.
 
-## 1. Visual Polish & Branding Consistency
-- **Hero refinement**: Improve the `HeroBanner` appearance with a subtle "glassmorphism" overlay that makes the transition between the flyer and the search UI more cohesive.
-- **Micro-interactions**: Add hover/focus states with "neon" effects to the primary search button to match the "Cyber-Marketing" aesthetic.
-- **Skeleton loading**: Implement a more refined skeleton state for lead cards instead of just a spinner, providing better visual feedback during search.
+## 1. Visual Aesthetics & Branding (Mago IA Integration)
+- **Palette Refinement**: Reinforce the use of Magic Purple (`#6B46E0`) and Brand Gold (`#EF9F27`) across the app.
+- **Animated Backgrounds**: Implement subtle, GPU-accelerated "blobs" or animated gradients in the background of auth/landing pages for a "magical" feel.
+- **Enhanced Logo Interactions**: Add a pulse and rotation effect to the wizard logo in `src/components/logo.tsx` during loading states or specific interactions.
 
-## 2. Free User Conversion (Growth)
-- **Visual Quota Counter**: Instead of just blocking searches, show a small "Search used: 1/1 (Free)" badge next to the search bar for trial users to make the limit clear BEFORE they hit the wall.
-- **Benefit Highlights**: In the empty state (before search), add a small "What you get with Pro" teaser (Full audit, Email scraping, No limits).
+## 2. Ultra-Fluid Login Flow (`src/routes/auth.tsx`)
+- **GPU-Accelerated Transitions**: Replace standard transitions with high-performance CSS transforms (`translateY`, `opacity`, `scale`).
+- **Modal Logic Optimization**:
+  - Implement a `slideUp` animation for the auth container when it enters.
+  - Add a `fadeIn` overlay effect.
+- **Input Micro-interactions**:
+  - Add a "subtle glow" neon effect when input fields are focused.
+  - Implement a dedicated password visibility toggle with smooth icon transitions.
+- **Loading UX**:
+  - Use a refined "magical" spinner that matches the branding.
+  - Ensure zero delay in tab switching (Login / Signup / Forgot) by pre-calculating layouts.
 
-## 3. Pro User Retention & Value
-- **"Pro" Badge Visibility**: Ensure Pro users see a clear "Account: PRO" indicator in the header to reinforce their status.
-- **Search History Quick-Access**: For Pro users, show a small horizontal list of recent search terms (`bm.history`) to allow quick re-runs.
-- **Active Support Widget**: Make the help widget (`HelpTip`) more discoverable in the Leads area, specifically explaining complex metrics like CNPJ scoring or Sitemap stale days.
+## 3. Global Interface Refinement
+- **Performance Optimization**: 
+  - Ensure animations use `will-change: transform, opacity` to leverage GPU.
+  - Minimize JavaScript-heavy animations in favor of CSS transitions.
+- **Accessibility & Touch**:
+  - Ensure all tap targets are at least 44px (consistent with previous hardening).
+  - Implement a custom scrollbar that matches the Magic Purple theme.
+- **Skeleton & Loading States**:
+  - Refine the `LeadSkeleton` and other loading components to be smoother and more visually integrated.
 
-## 4. Mobile & Interaction Improvements
-- **Pull-to-Refresh**: Implement a simulated pull-to-refresh or a clear "Clear Search" floating button for mobile users when the list is long.
-- **Map Interaction Overlay**: Add a temporary "Pinch to zoom / Drag to center" overlay that fades out after 3 seconds of map visibility to guide first-time mobile users.
-
-## 5. Implementation Roadmap
-1. Update `src/routes/index.tsx` with Pro/Free status indicators and search history.
-2. Refine `src/components/hero-banner.tsx` for better blending.
-3. Enhance `src/components/lead-result-card.tsx` with better typography for status reasons.
-4. Add "Launch Hardening" check to ensure PWA manifest is correctly referencing high-res icons.
-
----
-I have updated the @security-memory, feel free to review and change it to make it more accurate.
+## 4. Technical Roadmap
+1. **Logo & Assets**: Update `src/components/logo.tsx` with enhanced animation states.
+2. **Auth Page**: Refactor `src/routes/auth.tsx` with the new performance-first animation stack and visual tweaks.
+3. **Global Styles**: Update `src/styles.css` (Tailwind v4) with new utility classes for "magical" effects (blobs, custom scrollbars).
+4. **Testing**: Validate performance and responsiveness on mobile (iPhone/Android) via Playwright or device simulation.
