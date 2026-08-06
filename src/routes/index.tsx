@@ -907,44 +907,68 @@ function Home() {
 
 
 
-        {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div id="search-input" className="glass-panel relative z-50 mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
-          <SmartAutocomplete
+        {/* BLOCO PRINCIPAL DE BUSCA - Redesenhado Premium */}
+        <div id="search-input" className="glass-card relative z-50 mt-8 grid gap-4 p-6 ring-1 ring-primary/20 md:grid-cols-[1.2fr_1.4fr_auto]">
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Categoria</label>
+            <div className="relative group">
+              <SmartAutocomplete
+                value={query}
+                onChange={setQuery}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                placeholder="Ex: Padaria, Pet Shop..."
+                aria-label="Categoria de comércio"
+                staticList={CATEGORY_SUGGESTIONS}
+                minChars={1}
+                wrapperClassName="flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 ring-white/10 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05]"
+                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
+                leading={<Filter className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden />}
+              />
+            </div>
+          </div>
 
-            value={query}
-            onChange={setQuery}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Categoria (padaria, pet shop, advogado...)"
-            aria-label="Categoria de comércio"
-            staticList={CATEGORY_SUGGESTIONS}
-            minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
-          />
-          <SmartAutocomplete
-            value={region}
-            onChange={setRegion}
-            onSelect={onSelectRegion}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Cidade, bairro ou endereço"
-            aria-label="Região"
-            asyncSource={regionSource}
-            disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
-          />
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Região</label>
+            <div className="relative group">
+              <SmartAutocomplete
+                value={region}
+                onChange={setRegion}
+                onSelect={onSelectRegion}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                placeholder="Cidade ou Bairro..."
+                aria-label="Região"
+                asyncSource={regionSource}
+                disabled={usingGps}
+                wrapperClassName={`flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05] ${usingGps ? "opacity-50 ring-border" : "ring-white/10"}`}
+                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
+                leading={<MapPin className="h-5 w-5 text-primary" aria-hidden />}
+              />
+              <button
+                onClick={useGps}
+                disabled={locating}
+                title="Usar minha localização"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl bg-primary/10 p-2 text-primary transition-all hover:bg-primary/20 disabled:opacity-50"
+              >
+                {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
 
-
-
-          <button
-            onClick={runSearch}
-            disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-glow-primary active:scale-95 disabled:opacity-60 group relative overflow-hidden"
-          >
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
-            Buscar Leads
-          </button>
+          <div className="flex items-end">
+            <button
+              onClick={runSearch}
+              disabled={loading}
+              className="h-14 min-w-[160px] w-full rounded-2xl bg-primary px-8 text-base font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-60 group relative overflow-hidden"
+            >
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+              {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
+                <div className="flex items-center justify-center gap-2">
+                  <Zap className="h-5 w-5 fill-current" />
+                  <span>BUSCAR</span>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Search History Quick Access */}
