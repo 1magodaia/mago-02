@@ -25,6 +25,7 @@ import {
   X,
   Star,
   User as UserIcon,
+  Zap,
 } from "lucide-react";
 
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
@@ -39,11 +40,11 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 import { useServerFn } from "@tanstack/react-start";
 import { toTerms } from "@/lib/highlight";
-import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
+import { addHistory, cacheGet, cacheSet, exportToCsv, isContacted, isFavorite } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
-import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT, type Profile } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
@@ -786,16 +787,22 @@ function Home() {
                 </div>
               </div>
             ) : (
-              <Link
-                to="/auth"
-                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
-              >
-                <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
-              </Link>
+              <div className="flex items-center gap-2">
+                {!isPro && !isMaster && !isAdmin && (
+                  <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
+                )}
+                <Link
+                  to="/auth"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                >
+                  <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
+                </Link>
+              </div>
             )}
           </div>
         </div>
       </nav>
+
 
       {/* FAB Master — acesso rápido no mobile para admins */}
       {isAdmin && (
@@ -863,12 +870,19 @@ function Home() {
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-neon-primary hover:neon-primary active:scale-95 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+            Buscar Leads
           </button>
         </div>
+
+        {/* Search History Quick Access */}
+        <SearchHistory 
+          items={typeof window !== "undefined" ? JSON.parse(localStorage.getItem('bm.history') || '[]').slice(0, 5) : []} 
+          onSelect={(q) => setQuery(q)}
+        />
+
 
         {/* AÇÕES RÁPIDAS */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1054,17 +1068,15 @@ function Home() {
             className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
             aria-label="Resultados"
           >
-            {loading && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-                <p className="mt-2">Consultando Google Places...</p>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => <LeadSkeleton key={i} />)}
               </div>
-            )}
-            {!loading && filtered.length === 0 && (
+            ) : filtered.length === 0 ? (
               <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
                 Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
               </div>
-            )}
+            ) : null}
             {filtered.map((lead) => {
               const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
               return (
@@ -1100,6 +1112,12 @@ function Home() {
           </section>
         )}
 
+        {rawResults.length === 0 && !loading && (
+          <section className="mx-auto max-w-md py-12 px-4">
+            {!query && !isPro && <ProTeaser />}
+          </section>
+        )}
+
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
         <section
           className={`glass-panel relative overflow-hidden rounded-2xl ${
@@ -1112,6 +1130,7 @@ function Home() {
         >
           <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
             <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+              <MapOverlay />
               <MapView
                 center={center}
                 radiusKm={radiusKm}
@@ -1152,3 +1171,113 @@ function Home() {
     </div>
   );
 }
+
+function SearchHistory({ items, onSelect }: { items: string[], onSelect: (q: string) => void }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2 px-1">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Recentes:</span>
+      {items.map((q, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(q)}
+          className="rounded-full bg-glass px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border transition hover:bg-primary/10 hover:text-primary hover:ring-primary/40"
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ProBadge() {
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 ring-1 ring-primary/40 shadow-neon-primary/20">
+      <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Conta PRO</span>
+    </div>
+  );
+}
+
+function FreeQuotaBadge({ used }: { used: number }) {
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-warn/10 px-3 py-1 ring-1 ring-warn/30">
+      <AlertCircle className="h-3.5 w-3.5 text-warn" />
+      <span className="text-[10px] font-bold uppercase tracking-widest text-warn">
+        Busca Free: {used}/{FREE_LIFETIME_SEARCH_LIMIT}
+      </span>
+    </div>
+  );
+}
+
+function MapOverlay() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center bg-black/20 backdrop-blur-[1px] transition-opacity duration-1000 animate-out fade-out fill-mode-forwards">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-black/60 p-6 text-white shadow-2xl ring-1 ring-white/20">
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-8 w-8 animate-bounce rounded-full border-2 border-white/40 flex items-center justify-center">
+              <span className="text-xs">👆</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase">Mover</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-8 w-8 animate-pulse rounded-full border-2 border-white/40 flex items-center justify-center">
+              <span className="text-xs">🤏</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase">Zoom</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LeadSkeleton() {
+  return (
+    <div className="glass-panel relative flex flex-col gap-3 rounded-2xl p-4 animate-pulse">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-4 w-24 rounded bg-white/10" />
+          <div className="h-5 w-48 rounded bg-white/10" />
+          <div className="h-3 w-32 rounded bg-white/10" />
+        </div>
+        <div className="h-12 w-12 rounded-xl bg-white/10" />
+      </div>
+      <div className="h-8 w-full rounded-lg bg-white/10" />
+      <div className="flex gap-2">
+        <div className="h-4 w-16 rounded-full bg-white/10" />
+        <div className="h-4 w-16 rounded-full bg-white/10" />
+      </div>
+    </div>
+  );
+}
+
+function ProTeaser() {
+  return (
+    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center ring-1 ring-primary/20">
+      <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10">
+        <Zap className="h-6 w-6 text-primary" />
+      </div>
+      <h3 className="text-sm font-black uppercase tracking-widest text-primary">Seja PRO</h3>
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+        Auditoria completa, extração de e-mails, exportação CSV e buscas ilimitadas para escalar sua prospecção.
+      </p>
+      <Link
+        to="/auth"
+        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground transition hover:brightness-110"
+      >
+        Conhecer Planos
+      </Link>
+    </div>
+  );
+}
+
+

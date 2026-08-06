@@ -322,8 +322,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         if (!Number.isFinite(days) || days <= 180) return null;
         return (
           <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
-            <Flame className="h-3 w-3 shrink-0" />
-            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
+            <Flame className="h-3 w-3 shrink-0 animate-pulse" />
+            <span className="leading-tight">Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.</span>
           </div>
         );
       })()}
