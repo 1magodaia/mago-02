@@ -15,6 +15,7 @@ import {
   Phone,
   RefreshCw,
   Search,
+  Sparkles,
   Star,
   Zap,
 } from "lucide-react";
@@ -383,10 +384,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60 transition-all hover:scale-105"
           >
-            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-            {lead.audit ? "Reauditar" : "Auditar"}
+            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+            {lead.audit ? "Reescanear" : "Audit IA"}
           </button>
         )}
         {resolvedHref && (
@@ -395,10 +396,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             href={resolvedHref}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            onClick={(e) => {
+              // Abre instantâneo sem bloquear a thread UI
+            }}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 transition-all hover:scale-105 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`

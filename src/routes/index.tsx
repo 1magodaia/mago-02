@@ -50,6 +50,7 @@ import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
 import { HeroBanner } from "@/components/hero-banner";
+import { MembershipBadge } from "@/components/membership-badge";
 
 const HERO_CACHE_KEY = "bm.heroSettings.v1";
 type HeroCache = {
@@ -148,26 +149,56 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
           <Ban className="h-7 w-7 text-primary" />
         </div>
-        <h2 className="text-lg font-extrabold text-foreground">
+        <h2 className="text-xl font-black text-foreground">
           Seu acesso limitado expirou
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           {unlockLink 
-            ? "Desbloqueie agora para continuar prospectando comércios sem limites."
-            : "Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando."}
+            ? "O modo Free permite testar o app. Para prospecção profissional ilimitada, ative o Pro."
+            : "Ative sua conta pelo WhatsApp para liberar acesso completo e prospectar leads sem limites."}
         </p>
+
+        {/* Plan Comparison */}
+        <div className="mt-6 rounded-2xl bg-white/5 p-4 text-left ring-1 ring-border text-[11px]">
+          <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5">
+            <span className="font-bold text-muted-foreground uppercase">Benefícios</span>
+            <div className="flex gap-4 font-black">
+              <span className="text-muted-foreground">Free</span>
+              <span className="text-primary">Pro</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Buscas mensais</span>
+              <div className="flex gap-8"><span>1</span> <span className="font-bold">∞</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Exportação CSV</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Auditoria Completa (Scraping)</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Histórico de buscas</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+          </div>
+        </div>
+
         {actionHref ? (
           <a
             href={actionHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-sm font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
           >
-            {unlockLink ? <ShieldCheck className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
-            {unlockLink ? "Desbloquear meu acesso" : "Ativar no WhatsApp"}
+            {unlockLink ? <ShieldCheck className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+            {unlockLink ? "DESBLOQUEAR ACESSO PRO" : "ATUALIZAR VIA WHATSAPP"}
           </a>
         ) : (
-          <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
+          <p className="mt-6 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
             Link de ativação indisponível. Fale com o administrador.
           </p>
         )}
