@@ -207,7 +207,7 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
       tabIndex={0}
       role="button"
       aria-pressed={selected}
-      className={`glass-card group relative flex cursor-pointer flex-col gap-3 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-primary/20 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-[#0A0B1F]/80" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-card group relative flex cursor-pointer flex-col gap-4 p-5 transition-all duration-300 active:scale-[0.98] sm:hover:-translate-y-1 sm:hover:shadow-glow-primary/20 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-[#0A0B1F]/80" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">

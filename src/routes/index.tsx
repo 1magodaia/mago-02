@@ -1131,22 +1131,22 @@ function Home() {
 
       {/* TABS MOBILE — só aparecem quando há resultado, para não competir com o mapa vazio */}
       {rawResults.length > 0 && (
-        <div className="mx-auto mb-3 flex max-w-7xl gap-1 px-4 sm:px-6 lg:hidden" role="tablist">
+        <div className="mx-auto mb-4 flex max-w-7xl gap-2 px-4 sm:px-6 lg:hidden" role="tablist">
           <button
             role="tab"
             aria-selected={mobileTab === "list"}
             onClick={() => setMobileTab("list")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "list" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-2xl h-14 text-sm font-black uppercase tracking-widest transition-all ${mobileTab === "list" ? "bg-primary text-primary-foreground shadow-glow-primary scale-[1.02]" : "bg-white/5 text-muted-foreground ring-1 ring-white/10"}`}
           >
-            <List className="h-3.5 w-3.5" /> Lista ({filtered.length})
+            <List className="h-5 w-5" /> Lista ({filtered.length})
           </button>
           <button
             role="tab"
             aria-selected={mobileTab === "map"}
             onClick={() => setMobileTab("map")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "map" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-2xl h-14 text-sm font-black uppercase tracking-widest transition-all ${mobileTab === "map" ? "bg-primary text-primary-foreground shadow-glow-primary scale-[1.02]" : "bg-white/5 text-muted-foreground ring-1 ring-white/10"}`}
           >
-            <MapIcon className="h-3.5 w-3.5" /> Mapa
+            <MapIcon className="h-5 w-5" /> Mapa
           </button>
         </div>
       )}
@@ -1221,10 +1221,10 @@ function Home() {
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
         <section
-          className={`glass-card relative overflow-hidden ${
+          className={`glass-card relative overflow-hidden transition-all duration-500 ${
             rawResults.length > 0
-              ? `${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
-              : "block h-[65svh] max-h-[calc(100dvh-10rem)] lg:h-[calc(100vh-14rem)]"
+              ? `${mobileTab === "map" ? "block h-[70svh]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
+              : "block h-[65svh] lg:h-[calc(100vh-14rem)]"
           }`}
           style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
