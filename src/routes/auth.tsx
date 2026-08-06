@@ -126,19 +126,21 @@ function AuthPage() {
   };
 
   return (
-    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10 scrollbar-magical">
-      {/* Background Blobs */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="float-slow absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
-        <div className="float-slow absolute top-1/2 -right-24 h-80 w-80 -translate-y-1/2 rounded-full bg-warn/5 blur-[100px]" style={{ animationDelay: '-3s' }} />
-        <div className="float-slow absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-primary/5 blur-[80px]" style={{ animationDelay: '-5s' }} />
+    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10 scrollbar-magical bg-background">
+      {/* Background Blobs with enhanced colors */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="float-slow absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="float-slow absolute top-1/2 -right-24 h-96 w-96 -translate-y-1/2 rounded-full bg-warn/10 blur-[120px]" style={{ animationDelay: '-3s' }} />
+        <div className="float-slow absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" style={{ animationDelay: '-5s' }} />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.pattern')] opacity-[0.03] mix-blend-overlay" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        <Link to="/" className="mb-8 flex justify-center transition-transform hover:scale-105 active:scale-95">
-          <LogoWordmark variant="full" className="h-28 sm:h-32 w-auto mx-auto" />
+        <Link to="/" className="mb-10 flex justify-center transition-transform duration-500 hover:scale-110 active:scale-95">
+          <LogoWordmark variant="full" className="h-32 sm:h-36 w-auto mx-auto drop-shadow-2xl" />
         </Link>
-        <div className="glass-panel slide-up-fade rounded-3xl p-6 shadow-elevated sm:p-8">
+        <div className="glass-panel slide-up-fade rounded-[2.5rem] p-8 shadow-elevated border-white/10 backdrop-blur-3xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
           <h1 className="text-2xl font-extrabold tracking-tight">
             {mode === "login" && "Entrar"}
             {mode === "signup" && "Criar conta"}
@@ -269,8 +271,9 @@ function AuthPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:neon-primary active:scale-[0.98] disabled:opacity-60"
+              className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:-translate-y-1 active:translate-y-0 disabled:opacity-60 overflow-hidden"
             >
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "login" && "Entrar"}
               {mode === "signup" && "Criar conta"}
