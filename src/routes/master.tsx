@@ -1156,18 +1156,51 @@ import {
   Wand2, 
   AlertTriangle,
   History,
-  Activity
+  Activity,
+  X as XIcon
 } from "lucide-react";
+
+import { supabase } from "@/integrations/supabase/client";
 
 function SystemHistoryModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { supabase } = useAuth();
 
   useEffect(() => {
     if (open) {
       setLoading(true);
       const fetchLogs = async () => {
+        const { data } = await supabase
+          .from("admin_audit_log")
+          .select("*, profiles!target_user_id(email, full_name)")
+          .order("created_at", { ascending: false })
+          .limit(50);
+        setLogs(data ?? []);
+        setLoading(false);
+      };
+      fetchLogs();
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="flex h-full max-h-[80vh] w-full max-w-4xl flex-col rounded-3xl border border-primary/20 bg-[#0A0B1F] p-6 shadow-2xl ring-1 ring-white/10">
+        <header className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10">
+              <History className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-widest text-foreground">Histórico de Acessos</h2>
+              <p className="text-xs text-muted-foreground">Log de auditoria do sistema (últimas 50 ações)</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-full bg-white/5 p-2 text-muted-foreground hover:bg-white/10 hover:text-foreground">
+            <XIcon className="h-5 w-5" />
+          </button>
+        </header>
         const { data } = await supabase
           .from("admin_audit_log")
           .select("*, profiles!target_user_id(email, full_name)")
