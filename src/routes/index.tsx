@@ -93,13 +93,13 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Busca Mágica — Prospecção de comércios locais" },
+      { title: "Busca Magica — Prospecção de comércios locais" },
       {
         name: "description",
         content:
           "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
       },
-      { property: "og:title", content: "Busca Mágica — Prospecção de comércios locais" },
+      { property: "og:title", content: "Busca Magica — Prospecção de comércios locais" },
       {
         property: "og:description",
         content: "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
@@ -121,7 +121,7 @@ type SiteFilter = "any" | "no_site" | "with_site";
 function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string | null; unlockLink: string | null; onClose: () => void }) {
   const digits = (supportWa ?? "").replace(/\D/g, "");
   const msg = encodeURIComponent(
-    "Olá! Já usei minha busca gratuita no Busca Mágica e quero ativar minha conta para liberar acesso completo.",
+    "Olá! Já usei minha busca gratuita no Busca Magica e quero ativar minha conta para liberar acesso completo.",
   );
   const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
   const actionHref = unlockLink || waHref;
@@ -222,7 +222,7 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
 
 function ProWelcomeModal({ onClose }: { onClose: () => void }) {
   const digits = "5531980219724";
-  const msg = encodeURIComponent("Olá! Sou usuário Pro do Busca Mágica e estou enviando meu e-mail e comprovante para ativação.");
+  const msg = encodeURIComponent("Olá! Sou usuário Pro do Busca Magica e estou enviando meu e-mail e comprovante para ativação.");
   const waHref = `https://wa.me/${digits}?text=${msg}`;
 
   return (
@@ -774,7 +774,7 @@ function Home() {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
-          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
+          <Link to="/" aria-label="Busca Magica — início" className="shrink-0">
             <LogoIcon className="h-10 w-10 sm:hidden" />
             <span className="hidden sm:block"><LogoWordmark /></span>
           </Link>

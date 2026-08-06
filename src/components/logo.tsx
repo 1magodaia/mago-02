@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const NEW_LOGO_URL = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTc5MDM4LCJleHAiOjE3ODU5ODI2Mzh9.Sjsu9mA9OKhaoW_84DdquWaSS2m8RoeNuNmywnbmhkA";
+const NEW_LOGO_URL = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTgzNzIzLCJleHAiOjE3ODU5ODczMjN9.X-N1BCPWQ1z1oRgniCe1WA7XZgFTmWk2UtG1aaWi9mQ";
 
 interface LogoProps {
   className?: string;
@@ -50,7 +50,7 @@ export function LogoIcon({ className = "h-12 w-12", animate = true }: LogoProps 
   return (
     <EnhancedLogoImg
       src={NEW_LOGO_URL}
-      alt="Busca Mágica"
+      alt="Busca Magica"
       className={className}
       animate={animate}
     />
@@ -69,7 +69,7 @@ export function LogoWordmark({
     return (
       <EnhancedLogoImg
         src={NEW_LOGO_URL}
-        alt="Busca Mágica"
+        alt="Busca Magica"
         className={className || "h-24 w-auto"}
       />
     );
@@ -80,7 +80,7 @@ export function LogoWordmark({
       <LogoIcon className="h-12 w-12 sm:h-14 sm:w-14" />
       <div className="flex items-baseline gap-1">
         <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">Busca</span>
-        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Mágica</span>
+        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Magica</span>
       </div>
     </div>
   );
