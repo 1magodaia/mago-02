@@ -14,6 +14,8 @@ Disallow: /auth
 Disallow: /api/
 Disallow: /admin
 Disallow: /_authenticated
+Disallow: /reset-password
+Disallow: /sitemap.xml
 
 Sitemap: ${DOMAIN}/sitemap.xml
 `;
