@@ -1139,8 +1139,8 @@ function Home() {
             aria-label="Resultados"
           >
             {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => <LeadSkeleton key={i} />)}
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => <LeadSkeleton key={i} />)}
               </div>
             ) : filtered.length === 0 ? (
               <div className="glass-card p-10 text-center relative overflow-hidden group">

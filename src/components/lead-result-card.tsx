@@ -207,13 +207,13 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
       tabIndex={0}
       role="button"
       aria-pressed={selected}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-card group relative flex cursor-pointer flex-col gap-3 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-primary/20 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-[#0A0B1F]/80" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
-      <header className="flex items-start justify-between gap-3">
+      <header className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} animate-pulse`} />
               {meta.label}
             </span>
             {(() => {
@@ -318,9 +318,9 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
-            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-2xl bg-[#0A0B1F]/60 px-3 py-2 text-center ring-1 ring-white/10 shadow-inner group-hover:ring-primary/40 transition-colors">
+            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Score</div>
+            <div className={`font-black text-2xl tabular-nums tracking-tighter glow-text ${meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
