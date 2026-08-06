@@ -104,6 +104,7 @@ function MasterPanel() {
   const [supportMsg, setSupportMsg] = useState("");
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [citationsLimit, setCitationsLimit] = useState(20);
+  const [unlockLink, setUnlockLink] = useState("");
   const [heroImageUrl, setHeroImageUrl] = useState("");
   const [heroHeightDesktop, setHeroHeightDesktop] = useState(320);
   const [heroHeightMobile, setHeroHeightMobile] = useState(200);
@@ -181,6 +182,7 @@ function MasterPanel() {
           setSupportMsg(s.support_message ?? "");
           setCitationsEnabled(s.citations_enabled);
           setCitationsLimit(s.citations_daily_limit);
+          setUnlockLink(s.unlock_link ?? "");
           setHeroImageUrl(s.hero_image_url ?? "");
           setHeroHeightDesktop(s.hero_height_desktop ?? 320);
           setHeroHeightMobile(s.hero_height_mobile ?? 200);
@@ -225,6 +227,7 @@ function MasterPanel() {
           support_message: supportMsg || null,
           citations_enabled: citationsEnabled,
           citations_daily_limit: citationsLimit,
+          unlock_link: unlockLink.trim() || null,
           reason: reason.trim() || null,
         },
       });
@@ -232,6 +235,7 @@ function MasterPanel() {
       setSupportMsg(r.support_message ?? "");
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
+      setUnlockLink(r.unlock_link ?? "");
       setNotice("Configurações atualizadas.");
       setReason("");
       setWaLogPage(1);
@@ -539,6 +543,22 @@ function MasterPanel() {
               value={supportMsg}
               onChange={(e) => setSupportMsg(e.target.value)}
               maxLength={280}
+              className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase text-muted-foreground inline-flex items-center gap-1">
+              Link de Desbloqueio (Checkout/WhatsApp)
+              <HelpTip
+                title="Link de Desbloqueio"
+                text="URL para onde o usuário Free será enviado quando atingir a cota (ex: link do Stripe ou WhatsApp direto). Se vazio, usa o WhatsApp de suporte padrão."
+              />
+            </span>
+            <input
+              type="url"
+              placeholder="https://checkout.stripe.com/... ou https://wa.me/..."
+              value={unlockLink}
+              onChange={(e) => setUnlockLink(e.target.value)}
               className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
             />
           </label>

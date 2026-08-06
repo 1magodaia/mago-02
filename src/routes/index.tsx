@@ -18,6 +18,9 @@ import {
   MapPin,
   Search,
   Shield,
+  ShieldCheck,
+  Ban,
+  Mail,
   MessageCircle,
   X,
   Star,
@@ -109,23 +112,24 @@ type SiteFilter = "any" | "no_site" | "with_site";
 
 
 
-function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onClose: () => void }) {
+function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string | null; unlockLink: string | null; onClose: () => void }) {
   const digits = (supportWa ?? "").replace(/\D/g, "");
   const msg = encodeURIComponent(
     "Olá! Já usei minha busca gratuita no Busca Mágica e quero ativar minha conta para liberar acesso completo.",
   );
   const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
+  const actionHref = unlockLink || waHref;
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
   return (
     <div
       role="alertdialog"
       aria-modal="true"
-      aria-labelledby="quota-block-title"
-      aria-describedby="quota-block-desc"
       className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
       onClick={onClose}
     >
@@ -136,33 +140,34 @@ function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onCl
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
-          <Search className="h-7 w-7 text-primary" aria-hidden />
+          <Ban className="h-7 w-7 text-primary" />
         </div>
-        <h2 id="quota-block-title" className="text-lg font-extrabold text-foreground">
-          Você já usou sua busca gratuita
+        <h2 className="text-lg font-extrabold text-foreground">
+          Seu acesso limitado expirou
         </h2>
-        <p id="quota-block-desc" className="mt-2 text-sm text-muted-foreground">
-          Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando comércios.
+        <p className="mt-2 text-sm text-muted-foreground">
+          {unlockLink 
+            ? "Desbloqueie agora para continuar prospectando comércios sem limites."
+            : "Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando."}
         </p>
-        {waHref ? (
+        {actionHref ? (
           <a
-            href={waHref}
+            href={actionHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-bold text-white transition-all hover:brightness-110"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
           >
-            <MessageCircle className="h-4 w-4" />
-            Ativar minha conta no WhatsApp
+            {unlockLink ? <ShieldCheck className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
+            {unlockLink ? "Desbloquear meu acesso" : "Ativar no WhatsApp"}
           </a>
         ) : (
           <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
-            Contato de suporte ainda não configurado. Fale com o administrador.
+            Link de ativação indisponível. Fale com o administrador.
           </p>
         )}
         <button
@@ -171,6 +176,49 @@ function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onCl
           className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
         >
           Fechar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ProWelcomeModal({ onClose }: { onClose: () => void }) {
+  const digits = "5531980219724";
+  const msg = encodeURIComponent("Olá! Sou usuário Pro do Busca Mágica e estou enviando meu e-mail e comprovante para ativação.");
+  const waHref = `https://wa.me/${digits}?text=${msg}`;
+
+  return (
+    <div className="fixed inset-0 z-[9998] grid place-items-center bg-black/80 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="glass-panel relative w-full max-w-lg rounded-2xl border border-primary/50 p-8 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-primary/20 ring-1 ring-primary/60">
+          <ShieldCheck className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-2xl font-black text-foreground tracking-tight">Você agora é PRO!</h2>
+        <p className="mt-4 text-muted-foreground leading-relaxed">
+          Para liberar seu acesso total, envie seu <span className="text-foreground font-bold underline">e-mail de cadastro</span> e o <span className="text-foreground font-bold underline">comprovante de compra</span> agora mesmo.
+        </p>
+        
+        <div className="mt-8 space-y-4">
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#25D366] px-8 py-4 text-lg font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-[#25D366]/20"
+          >
+            <MessageCircle className="h-6 w-6" />
+            Enviar via WhatsApp (31) 98021-9724
+          </a>
+          <div className="flex items-center gap-3 rounded-xl bg-glass p-4 text-left ring-1 ring-border">
+            <Mail className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Ou envie para</p>
+              <p className="text-sm font-medium text-foreground">contato@buscamagica.app</p>
+            </div>
+          </div>
+        </div>
+
+        <button onClick={onClose} className="mt-8 text-sm text-muted-foreground hover:text-primary transition-colors">
+          Entendi, vou enviar agora
         </button>
       </div>
     </div>
@@ -226,6 +274,8 @@ function Home() {
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
+  const [unlockLink, setUnlockLink] = useState<string | null>(null);
+  const [showProWelcome, setShowProWelcome] = useState(false);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const _initHero = typeof window !== "undefined" ? readHeroCache() : null;
   const [heroImageUrl, setHeroImageUrl] = useState<string>(_initHero?.url ?? heroDefault.url);
@@ -310,6 +360,7 @@ function Home() {
           writeHeroCache({ url: nextUrl, hd: nextHd, hm: nextHm, fit: nextFit });
 
           setSupportWa(s.support_whatsapp);
+          setUnlockLink(s.unlock_link);
           setSupportUpdatedAt(s.updated_at);
         })
         .catch(() => {});
@@ -1095,8 +1146,9 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock supportWa={supportWa} onClose={() => setQuotaBlocked(false)} />
+        <FreeQuotaBlock supportWa={supportWa} unlockLink={unlockLink} onClose={() => setQuotaBlocked(false)} />
       )}
+      {showProWelcome && <ProWelcomeModal onClose={() => setShowProWelcome(false)} />}
     </div>
   );
 }
