@@ -142,7 +142,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       });
     }
 
-    const r = row as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string }) | null;
+    const r = row as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string; unlock_link?: string }) | null;
     return {
       support_whatsapp: r?.support_whatsapp ?? null,
       support_message: r?.support_message ?? null,
@@ -152,6 +152,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       hero_height_desktop: r?.hero_height_desktop ?? 320,
       hero_height_mobile: r?.hero_height_mobile ?? 200,
       hero_fit: (r?.hero_fit === "contain" ? "contain" : "cover"),
+      unlock_link: r?.unlock_link ?? null,
       updated_at: r?.updated_at ?? null,
     };
 
