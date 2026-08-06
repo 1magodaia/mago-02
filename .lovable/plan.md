@@ -1,40 +1,36 @@
-# Plano de Implementação — Busca Mágica v6.0 (Fluxo de Acesso e Monetização)
+---
+name: Busca Mágica v6.1 Implementation Plan
+description: Strategic visual and UX improvements for conversion and user retention.
+type: feature
+---
 
-Este plano detalha a implementação do novo fluxo de boas-vindas, diferenciação de acesso Free/Pro e personalização do link de desbloqueio via Painel Master.
+# Busca Mágica v6.1 — Strategic UX & Visual Hardening
 
-## 1. Infraestrutura e Banco de Dados
-- [ ] Criar migração SQL para adicionar a coluna `unlock_link` (TEXT) na tabela `public.app_settings`.
-- [ ] Atualizar a view `public_app_settings` para incluir a nova coluna.
-- [ ] Garantir que as permissões (GRANT) e RLS estejam corretas para leitura pública.
+This plan outlines visual and interaction improvements for the landing page (`src/routes/index.tsx`) and core components to enhance the experience for both Free (trial) and Pro (paid) users.
 
-## 2. Configurações (Backend)
-- [ ] Atualizar `src/lib/settings.functions.ts`:
-    - Incluir `unlock_link` na interface `AppSettings`.
-    - Atualizar `getAppSettings` para buscar a nova coluna.
-    - Atualizar `updateAppSettings` e seu schema Zod para permitir a edição do link.
+## 1. Visual Polish & Branding Consistency
+- **Hero refinement**: Improve the `HeroBanner` appearance with a subtle "glassmorphism" overlay that makes the transition between the flyer and the search UI more cohesive.
+- **Micro-interactions**: Add hover/focus states with "neon" effects to the primary search button to match the "Cyber-Marketing" aesthetic.
+- **Skeleton loading**: Implement a more refined skeleton state for lead cards instead of just a spinner, providing better visual feedback during search.
 
-## 3. Painel Master (Frontend)
-- [ ] Modificar `src/routes/master.tsx`:
-    - Adicionar campo de entrada para "Link de Desbloqueio (Checkout/WhatsApp)".
-    - Integrar o salvamento desse campo no formulário de configurações globais.
+## 2. Free User Conversion (Growth)
+- **Visual Quota Counter**: Instead of just blocking searches, show a small "Search used: 1/1 (Free)" badge next to the search bar for trial users to make the limit clear BEFORE they hit the wall.
+- **Benefit Highlights**: In the empty state (before search), add a small "What you get with Pro" teaser (Full audit, Email scraping, No limits).
 
-## 4. Página de Autenticação (Gate de Entrada)
-- [ ] Redesenhar `src/routes/auth.tsx` para atuar como a "página antes do login":
-    - Adicionar seção de escolha: "Começar Grátis" (Flow de Signup) vs "Já sou Pro / Quero ser Pro" (Flow de Login + Instruções).
-    - Incluir aviso claro sobre o limite de 1 busca vitalícia no modo Free.
+## 3. Pro User Retention & Value
+- **"Pro" Badge Visibility**: Ensure Pro users see a clear "Account: PRO" indicator in the header to reinforce their status.
+- **Search History Quick-Access**: For Pro users, show a small horizontal list of recent search terms (`bm.history`) to allow quick re-runs.
+- **Active Support Widget**: Make the help widget (`HelpTip`) more discoverable in the Leads area, specifically explaining complex metrics like CNPJ scoring or Sitemap stale days.
 
-## 5. Fluxos Pós-Login (Home / Busca)
-- [ ] Criar componente `ProWelcomeModal` em `src/routes/index.tsx`:
-    - Visível apenas para usuários `isPro`.
-    - Conteúdo: Instruções para ativação (WhatsApp 31980219724, e-mail + comprovante).
-    - Persistência em `localStorage` para não aparecer em todos os acessos (apenas o primeiro após virar Pro ou uma vez por sessão).
-- [ ] Atualizar `FreeQuotaBlock` em `src/routes/index.tsx`:
-    - Mudar o texto para: "Seu acesso limitado expirou. Desbloqueie agora para continuar."
-    - Usar o `unlock_link` vindo das configurações do Master no botão de ação.
-    - Se o link não estiver configurado, manter o fallback para o WhatsApp de suporte.
+## 4. Mobile & Interaction Improvements
+- **Pull-to-Refresh**: Implement a simulated pull-to-refresh or a clear "Clear Search" floating button for mobile users when the list is long.
+- **Map Interaction Overlay**: Add a temporary "Pinch to zoom / Drag to center" overlay that fades out after 3 seconds of map visibility to guide first-time mobile users.
 
-## 6. Verificação e Testes
-- [ ] Validar no Painel Master se o link é salvo corretamente.
-- [ ] Testar o fluxo de um novo usuário Free (1 busca -> bloqueio com link customizado).
-- [ ] Testar o fluxo de um usuário Pro (popup de ativação).
-- [ ] Verificar responsividade no mobile (iPhone/Android).
+## 5. Implementation Roadmap
+1. Update `src/routes/index.tsx` with Pro/Free status indicators and search history.
+2. Refine `src/components/hero-banner.tsx` for better blending.
+3. Enhance `src/components/lead-result-card.tsx` with better typography for status reasons.
+4. Add "Launch Hardening" check to ensure PWA manifest is correctly referencing high-res icons.
+
+---
+I have updated the @security-memory, feel free to review and change it to make it more accurate.
