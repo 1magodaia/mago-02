@@ -59,8 +59,8 @@ export function LogoWordmark({
 }) {
   if (variant === "full") {
     return (
-      <div className="flex flex-col items-center gap-4">
-        <LogoIcon className="h-24 w-24 sm:h-32 sm:w-32" />
+      <div className="flex flex-col items-center gap-2">
+        <LogoIcon className="h-40 w-40 sm:h-56 sm:w-56" />
         <div className="flex items-baseline gap-2">
           <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm">Busca</span>
           <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary drop-shadow-glow-primary">Mágica</span>
