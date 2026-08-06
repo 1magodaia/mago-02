@@ -46,8 +46,8 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
           .bm-hero-wrap { height: min(60vh, calc(var(--hero-h-mobile) * 0.6)); }
         }
         @media (min-width: 640px){
-          .bm-hero-wrap { height: var(--hero-h-desktop); }
-          .bm-hero-img { object-fit: var(--hero-fit-desktop); }
+          .bm-hero-wrap { height: var(--hero-h-desktop); padding: 2rem; }
+          .bm-hero-img { object-fit: var(--hero-fit-desktop); background: transparent; }
         }
       `}</style>
 
