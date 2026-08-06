@@ -12,8 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
-import { SupportWidget } from "../components/support-widget";
-import { SupportChat } from "../components/support-chat";
+import { SupportHub } from "../components/support-hub";
 import { useDevice } from "../hooks/use-mobile";
 import { Toaster } from "../components/ui/sonner";
 import favicon from "../assets/favicon.png.asset.json";
@@ -148,8 +147,7 @@ function RootComponent() {
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
-        <SupportChat />
-        <SupportWidget />
+        <SupportHub />
         <Toaster />
       </AuthProvider>
 

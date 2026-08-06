@@ -36,8 +36,14 @@ function saveHistory(msgs: Msg[]) {
   }
 }
 
-export function SupportChat() {
+export function SupportChat({ standalone = true, onClose }: { standalone?: boolean; onClose?: () => void }) {
   const [open, setOpen] = useState(false);
+
+  const isVisible = standalone ? open : true;
+  const handleClose = () => {
+    if (standalone) setOpen(false);
+    onClose?.();
+  };
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -114,7 +120,7 @@ export function SupportChat() {
 
   return (
     <>
-      {open && (
+      {isVisible && (
         <div
           className="fixed inset-x-3 z-[999] flex max-h-[65vh] w-auto flex-col overflow-hidden rounded-2xl border border-primary/40 bg-popover shadow-2xl sm:inset-x-auto sm:right-6 sm:bottom-24 sm:h-[560px] sm:max-h-[calc(100vh-8rem)] sm:w-[360px]"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 8.5rem)" }}
@@ -136,7 +142,7 @@ export function SupportChat() {
                 <Trash2 className="h-4 w-4" />
               </button>
               <button
-                onClick={() => setOpen(false)}
+                onClick={handleClose}
                 aria-label="Fechar chat"
                 className="rounded-full p-1.5 text-primary-foreground/80 hover:bg-white/10 hover:text-white"
               >
@@ -217,15 +223,17 @@ export function SupportChat() {
         </div>
       )}
 
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Fechar chat" : "Abrir chat de suporte"}
-        title="Precisa de ajuda?"
-        className="fixed right-3 z-[999] flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/25 transition hover:scale-105 sm:h-10 sm:w-10 sm:right-6"
-        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 4.75rem)" }}
-      >
-        {open ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-      </button>
+      {standalone && (
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? "Fechar chat" : "Abrir chat de suporte"}
+          title="Precisa de ajuda?"
+          className="fixed right-3 z-[999] flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/25 transition hover:scale-105 sm:h-10 sm:w-10 sm:right-6"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 4.75rem)" }}
+        >
+          {open ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+        </button>
+      )}
     </>
   );
 }
