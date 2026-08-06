@@ -18,15 +18,10 @@ import {
   MapPin,
   Search,
   Shield,
-  ShieldCheck,
-  Ban,
-  Mail,
   MessageCircle,
   X,
   Star,
   User as UserIcon,
-  Zap,
-  Sparkles,
 } from "lucide-react";
 
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
@@ -41,22 +36,18 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 import { useServerFn } from "@tanstack/react-start";
 import { toTerms } from "@/lib/highlight";
-import { addHistory, cacheGet, cacheSet, exportToCsv, isContacted, isFavorite } from "@/lib/storage";
+import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
-import { FREE_LIFETIME_SEARCH_LIMIT, type Profile } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
 import { HeroBanner } from "@/components/hero-banner";
-import { MembershipBadge } from "@/components/membership-badge";
-
-import { OnboardingTour } from "@/components/onboarding-tour";
 
 const HERO_CACHE_KEY = "bm.heroSettings.v1";
-
 type HeroCache = {
   url: string;
   hd: number;
@@ -93,13 +84,13 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Busca Magica — Prospecção de comércios locais" },
+      { title: "Busca Mágica — Prospecção de comércios locais" },
       {
         name: "description",
         content:
           "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
       },
-      { property: "og:title", content: "Busca Magica — Prospecção de comércios locais" },
+      { property: "og:title", content: "Busca Mágica — Prospecção de comércios locais" },
       {
         property: "og:description",
         content: "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
@@ -118,94 +109,60 @@ type SiteFilter = "any" | "no_site" | "with_site";
 
 
 
-function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string | null; unlockLink: string | null; onClose: () => void }) {
+function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onClose: () => void }) {
   const digits = (supportWa ?? "").replace(/\D/g, "");
   const msg = encodeURIComponent(
-    "Olá! Já usei minha busca gratuita no Busca Magica e quero ativar minha conta para liberar acesso completo.",
+    "Olá! Já usei minha busca gratuita no Busca Mágica e quero ativar minha conta para liberar acesso completo.",
   );
   const waHref = digits ? `https://wa.me/${digits}?text=${msg}` : null;
-  const actionHref = unlockLink || waHref;
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-
   return (
     <div
       role="alertdialog"
       aria-modal="true"
-      className="fixed inset-0 z-[9999] grid place-items-center bg-black/60 p-4 backdrop-blur-2xl"
+      aria-labelledby="quota-block-title"
+      aria-describedby="quota-block-desc"
+      className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        className="glass-panel relative w-full max-w-md rounded-3xl border border-primary/30 p-8 text-center shadow-elevated slide-up-fade"
+        className="glass-panel relative w-full max-w-md rounded-2xl border border-primary/40 p-6 text-center shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground"
+          aria-label="Fechar"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/10 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <X className="h-4 w-4" />
         </button>
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
-          <Ban className="h-7 w-7 text-primary" />
+          <Search className="h-7 w-7 text-primary" aria-hidden />
         </div>
-        <h2 className="text-xl font-black text-foreground">
-          Seu acesso limitado expirou
+        <h2 id="quota-block-title" className="text-lg font-extrabold text-foreground">
+          Você já usou sua busca gratuita
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-          {unlockLink 
-            ? "O modo Free permite testar o app. Para prospecção profissional ilimitada, ative o Pro."
-            : "Ative sua conta pelo WhatsApp para liberar acesso completo e prospectar leads sem limites."}
+        <p id="quota-block-desc" className="mt-2 text-sm text-muted-foreground">
+          Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando comércios.
         </p>
-
-        {/* Plan Comparison */}
-        <div className="mt-6 rounded-2xl bg-white/5 p-4 text-left ring-1 ring-border text-[11px]">
-          <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5">
-            <span className="font-bold text-muted-foreground uppercase">Benefícios</span>
-            <div className="flex gap-4 font-black">
-              <span className="text-muted-foreground">Free</span>
-              <span className="text-primary">Pro</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span>Buscas mensais</span>
-              <div className="flex gap-8"><span>1</span> <span className="font-bold">∞</span></div>
-            </div>
-            <div className="flex justify-between">
-              <span>Exportação CSV</span>
-              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
-            </div>
-            <div className="flex justify-between">
-              <span>Auditoria Completa (Scraping)</span>
-              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
-            </div>
-            <div className="flex justify-between">
-              <span>Histórico de buscas</span>
-              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
-            </div>
-          </div>
-        </div>
-
-        {actionHref ? (
+        {waHref ? (
           <a
-            href={actionHref}
-
-
+            href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-sm font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-bold text-white transition-all hover:brightness-110"
           >
-            {unlockLink ? <ShieldCheck className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-            {unlockLink ? "DESBLOQUEAR ACESSO PRO" : "ATUALIZAR VIA WHATSAPP"}
+            <MessageCircle className="h-4 w-4" />
+            Ativar minha conta no WhatsApp
           </a>
         ) : (
-          <p className="mt-6 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
-            Link de ativação indisponível. Fale com o administrador.
+          <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
+            Contato de suporte ainda não configurado. Fale com o administrador.
           </p>
         )}
         <button
@@ -214,49 +171,6 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
           className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
         >
           Fechar
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ProWelcomeModal({ onClose }: { onClose: () => void }) {
-  const digits = "5531980219724";
-  const msg = encodeURIComponent("Olá! Sou usuário Pro do Busca Magica e estou enviando meu e-mail e comprovante para ativação.");
-  const waHref = `https://wa.me/${digits}?text=${msg}`;
-
-  return (
-    <div className="fixed inset-0 z-[9998] grid place-items-center bg-black/60 p-4 backdrop-blur-2xl" onClick={onClose}>
-      <div className="glass-panel relative w-full max-w-lg rounded-3xl border border-primary/40 p-10 text-center shadow-elevated slide-up-fade" onClick={e => e.stopPropagation()}>
-        <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-primary/20 ring-1 ring-primary/60">
-          <ShieldCheck className="h-8 w-8 text-primary" />
-        </div>
-        <h2 className="text-2xl font-black text-foreground tracking-tight">Você agora é PRO!</h2>
-        <p className="mt-4 text-muted-foreground leading-relaxed">
-          Para liberar seu acesso total, envie seu <span className="text-foreground font-bold underline">e-mail de cadastro</span> e o <span className="text-foreground font-bold underline">comprovante de compra</span> agora mesmo.
-        </p>
-        
-        <div className="mt-8 space-y-4">
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#25D366] px-8 py-4 text-lg font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-[#25D366]/20"
-          >
-            <MessageCircle className="h-6 w-6" />
-            Enviar via WhatsApp (31) 98021-9724
-          </a>
-          <div className="flex items-center gap-3 rounded-xl bg-glass p-4 text-left ring-1 ring-border">
-            <Mail className="h-5 w-5 text-primary shrink-0" />
-            <div>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Ou envie para</p>
-              <p className="text-sm font-medium text-foreground">contato@buscamagica.app</p>
-            </div>
-          </div>
-        </div>
-
-        <button onClick={onClose} className="mt-8 text-sm text-muted-foreground hover:text-primary transition-colors">
-          Entendi, vou enviar agora
         </button>
       </div>
     </div>
@@ -312,8 +226,6 @@ function Home() {
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
-  const [unlockLink, setUnlockLink] = useState<string | null>(null);
-  const [showProWelcome, setShowProWelcome] = useState(false);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const _initHero = typeof window !== "undefined" ? readHeroCache() : null;
   const [heroImageUrl, setHeroImageUrl] = useState<string>(_initHero?.url ?? heroDefault.url);
@@ -398,7 +310,6 @@ function Home() {
           writeHeroCache({ url: nextUrl, hd: nextHd, hm: nextHm, fit: nextFit });
 
           setSupportWa(s.support_whatsapp);
-          setUnlockLink(s.unlock_link);
           setSupportUpdatedAt(s.updated_at);
         })
         .catch(() => {});
@@ -741,70 +652,42 @@ function Home() {
 
   // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
   // a home para evitar flash da tela de busca a usuários deslogados.
-  if (authLoading) {
+  if (authLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0A0B1F]">
-        {/* Immersive Loading Background */}
-        <div className="pointer-events-none fixed inset-0 z-0">
-          <div className="absolute inset-0 bg-[#0A0B1F] animate-noise mix-blend-overlay opacity-40" />
-          <div className="absolute top-[-10%] left-[-5%] h-[60%] w-[60%] rounded-full bg-primary/20 blur-[120px] animate-float-slow" />
-          <div className="absolute bottom-[-15%] right-[-5%] h-[60%] w-[60%] rounded-full bg-warn/10 blur-[120px] animate-float-slow" style={{ animationDelay: '-5s' }} />
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center gap-8 animate-in fade-in duration-1000">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full animate-pulse" />
-            <LogoIcon className="h-24 w-24 relative z-10 animate-float-magical" />
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-1 w-48 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
-              <div className="h-full w-1/3 animate-shimmer bg-gradient-to-r from-transparent via-primary to-transparent" />
-            </div>
-            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-primary glow-text animate-pulse">
-              Sincronizando Magia...
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <ProTeaser />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Carregando" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <OnboardingTour />
-
 
       {/* NAV — sticky com safe-area; alvos de toque ≥44px no mobile */}
       <nav
-        className="sticky top-0 z-50 border-b border-white/5 bg-[#0A0B1F]/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-[#0A0B1F]/60"
+        className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
-          <Link to="/" aria-label="Busca Magica — início" className="shrink-0">
+          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0">
             <LogoIcon className="h-10 w-10 sm:hidden" />
             <span className="hidden sm:block"><LogoWordmark /></span>
           </Link>
-          <div className="flex items-center gap-1.5 sm:gap-4">
-            {user && (
-              <MembershipBadge 
-                showBenefits={() => setQuotaBlocked(true)} 
-                className="hidden md:flex" 
-              />
-            )}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {user && (
               <Link
                 to="/leads"
-                className="hidden h-9 items-center gap-1.5 rounded-full bg-white/[0.03] px-3 text-xs font-bold text-foreground ring-1 ring-white/10 hover:bg-white/5 sm:inline-flex"
+                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
               >
                 <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/novidades"
+                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
+              >
+                <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
               </Link>
             )}
             {isAdmin && (
@@ -824,7 +707,7 @@ function Home() {
             ) : user ? (
               <div className="group relative">
                 <button
-                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-white/[0.03] px-4 text-sm font-bold text-foreground ring-1 ring-white/10 hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-glass px-4 text-sm font-semibold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
                   aria-label="Menu da conta"
                 >
                   <UserIcon className="h-4 w-4 text-primary sm:h-3.5 sm:w-3.5" />
@@ -852,25 +735,16 @@ function Home() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                {!isPro && !isMaster && !isAdmin && (
-                  <div id="pro-upgrade-link">
-                    <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
-                  </div>
-                )}
-
-                <Link
-                  to="/auth"
-                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-black uppercase tracking-widest text-primary-foreground hover:brightness-110 shadow-glow-primary transition-all hover:scale-105 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
-                >
-                  <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
-                </Link>
-              </div>
+              <Link
+                to="/auth"
+                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+              >
+                <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
+              </Link>
             )}
           </div>
         </div>
       </nav>
-
 
       {/* FAB Master — acesso rápido no mobile para admins */}
       {isAdmin && (
@@ -907,76 +781,43 @@ function Home() {
 
 
 
-        {/* BLOCO PRINCIPAL DE BUSCA - Redesenhado Premium */}
-        <div id="search-input" className="glass-card relative z-50 mt-8 grid gap-4 p-6 ring-1 ring-primary/20 md:grid-cols-[1.2fr_1.4fr_auto]">
-          <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Categoria</label>
-            <div className="relative group">
-              <SmartAutocomplete
-                value={query}
-                onChange={setQuery}
-                onKeyDown={(e) => e.key === "Enter" && runSearch()}
-                placeholder="Ex: Padaria, Pet Shop..."
-                aria-label="Categoria de comércio"
-                staticList={CATEGORY_SUGGESTIONS}
-                minChars={1}
-                wrapperClassName="flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 ring-white/10 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05]"
-                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
-                leading={<Filter className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden />}
-              />
-            </div>
-          </div>
+        {/* BLOCO PRINCIPAL DE BUSCA */}
+        <div className="glass-panel relative z-50 mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
+          <SmartAutocomplete
+            value={query}
+            onChange={setQuery}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Categoria (padaria, pet shop, advogado...)"
+            aria-label="Categoria de comércio"
+            staticList={CATEGORY_SUGGESTIONS}
+            minChars={1}
+            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+          />
+          <SmartAutocomplete
+            value={region}
+            onChange={setRegion}
+            onSelect={onSelectRegion}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Cidade, bairro ou endereço"
+            aria-label="Região"
+            asyncSource={regionSource}
+            disabled={usingGps}
+            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+          />
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Região</label>
-            <div className="relative group">
-              <SmartAutocomplete
-                value={region}
-                onChange={setRegion}
-                onSelect={onSelectRegion}
-                onKeyDown={(e) => e.key === "Enter" && runSearch()}
-                placeholder="Cidade ou Bairro..."
-                aria-label="Região"
-                asyncSource={regionSource}
-                disabled={usingGps}
-                wrapperClassName={`flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05] ${usingGps ? "opacity-50 ring-border" : "ring-white/10"}`}
-                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
-                leading={<MapPin className="h-5 w-5 text-primary" aria-hidden />}
-              />
-              <button
-                onClick={useGps}
-                disabled={locating}
-                title="Usar minha localização"
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl bg-primary/10 p-2 text-primary transition-all hover:bg-primary/20 disabled:opacity-50"
-              >
-                {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
 
-          <div className="flex items-end">
-            <button
-              onClick={runSearch}
-              disabled={loading}
-              className="h-14 min-w-[160px] w-full rounded-2xl bg-primary px-8 text-base font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-60 group relative overflow-hidden"
-            >
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-              {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
-                <div className="flex items-center justify-center gap-2">
-                  <Zap className="h-5 w-5 fill-current" />
-                  <span>BUSCAR</span>
-                </div>
-              )}
-            </button>
-          </div>
+
+          <button
+            onClick={runSearch}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Buscar
+          </button>
         </div>
-
-        {/* Search History Quick Access */}
-        <SearchHistory 
-          items={typeof window !== "undefined" ? JSON.parse(localStorage.getItem('bm.history') || '[]').slice(0, 5) : []} 
-          onSelect={(q) => setQuery(q)}
-        />
-
 
         {/* AÇÕES RÁPIDAS */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1131,22 +972,22 @@ function Home() {
 
       {/* TABS MOBILE — só aparecem quando há resultado, para não competir com o mapa vazio */}
       {rawResults.length > 0 && (
-        <div className="mx-auto mb-4 flex max-w-7xl gap-2 px-4 sm:px-6 lg:hidden" role="tablist">
+        <div className="mx-auto mb-3 flex max-w-7xl gap-1 px-4 sm:px-6 lg:hidden" role="tablist">
           <button
             role="tab"
             aria-selected={mobileTab === "list"}
             onClick={() => setMobileTab("list")}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-2xl h-14 text-sm font-black uppercase tracking-widest transition-all ${mobileTab === "list" ? "bg-primary text-primary-foreground shadow-glow-primary scale-[1.02]" : "bg-white/5 text-muted-foreground ring-1 ring-white/10"}`}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "list" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
           >
-            <List className="h-5 w-5" /> Lista ({filtered.length})
+            <List className="h-3.5 w-3.5" /> Lista ({filtered.length})
           </button>
           <button
             role="tab"
             aria-selected={mobileTab === "map"}
             onClick={() => setMobileTab("map")}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-2xl h-14 text-sm font-black uppercase tracking-widest transition-all ${mobileTab === "map" ? "bg-primary text-primary-foreground shadow-glow-primary scale-[1.02]" : "bg-white/5 text-muted-foreground ring-1 ring-white/10"}`}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${mobileTab === "map" ? "bg-primary text-primary-foreground" : "bg-glass text-foreground ring-1 ring-border"}`}
           >
-            <MapIcon className="h-5 w-5" /> Mapa
+            <MapIcon className="h-3.5 w-3.5" /> Mapa
           </button>
         </div>
       )}
@@ -1159,52 +1000,44 @@ function Home() {
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
         {rawResults.length > 0 && (
           <section
-            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 scrollbar-magical content-auto`}
+            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
             aria-label="Resultados"
           >
-            {loading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 6 }).map((_, i) => <LeadSkeleton key={i} />)}
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="glass-card p-10 text-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-white/5 text-muted-foreground/50">
-                  <Filter className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-bold text-foreground mb-1">Nenhum lead encontrado</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Tente ampliar o raio de busca ou ajustar os filtros de avaliação e site.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filtered.map((lead) => {
-                  const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
-                  return (
-                    <div key={lead.place_id} className="space-y-1">
-                      {sport && (
-                        <div className="flex">
-                          <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
-                            <span>{sport.emoji}</span>
-                            <span>{sport.label}</span>
-                          </span>
-                        </div>
-                      )}
-                      <LeadResultCard
-                        lead={lead}
-                        selected={selected === lead.place_id}
-                        onSelect={() => setSelected(lead.place_id)}
-                        onUpdate={updateOne}
-                        citationsAvailable={citationsAvailable}
-                        highlight={highlightTerms}
-                      />
-                    </div>
-                  );
-                })}
+            {loading && (
+              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+                <p className="mt-2">Consultando Google Places...</p>
               </div>
             )}
-            
+            {!loading && filtered.length === 0 && (
+              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              </div>
+            )}
+            {filtered.map((lead) => {
+              const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+              return (
+                <div key={lead.place_id} className="space-y-1">
+                  {sport && (
+                    <div className="flex">
+                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                        <span>{sport.emoji}</span>
+                        <span>{sport.label}</span>
+                      </span>
+                    </div>
+                  )}
+                  <LeadResultCard
+                    lead={lead}
+                    selected={selected === lead.place_id}
+                    onSelect={() => setSelected(lead.place_id)}
+                    onUpdate={updateOne}
+                    citationsAvailable={citationsAvailable}
+                    highlight={highlightTerms}
+                  />
+
+                </div>
+              );
+            })}
             {filtered.length > 0 && (
               <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
                 <Info className="h-3 w-3" aria-hidden />
@@ -1216,60 +1049,26 @@ function Home() {
           </section>
         )}
 
-        {rawResults.length === 0 && !loading && (
-          <section className="mx-auto max-w-md py-12 px-4">
-            {!query && !isPro && <ProTeaser />}
-          </section>
-        )}
-
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
-        {/* Mapa — Renderizado dinamicamente para performance */}
         <section
-          className={`glass-card relative overflow-hidden transition-all duration-500 ${
+          className={`glass-panel relative overflow-hidden rounded-2xl ${
             rawResults.length > 0
-              ? `${mobileTab === "map" ? "block h-[70svh]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
-              : "block h-[65svh] lg:h-[calc(100vh-14rem)]"
+              ? `${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
+              : "block h-[65svh] max-h-[calc(100dvh-10rem)] lg:h-[calc(100vh-14rem)]"
           }`}
           style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
         >
-          <ClientOnly fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
-            <Suspense fallback={
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0B1F]/60 backdrop-blur-md">
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                  <MapIcon className="h-10 w-10 text-primary/40 animate-pulse relative z-10" />
-                </div>
-                <div className="h-1.5 w-32 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
-                  <div className="h-full w-1/2 animate-shimmer bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                </div>
-                <span className="mt-3 text-[10px] font-black uppercase tracking-widest text-primary/60">Carregando Mapa...</span>
-              </div>
-            }>
-              {/* Lazy Loading: Só renderiza o mapa no mobile se a tab de mapa estiver ativa ou se estiver em desktop */}
-              {(typeof window !== "undefined" && (window.innerWidth >= 1024 || mobileTab === "map" || rawResults.length === 0)) ? (
-                <>
-                  <MapOverlay />
-                  <MapView
-                    center={center}
-                    radiusKm={radiusKm}
-                    leads={filtered}
-                    selectedId={selected}
-                    onSelect={setSelected}
-                    onMapClick={onMapPin}
-                  />
-                </>
-              ) : (
-                <div className="absolute inset-0 grid place-items-center bg-white/[0.02]">
-                  <button 
-                    onClick={() => setMobileTab("map")}
-                    className="flex flex-col items-center gap-3 rounded-2xl bg-primary/10 p-6 ring-1 ring-primary/30 transition-all hover:bg-primary/20"
-                  >
-                    <MapIcon className="h-8 w-8 text-primary" />
-                    <span className="text-xs font-black uppercase tracking-widest text-primary">Ativar Visualização do Mapa</span>
-                  </button>
-                </div>
-              )}
+          <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+            <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+              <MapView
+                center={center}
+                radiusKm={radiusKm}
+                leads={filtered}
+                selectedId={selected}
+                onSelect={setSelected}
+                onMapClick={onMapPin}
+              />
             </Suspense>
           </ClientOnly>
 
@@ -1286,9 +1085,9 @@ function Home() {
             <button
               onClick={runSearch}
               disabled={loading}
-              className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4 items-center gap-3 rounded-full bg-primary px-8 py-4 text-base font-black uppercase tracking-widest text-primary-foreground shadow-glow-primary ring-2 ring-primary/40 transition-all hover:scale-[1.05] hover:brightness-110 active:scale-95 disabled:opacity-60"
+              className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-elevated ring-2 ring-primary/40 transition hover:brightness-110 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               Buscar aqui
             </button>
           )}
@@ -1296,143 +1095,8 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock 
-          supportWa={supportWa} 
-          unlockLink={unlockLink} 
-          onClose={() => setQuotaBlocked(false)} 
-        />
+        <FreeQuotaBlock supportWa={supportWa} onClose={() => setQuotaBlocked(false)} />
       )}
-      {showProWelcome && <ProWelcomeModal onClose={() => setShowProWelcome(false)} />}
     </div>
   );
 }
-
-function SearchHistory({ items, onSelect }: { items: string[], onSelect: (q: string) => void }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-2 px-1">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Recentes:</span>
-      {items.map((q, i) => (
-        <button
-          key={i}
-          onClick={() => onSelect(q)}
-          className="rounded-full bg-glass px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border transition hover:bg-primary/10 hover:text-primary hover:ring-primary/40"
-        >
-          {q}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ProBadge() {
-  return (
-    <div className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 ring-1 ring-primary/40 shadow-neon-primary/20">
-      <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Conta PRO</span>
-    </div>
-  );
-}
-
-function FreeQuotaBadge({ used }: { used: number }) {
-  return (
-    <div className="flex items-center gap-1.5 rounded-full bg-warn/10 px-3 py-1 ring-1 ring-warn/30">
-      <AlertCircle className="h-3.5 w-3.5 text-warn" />
-      <span className="text-[10px] font-bold uppercase tracking-widest text-warn">
-        Busca Free: {used}/{FREE_LIFETIME_SEARCH_LIMIT}
-      </span>
-    </div>
-  );
-}
-
-function MapOverlay() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!visible) return null;
-  return (
-    <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center bg-black/20 backdrop-blur-[1px] transition-opacity duration-1000 animate-out fade-out fill-mode-forwards">
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-black/60 p-6 text-white shadow-2xl ring-1 ring-white/20">
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-8 w-8 animate-bounce rounded-full border-2 border-white/40 flex items-center justify-center">
-              <span className="text-xs">👆</span>
-            </div>
-            <span className="text-[10px] font-bold uppercase">Mover</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-8 w-8 animate-pulse rounded-full border-2 border-white/40 flex items-center justify-center">
-              <span className="text-xs">🤏</span>
-            </div>
-            <span className="text-[10px] font-bold uppercase">Zoom</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LeadSkeleton() {
-  return (
-    <div className="glass-panel relative flex flex-col gap-3 rounded-2xl p-4 animate-pulse">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="h-4 w-24 rounded bg-white/10" />
-          <div className="h-5 w-48 rounded bg-white/10" />
-          <div className="h-3 w-32 rounded bg-white/10" />
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-white/10" />
-      </div>
-      <div className="h-8 w-full rounded-lg bg-white/10" />
-      <div className="flex gap-2">
-        <div className="h-4 w-16 rounded-full bg-white/10" />
-        <div className="h-4 w-16 rounded-full bg-white/10" />
-      </div>
-    </div>
-  );
-}
-
-function ProTeaser() {
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-primary/40 bg-primary/5 p-8 text-center ring-1 ring-primary/20 backdrop-blur-sm transition-all hover:border-primary/60 hover:bg-primary/10">
-      <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl transition-all group-hover:scale-110" />
-      
-      <div className="relative z-10">
-        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-primary/15 text-primary shadow-glow-primary">
-          <Sparkles className="h-8 w-8 animate-pulse" />
-        </div>
-        
-        <h3 className="text-lg font-black uppercase tracking-[0.2em] text-primary">Libere o Poder Mágico</h3>
-        
-        <div className="mt-6 space-y-3 text-left">
-          {[
-            "Buscas ilimitadas em todo o Brasil",
-            "Extração de e-mails reais de sites",
-            "Auditoria avançada de presença digital",
-            "Exportação total para Excel/CSV",
-            "Histórico completo e filtros salvos"
-          ].map((text, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-              <span>{text}</span>
-            </div>
-          ))}
-        </div>
-
-        <Link
-          to="/auth"
-          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-xs font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
-        >
-          <Zap className="h-4 w-4 fill-current" />
-          QUERO SER PRO AGORA
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-
-

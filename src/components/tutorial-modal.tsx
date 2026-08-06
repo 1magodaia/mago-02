@@ -104,11 +104,9 @@ export function TutorialModal({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
       <div
-        className="w-full max-w-[500px] rounded-2xl border border-primary/40 bg-popover/80 backdrop-blur-2xl p-6 shadow-glow-primary sm:p-8 relative overflow-hidden"
-        style={{ animation: "slide-up-fade .4s ease-out forwards" }}
+        className="w-full max-w-[500px] rounded-2xl border-2 border-primary bg-popover p-6 shadow-2xl sm:p-8"
+        style={{ animation: "fadeIn .2s ease-out" }}
       >
-        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-warn/10 blur-3xl pointer-events-none" />
         {/* Progress */}
         <div className="mb-4 flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">

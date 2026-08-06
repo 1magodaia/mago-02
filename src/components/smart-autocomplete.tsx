@@ -113,7 +113,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
       minChars = 1,
       maxItems = 8,
       leading,
-      wrapperClassName = "flex items-center gap-2 rounded-xl bg-white/5 backdrop-blur-md px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70 focus-within:bg-white/10 transition-all",
+      wrapperClassName = "flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70",
       className = "w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground",
       autocomplete = true,
       onKeyDown,
@@ -297,7 +297,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
         </label>
         {showPanel && (
           <div
-            className="absolute left-0 right-0 top-full z-[1000] mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-black/60 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-200"
+            className="absolute left-0 right-0 top-full mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
             style={{ zIndex: 2147483000 }}
           >
 
@@ -337,10 +337,10 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
                       commit(it);
                     }}
                     onMouseEnter={() => setHighlight(idx)}
-                    className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm transition-colors ${
+                    className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm ${
                       idx === highlight
-                        ? "bg-primary text-primary-foreground shadow-glow-primary/20"
-                        : "hover:bg-white/5"
+                        ? "bg-primary/15 text-primary-foreground"
+                        : "hover:bg-muted/40"
                     }`}
                   >
                     <div className="truncate font-medium">{it.label}</div>

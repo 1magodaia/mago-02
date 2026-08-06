@@ -1,17 +1,11 @@
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { 
-  Loader2, Mail, Lock, AlertCircle, Eye, EyeOff, 
-  ShieldCheck, Sparkles, MessageSquare, Zap, 
-  ArrowRight, CheckCircle2, UserPlus, Star, ChevronRight
-} from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { LogoIcon } from "@/components/logo";
+import { LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
-import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/logo-mago.png.asset.json";
 
 const searchSchema = z.object({ redirect: z.string().optional() });
 
@@ -19,8 +13,12 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
-      { title: "Mago Busca — Acesso Premium" },
-      { name: "description", content: "Encontre arquivos, links e conteúdos em segundos com o poder da Busca Mágica." },
+      { title: "Entrar — Busca Mágica" },
+      { name: "description", content: "Acesse sua conta Busca Mágica para prospectar comércios locais." },
+      { property: "og:title", content: "Busca Mágica — Entrar" },
+      { property: "og:description", content: "Acesse sua conta para prospectar leads com auditoria digital." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,
@@ -37,11 +35,9 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
+  // Same-origin relative path guard for post-login redirects (e.g. MCP consent URL).
   const safeRedirect =
     typeof redirect === "string" && redirect.startsWith("/") && !redirect.startsWith("//")
       ? redirect
@@ -52,13 +48,18 @@ function AuthPage() {
     setInfo(null);
     setGoogleLoading(true);
     try {
+      // Stash the intended destination so we can consume it after the session hydrates,
+      // regardless of whether Google returns via popup (web_message) or full-page redirect.
       if (safeRedirect && typeof window !== "undefined") {
         try { sessionStorage.setItem("bm.postLoginRedirect", safeRedirect); } catch { /* quota */ }
       }
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        // Return to /auth so the useEffect below can pick up the stashed redirect
+        // and forward the user to the original destination (e.g. /.lovable/oauth/consent).
         redirect_uri: `${window.location.origin}/auth`,
       });
-      if (error) throw error;
+      if (result.error) throw result.error;
+      // if redirected, browser navigates away; otherwise session is set and useEffect redirects
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao entrar com Google.");
     } finally {
@@ -68,25 +69,22 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      setLoginSuccess(true);
-      const timer = setTimeout(() => {
-        let stashed: string | null = null;
-        if (typeof window !== "undefined") {
-          try {
-            stashed = sessionStorage.getItem("bm.postLoginRedirect");
-            if (stashed) sessionStorage.removeItem("bm.postLoginRedirect");
-          } catch { /* ignore */ }
-        }
-        const target = stashed && stashed.startsWith("/") && !stashed.startsWith("//")
-          ? stashed
-          : safeRedirect;
-        if (target) {
-          window.location.assign(target);
-        } else {
-          nav({ to: "/" });
-        }
-      }, 2000);
-      return () => clearTimeout(timer);
+      let stashed: string | null = null;
+      if (typeof window !== "undefined") {
+        try {
+          stashed = sessionStorage.getItem("bm.postLoginRedirect");
+          if (stashed) sessionStorage.removeItem("bm.postLoginRedirect");
+        } catch { /* ignore */ }
+      }
+      const target = stashed && stashed.startsWith("/") && !stashed.startsWith("//")
+        ? stashed
+        : safeRedirect;
+      if (target) {
+        // Use full navigation to preserve query strings (authorization_id etc.).
+        window.location.assign(target);
+      } else {
+        nav({ to: "/" });
+      }
     }
   }, [user, loading, nav, safeRedirect]);
 
@@ -109,14 +107,14 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        setInfo("Conta criada com sucesso! Faça login abaixo.");
+        setInfo("Conta criada. Faça login abaixo.");
         setMode("login");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
-        setInfo("Enviamos um link para redefinir sua senha.");
+        setInfo("Se o e-mail existir, enviamos um link para redefinir a senha.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido.");
@@ -126,231 +124,166 @@ function AuthPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0A0B1F] px-4 py-8">
-      {/* Dynamic Magical & IA Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        {/* Deep Night Base with Noise */}
-        <div className="absolute inset-0 bg-[#0A0B1F] animate-noise mix-blend-overlay opacity-40" />
-        
-        {/* Animated Cyber Grid */}
-        <div className="absolute inset-0 particle-bg opacity-30" />
+    <div className="grid min-h-screen place-items-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <Link to="/" className="mb-8 flex justify-center">
+          <LogoWordmark variant="full" className="h-28 sm:h-32 w-auto mx-auto" />
+        </Link>
+        <div className="glass-panel rounded-2xl p-6 sm:p-8">
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {mode === "login" && "Entrar"}
+            {mode === "signup" && "Criar conta"}
+            {mode === "forgot" && "Recuperar senha"}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {mode === "login" && "Acesse sua conta para começar a prospectar."}
+            {mode === "signup" && "Comece grátis. Sem cartão de crédito."}
+            {mode === "forgot" && "Enviaremos um link para você redefinir."}
+          </p>
 
-        {/* Floating Magical Orbs */}
-        <div className="absolute top-[-10%] left-[-5%] h-[60%] w-[60%] rounded-full bg-primary/25 blur-[120px] animate-float-slow" />
-        <div className="absolute bottom-[-15%] right-[-5%] h-[60%] w-[60%] rounded-full bg-warn/15 blur-[120px] animate-float-slow" style={{ animationDelay: '-5s' }} />
-        <div className="absolute top-[20%] right-[10%] h-[30%] w-[30%] rounded-full bg-primary/10 blur-[80px] animate-pulse-subtle" />
-        
-        {/* IA Scanning Effect Overlay */}
-        <div className="absolute inset-0 scan-effect opacity-10" />
-
-        {/* Abstract Business Connections (Decorative SVGs) */}
-        <svg className="absolute inset-0 h-full w-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
-          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1" fill="currentColor" className="text-primary" />
-            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-primary" />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-700">
-        <div className="glass-panel rounded-[32px] border-white/10 bg-[#0A0B1F]/60 p-10 shadow-elevated backdrop-blur-3xl relative overflow-hidden">
-          {/* Subtle Inner Glow */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          
-          {/* Header */}
-          <div className="flex flex-col items-center text-center mb-10">
-            <Link to="/" className="group mb-8 block relative">
-              <div className="absolute inset-0 -m-8 bg-primary/25 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <img 
-                src={logoAsset.url} 
-                alt="Mago Busca"
-                className="h-40 w-auto animate-float-magical relative z-10 select-none pointer-events-none transition-transform duration-700 group-hover:scale-110"
-              />
-            </Link>
-            <h1 className="text-3xl font-black tracking-tighter text-white mb-3 font-heading uppercase">
-              {mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta Free" : "Recuperar Senha"}
-            </h1>
-            <p className="text-sm text-muted-foreground/90 max-w-[320px] leading-relaxed">
-              Descubra o poder da prospecção mágica com o Mago Busca.
-            </p>
-          </div>
-
-          {/* Opções de Login */}
-          <div className="space-y-6">
-            {/* Google Login - Agora como primeira opção */}
-            <div className="space-y-3">
+          {mode !== "forgot" && (
+            <>
               <button
                 type="button"
                 onClick={handleGoogle}
-                disabled={googleLoading}
-                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white py-4.5 text-base font-black text-gray-900 shadow-glow-white transition-all hover:bg-gray-50 hover:scale-[1.02] active:scale-95 disabled:opacity-50 group"
+                disabled={googleLoading || submitting}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-bold text-gray-900 ring-1 ring-border transition hover:brightness-95 disabled:opacity-60"
               >
                 {googleLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <svg className="h-5 w-5 transition-transform group-hover:scale-110" viewBox="0 0 48 48">
+                  <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
                     <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                     <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                   </svg>
                 )}
-                CONTINUAR COM GOOGLE
+                Continuar com Google
               </button>
-              <p className="text-[10px] text-center text-muted-foreground px-4 font-medium uppercase tracking-wider">
-                Acesso instantâneo para contas Google
-              </p>
-            </div>
 
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-white/5"></div>
-              <span className="flex-shrink mx-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">OU ACESSE COM E-MAIL</span>
-              <div className="flex-grow border-t border-white/5"></div>
-            </div>
+              <div className="my-5 flex items-center gap-3 text-[10px] uppercase text-muted-foreground">
+                <div className="h-px flex-1 bg-border" />
+                ou com e-mail
+                <div className="h-px flex-1 bg-border" />
+              </div>
+            </>
+          )}
 
-            <form onSubmit={handle} className="space-y-4">
-              {mode === "signup" && (
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">Nome Completo</label>
-                  <input
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Seu nome"
-                    className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
-                  />
-                </div>
-              )}
+          <form onSubmit={handle} className={mode === "forgot" ? "mt-6 space-y-3" : "space-y-3"}>
 
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">📧 E-mail</label>
+            {mode === "signup" && (
+              <label className="block">
+                <span className="text-xs font-semibold text-muted-foreground">Nome</span>
+                <input
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+                />
+              </label>
+            )}
+            <label className="block">
+              <span className="text-xs font-semibold text-muted-foreground">E-mail</span>
+              <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+                <Mail className="h-4 w-4 text-muted-foreground" />
                 <input
                   type="email"
                   required
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
+                  className="w-full bg-transparent text-sm outline-none"
                 />
               </div>
-
-              {mode !== "forgot" && (
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">🔒 Senha</label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      minLength={8}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {mode === "login" && (
-                <div className="flex items-center gap-2 px-1">
-                  <input 
-                    type="checkbox" 
-                    id="remember" 
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded border-white/10 bg-white/5 text-primary focus:ring-offset-0 focus:ring-primary" 
+            </label>
+            {mode !== "forgot" && (
+              <label className="block">
+                <span className="text-xs font-semibold text-muted-foreground">Senha</span>
+                <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-transparent text-sm outline-none"
                   />
-                  <label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer select-none">Lembrar de mim</label>
                 </div>
-              )}
-
-              {error && (
-                <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-xs text-destructive animate-in slide-in-from-top-1">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {info && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs text-primary animate-in slide-in-from-top-1">
-                  {info}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full rounded-2xl bg-white/5 py-4.5 text-base font-black tracking-widest text-white border border-white/10 transition-all hover:bg-white/10 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-              >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : (
-                  mode === "login" ? "ENTRAR" : mode === "signup" ? "CRIAR CONTA FREE" : "ENVIAR LINK"
+                {mode === "signup" && (
+                  <span className="mt-1 block text-[10px] text-muted-foreground">Mínimo 8 caracteres.</span>
                 )}
-              </button>
-            </form>
-          </div>
-
-          {/* Bottom Links */}
-          <div className="mt-8 flex items-center justify-center gap-6 text-xs font-semibold text-primary">
-            {mode === "login" ? (
-              <button onClick={() => setMode("signup")} className="hover:underline">Criar Conta Free</button>
-            ) : (
-              <button onClick={() => setMode("login")} className="hover:underline">Voltar ao Login</button>
+              </label>
             )}
-            <button onClick={() => setMode("forgot")} className="hover:underline">Esqueci minha Senha</button>
-          </div>
-
-          {/* WhatsApp / PRO Info Card */}
-          <div className="mt-8 animate-in fade-in duration-700 delay-300">
-            {loginSuccess ? (
-              <a
-                href="https://wa.me/55?text=Olá, acabei de fazer login no Mago Busca e gostaria de ativar meu acesso PRO."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95 shadow-lg"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Enviar comprovante no WhatsApp
-              </a>
-            ) : (
-              <div className="rounded-[24px] border border-white/10 bg-[#0A0B1F]/40 p-6 text-center shadow-inner relative overflow-hidden group">
-                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <p className="text-xs font-black text-white mb-2 flex items-center justify-center gap-2 uppercase tracking-tight relative z-10">
-                  <Star className="h-3.5 w-3.5 text-warn fill-warn animate-pulse" /> Já adquiriu o Mago Busca PRO?
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed relative z-10 font-medium">
-                  Faça login com o e-mail da compra. Após entrar, envie seu comprovante pelo WhatsApp para ativação instantânea.
-                </p>
+            {mode === "login" && (
+              <div className="flex items-center justify-between text-xs">
+                <label className="flex items-center gap-2 text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    className="h-3.5 w-3.5 rounded border-border bg-glass accent-primary"
+                  />
+                  Lembrar de mim
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Esqueci a senha
+                </button>
               </div>
+            )}
+
+            {error && (
+              <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+            {info && (
+              <div className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs text-primary">
+                {info}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {mode === "login" && "Entrar"}
+              {mode === "signup" && "Criar conta"}
+              {mode === "forgot" && "Enviar link"}
+            </button>
+          </form>
+
+          <div className="mt-5 flex flex-col gap-1.5 text-center text-xs text-muted-foreground">
+            {mode === "login" && (
+              <>
+                <button onClick={() => setMode("forgot")} className="hover:text-primary">
+                  Esqueci minha senha
+                </button>
+                <button onClick={() => setMode("signup")} className="hover:text-primary">
+                  Não tem conta? <span className="text-primary">Criar agora</span>
+                </button>
+              </>
+            )}
+            {mode === "signup" && (
+              <button onClick={() => setMode("login")} className="hover:text-primary">
+                Já tem conta? <span className="text-primary">Entrar</span>
+              </button>
+            )}
+            {mode === "forgot" && (
+              <button onClick={() => setMode("login")} className="hover:text-primary">
+                Voltar para login
+              </button>
             )}
           </div>
         </div>
-
-        {/* Signup Benefits (only shown in signup mode) */}
-        {mode === "signup" && (
-          <div className="mt-6 grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {[
-              { icon: <Zap className="h-3.5 w-3.5" />, text: "Pesquisa inteligente" },
-              { icon: <Sparkles className="h-3.5 w-3.5" />, text: "Recursos gratuitos" },
-              { icon: <ShieldCheck className="h-3.5 w-3.5" />, text: "Limite diário" },
-              { icon: <ChevronRight className="h-3.5 w-3.5" />, text: "Upgrade para PRO" }
-            ].map((b, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-lg bg-[#0A0B1F]/40 p-2.5 border border-white/5">
-                <div className="text-primary">{b.icon}</div>
-                <span className="text-[10px] text-gray-300 font-medium">{b.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

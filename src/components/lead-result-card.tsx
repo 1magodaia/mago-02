@@ -15,9 +15,7 @@ import {
   Phone,
   RefreshCw,
   Search,
-  Sparkles,
   Star,
-  ShieldCheck,
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
@@ -84,9 +82,7 @@ function relTime(iso: string | null | undefined): string | null {
 
 import { classifyLink } from "@/lib/link-classify";
 
-import { memo } from "react";
-
-export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
+export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -203,17 +199,13 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
   return (
     <article
       onClick={onSelect}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(); } }}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selected}
-      className={`glass-card group relative flex cursor-pointer flex-col gap-4 p-5 transition-all duration-300 active:scale-[0.98] sm:hover:-translate-y-1 sm:hover:shadow-glow-primary/20 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-[#0A0B1F]/80" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap mb-2">
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} animate-pulse`} />
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
             {(() => {
@@ -318,9 +310,9 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-2xl bg-[#0A0B1F]/60 px-3 py-2 text-center ring-1 ring-white/10 shadow-inner group-hover:ring-primary/40 transition-colors">
-            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Score</div>
-            <div className={`font-black text-2xl tabular-nums tracking-tighter glow-text ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
+            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
+            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
@@ -330,8 +322,8 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
         if (!Number.isFinite(days) || days <= 180) return null;
         return (
           <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
-            <Flame className="h-3 w-3 shrink-0 animate-pulse" />
-            <span className="leading-tight">Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.</span>
+            <Flame className="h-3 w-3 shrink-0" />
+            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
           </div>
         );
       })()}
@@ -350,30 +342,6 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
 
       {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
       {lead.audit && <EmailBlock email={lead.audit.email} />}
-      
-      {!lead.audit && (
-        <div className="group/pro relative overflow-hidden rounded-2xl bg-[#0A0B1F]/40 p-5 ring-1 ring-white/10 transition-all hover:bg-[#0A0B1F]/60">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover/pro:opacity-100 transition-opacity duration-500" />
-          <div className="relative z-10 flex items-center justify-between gap-4">
-            <div className="space-y-2 flex-1">
-              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-primary glow-text">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                DADOS EXCLUSIVOS PRO
-              </div>
-              <div className="h-2.5 w-full max-w-[180px] rounded-full bg-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-              </div>
-              <div className="h-2.5 w-full max-w-[120px] rounded-full bg-white/5 relative overflow-hidden">
-                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <Sparkles className="h-6 w-6 text-primary/30 animate-pulse" />
-              <span className="text-[9px] font-bold text-primary/40 uppercase">Bloqueado</span>
-            </div>
-          </div>
-        </div>
-      )}
 
 
       {lead.audit && (
@@ -415,10 +383,10 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60 transition-all hover:scale-105"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
           >
-            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-            {lead.audit ? "Reescanear" : "Audit IA"}
+            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+            {lead.audit ? "Reauditar" : "Auditar"}
           </button>
         )}
         {resolvedHref && (
@@ -427,10 +395,10 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
             href={resolvedHref}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => {
-              // Abre instantâneo sem bloquear a thread UI
-            }}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 transition-all hover:scale-105 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
@@ -572,7 +540,7 @@ export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onS
       </footer>
     </article>
   );
-});
+}
 
 const PRICE_LABELS: Record<number, string> = {
   0: "Grátis",

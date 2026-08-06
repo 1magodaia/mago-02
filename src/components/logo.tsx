@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-
-const NEW_LOGO_URL = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTgzNzIzLCJleHAiOjE3ODU5ODczMjN9.X-N1BCPWQ1z1oRgniCe1WA7XZgFTmWk2UtG1aaWi9mQ";
+import logoIcon from "../assets/logo-icon.png.asset.json";
+import logoFull from "../assets/logo-full.png.asset.json";
 
 interface LogoProps {
   className?: string;
@@ -9,54 +7,16 @@ interface LogoProps {
   monochrome?: boolean;
 }
 
-function EnhancedLogoImg({ 
-  src, 
-  alt, 
-  className,
-  animate = true 
-}: { 
-  src: string; 
-  alt: string; 
-  className?: string;
-  animate?: boolean;
-}) {
-  const [isLoaded, setIsLoaded] = useState(false);
-
+export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
   return (
-    <div className={cn(
-      "relative overflow-hidden transition-all duration-700", 
-      !isLoaded && "blur-md scale-95 opacity-50",
-      isLoaded && animate && "magical-pulse",
-      className
-    )}>
-      <img
-        src={src}
-        alt={alt}
-        onLoad={() => setIsLoaded(true)}
-        className={cn(
-          "h-full w-full object-contain transition-all duration-1000 ease-out",
-          isLoaded ? "blur-0 scale-100 opacity-100" : "blur-lg scale-90 opacity-0"
-        )}
-        style={{
-          filter: isLoaded ? "drop-shadow(0 0 15px rgba(107, 70, 224, 0.4))" : "none"
-        }}
-        draggable={false}
-      />
-    </div>
-  );
-}
-
-export function LogoIcon({ className = "h-12 w-12", animate = true }: LogoProps & { animate?: boolean }) {
-  return (
-    <EnhancedLogoImg
-      src={NEW_LOGO_URL}
-      alt="Busca Magica"
+    <img
+      src={logoIcon.url}
+      alt="Busca Mágica"
       className={className}
-      animate={animate}
+      draggable={false}
     />
   );
 }
-
 
 export function LogoWordmark({
   className = "",
@@ -67,20 +27,20 @@ export function LogoWordmark({
 }) {
   if (variant === "full") {
     return (
-      <EnhancedLogoImg
-        src={NEW_LOGO_URL}
-        alt="Busca Magica"
+      <img
+        src={logoFull.url}
+        alt="Busca Mágica"
         className={className || "h-24 w-auto"}
+        draggable={false}
       />
     );
   }
-
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={`flex items-center gap-3 ${className}`}>
       <LogoIcon className="h-12 w-12 sm:h-14 sm:w-14" />
       <div className="flex items-baseline gap-1">
         <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">Busca</span>
-        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Magica</span>
+        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Mágica</span>
       </div>
     </div>
   );

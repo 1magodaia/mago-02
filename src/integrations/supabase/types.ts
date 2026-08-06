@@ -102,7 +102,6 @@ export type Database = {
           id: number
           support_message: string | null
           support_whatsapp: string | null
-          unlock_link: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -118,7 +117,6 @@ export type Database = {
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -134,7 +132,6 @@ export type Database = {
           id?: number
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -437,7 +434,6 @@ export type Database = {
           id: number | null
           support_message: string | null
           support_whatsapp: string | null
-          unlock_link: string | null
           updated_at: string | null
         }
         Insert: {
@@ -450,7 +446,6 @@ export type Database = {
           id?: number | null
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -463,7 +458,6 @@ export type Database = {
           id?: number | null
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string | null
         }
         Relationships: []
