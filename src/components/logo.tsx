@@ -31,8 +31,8 @@ export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
     }).catch(console.error);
   }, []);
 
-  // Fallback para a URL hardcoded se nenhuma outra estiver disponível e for a oficial do projeto
-  const defaultLogoUrl = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTg5MTgzLCJleHAiOjE3ODU5OTI3ODN9.__XKav0p1-R-xrdBznz7nRMjJSdb0mdabVvGrnpLLV8";
+  // Fallback para a URL do asset carregado se nenhuma outra estiver disponível no DB/Local
+  const defaultLogoUrl = logoFixed.url;
   
   const finalLogoUrl = logoUrl || defaultLogoUrl;
 
