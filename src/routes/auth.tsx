@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LogoWordmark } from "@/components/logo";
