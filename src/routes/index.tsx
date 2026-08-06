@@ -193,8 +193,8 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
 
         {actionHref ? (
           <a
-            id="pro-upgrade-trigger"
             href={actionHref}
+
 
             target="_blank"
             rel="noopener noreferrer"
@@ -840,8 +840,11 @@ function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 {!isPro && !isMaster && !isAdmin && (
-                  <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
+                  <div id="pro-upgrade-link">
+                    <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
+                  </div>
                 )}
+
                 <Link
                   to="/auth"
                   className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
