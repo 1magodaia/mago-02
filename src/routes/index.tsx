@@ -93,7 +93,7 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Busca Mágica — Prospecção de comércios locais" },
+      { title: "Busca Magica — Prospecção de comércios locais" },
       {
         name: "description",
         content:
