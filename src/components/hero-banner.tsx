@@ -33,6 +33,10 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
         ["--hero-fit-desktop" as string]: fit,
       }}
     >
+      {/* Visual Hardening: subtle gradient overlay for better text readability and blending */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 z-[1] h-24 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
+
       {/*
         Mobile: força object-fit:contain — em telas estreitas "cover" corta
         a face do mago e/ou o texto do flyer. Desktop respeita a preferência
