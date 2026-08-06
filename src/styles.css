@@ -43,6 +43,12 @@
   --animate-magical-pulse: magical-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float-slow: float-slow 10s ease-in-out infinite;
   --animate-slide-up-fade: slide-up-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-shimmer: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes magical-pulse {
