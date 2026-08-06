@@ -4,6 +4,7 @@ import { SupportChat } from "./support-chat";
 import { SupportWidget } from "./support-widget";
 import { LogoIcon } from "./logo";
 import { cn } from "@/lib/utils";
+import botAsset from "@/assets/support-bot.png.asset.json";
 
 export function SupportHub() {
   const [isOpen, setIsOpen] = useState(false);
@@ -70,9 +71,13 @@ export function SupportHub() {
           {isOpen ? (
             <X className="h-5 w-5 text-foreground" />
           ) : (
-            <div className="relative h-full w-full p-1.5 flex items-center justify-center">
-              <LogoIcon className="h-full w-full" />
-              <div className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[9px] font-black text-black ring-2 ring-background shadow-sm">
+            <div className="relative h-full w-full p-0 flex items-center justify-center">
+              <img 
+                src={botAsset.url} 
+                alt="Mago Bot" 
+                className="h-full w-full object-cover scale-110"
+              />
+              <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-[9px] font-black text-black ring-2 ring-background shadow-sm">
                 <Info className="h-2.5 w-2.5" strokeWidth={3} />
               </div>
             </div>
