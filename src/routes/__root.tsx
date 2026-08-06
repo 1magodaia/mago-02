@@ -131,9 +131,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Busca Mágica",
+              "url": "https://buscamagica.lovable.app",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://buscamagica.lovable.app/?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Busca Mágica",
+              "url": "https://buscamagica.lovable.app",
+              "logo": "https://buscamagica.lovable.app/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png",
+              "sameAs": [
+                "https://www.instagram.com/buscamagica"
+              ]
+            })
+          }}
+        />
       </head>
       <body>
         {children}
