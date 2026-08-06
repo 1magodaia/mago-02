@@ -77,7 +77,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
             )}
           </>
         ) : (
-          <div className="h-full w-full bg-black" />
+          <div className="h-full w-full bg-background" />
         )}
       </div>
     </section>
