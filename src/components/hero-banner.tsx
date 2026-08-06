@@ -26,7 +26,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
 
   return (
     <section
-      className="relative isolate overflow-hidden rounded-3xl bg-black ring-1 ring-border shadow-elevated"
+      className="relative isolate overflow-hidden rounded-3xl bg-background ring-1 ring-border shadow-elevated"
       style={{
         ["--hero-h-mobile" as string]: `calc(${heightMobile}px + 2rem)`,
         ["--hero-h-desktop" as string]: `calc(${heightDesktop}px + 4rem)`,
