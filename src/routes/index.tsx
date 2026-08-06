@@ -710,11 +710,11 @@ function Home() {
             ) : user ? (
               <div className="group relative">
                 <button
-                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-glass px-4 text-sm font-semibold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-glass px-4 text-sm font-bold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
                   aria-label="Menu da conta"
                 >
-                  <UserIcon className="h-4 w-4 text-primary sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
+                  <UserIcon className="h-5 w-5 text-primary sm:h-3.5 sm:w-3.5" />
+                  <span className="max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
                 </button>
                 <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
                   <div className="px-3 py-2 text-[11px] text-muted-foreground">{user.email}</div>
