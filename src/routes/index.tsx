@@ -789,7 +789,7 @@ function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 {!isPro && !isMaster && !isAdmin && (
-                  <FreeQuotaBadge used={profile?.total_searches ?? 0} />
+                  <FreeQuotaBadge used={profile?.search_count_month ?? 0} />
                 )}
                 <Link
                   to="/auth"
