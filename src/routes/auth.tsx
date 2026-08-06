@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LogoWordmark } from "@/components/logo";
@@ -35,7 +35,9 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
 
   // Same-origin relative path guard for post-login redirects (e.g. MCP consent URL).
   const safeRedirect =
@@ -124,12 +126,19 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link to="/" className="mb-8 flex justify-center">
+    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10 scrollbar-magical">
+      {/* Background Blobs */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="float-slow absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/10 blur-[100px]" />
+        <div className="float-slow absolute top-1/2 -right-24 h-80 w-80 -translate-y-1/2 rounded-full bg-warn/5 blur-[100px]" style={{ animationDelay: '-3s' }} />
+        <div className="float-slow absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-primary/5 blur-[80px]" style={{ animationDelay: '-5s' }} />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        <Link to="/" className="mb-8 flex justify-center transition-transform hover:scale-105 active:scale-95">
           <LogoWordmark variant="full" className="h-28 sm:h-32 w-auto mx-auto" />
         </Link>
-        <div className="glass-panel rounded-2xl p-6 sm:p-8">
+        <div className="glass-panel slide-up-fade rounded-3xl p-6 shadow-elevated sm:p-8">
           <h1 className="text-2xl font-extrabold tracking-tight">
             {mode === "login" && "Entrar"}
             {mode === "signup" && "Criar conta"}
@@ -147,7 +156,7 @@ function AuthPage() {
                 type="button"
                 onClick={handleGoogle}
                 disabled={googleLoading || submitting}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-bold text-gray-900 ring-1 ring-border transition hover:brightness-95 disabled:opacity-60"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-black text-gray-900 shadow-md ring-1 ring-border transition-all hover:bg-gray-50 active:scale-[0.98] disabled:opacity-60"
               >
                 {googleLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -180,13 +189,13 @@ function AuthPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="mt-1 w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+                  className="mt-1 w-full rounded-xl bg-glass px-4 py-3 text-sm outline-none ring-1 ring-border transition-all focus:ring-2 focus:ring-primary/70 focus:shadow-glow-primary"
                 />
               </label>
             )}
             <label className="block">
               <span className="text-xs font-semibold text-muted-foreground">E-mail</span>
-              <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+              <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border transition-all focus-within:ring-2 focus-within:ring-primary/70 focus-within:shadow-glow-primary">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <input
                   type="email"
@@ -201,10 +210,10 @@ function AuthPage() {
             {mode !== "forgot" && (
               <label className="block">
                 <span className="text-xs font-semibold text-muted-foreground">Senha</span>
-                <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-2.5 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70">
+                <div className="mt-1 flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border transition-all focus-within:ring-2 focus-within:ring-primary/70 focus-within:shadow-glow-primary">
                   <Lock className="h-4 w-4 text-muted-foreground" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     minLength={8}
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
@@ -212,6 +221,14 @@ function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-transparent text-sm outline-none"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-muted-foreground transition-colors hover:text-primary"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 {mode === "signup" && (
                   <span className="mt-1 block text-[10px] text-muted-foreground">Mínimo 8 caracteres.</span>
@@ -252,7 +269,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground transition hover:brightness-110 hover:neon-primary disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:neon-primary active:scale-[0.98] disabled:opacity-60"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "login" && "Entrar"}

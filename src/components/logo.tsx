@@ -9,11 +9,26 @@ interface LogoProps {
   monochrome?: boolean;
 }
 
-function EnhancedLogoImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
+function EnhancedLogoImg({ 
+  src, 
+  alt, 
+  className,
+  animate = true 
+}: { 
+  src: string; 
+  alt: string; 
+  className?: string;
+  animate?: boolean;
+}) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div className={cn("relative overflow-hidden transition-all duration-700", !isLoaded && "blur-md scale-95 opacity-50", className)}>
+    <div className={cn(
+      "relative overflow-hidden transition-all duration-700", 
+      !isLoaded && "blur-md scale-95 opacity-50",
+      isLoaded && animate && "magical-pulse",
+      className
+    )}>
       <img
         src={src}
         alt={alt}
@@ -28,15 +43,17 @@ function EnhancedLogoImg({ src, alt, className }: { src: string; alt: string; cl
   );
 }
 
-export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
+export function LogoIcon({ className = "h-12 w-12", animate = true }: LogoProps & { animate?: boolean }) {
   return (
     <EnhancedLogoImg
       src={NEW_LOGO_URL}
       alt="Busca Mágica"
       className={className}
+      animate={animate}
     />
   );
 }
+
 
 export function LogoWordmark({
   className = "",
