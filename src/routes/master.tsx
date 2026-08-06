@@ -111,6 +111,9 @@ function MasterPanel() {
   const [heroPreviewStatus, setHeroPreviewStatus] = useState<"idle" | "loading" | "ok" | "invalid" | "error">("idle");
   const [heroPreviewDevice, setHeroPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [heroBusy, setHeroBusy] = useState(false);
+  const [logoUrlInput, setLogoUrlInput] = useState("");
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [logoPreviewStatus, setLogoPreviewStatus] = useState<"idle" | "loading" | "ok" | "invalid" | "error">("idle");
 
   const [settingsBusy, setSettingsBusy] = useState(false);
   const [settingsError, setSettingsError] = useState<string | null>(null);
@@ -185,6 +188,7 @@ function MasterPanel() {
           setHeroHeightDesktop(s.hero_height_desktop ?? 320);
           setHeroHeightMobile(s.hero_height_mobile ?? 200);
           setHeroFit(s.hero_fit ?? "cover");
+          setLogoUrlInput(s.logo_url ?? "");
         })
         .catch(() => {});
       readCostStats().then(setCostStats).catch(() => {});
@@ -287,6 +291,49 @@ function MasterPanel() {
       setHeroBusy(false);
     }
   };
+
+  const saveLogo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLogoBusy(true);
+    setSettingsError(null);
+    const tid = toast.loading("Salvando logo...");
+    try {
+      const r = await writeSettings({
+        data: {
+          logo_url: logoUrlInput.trim() || null,
+        },
+      });
+      setLogoUrlInput(r.logo_url ?? "");
+      // Atualiza o cache local para a logo refletir imediatamente em outros componentes sem reload
+      if (r.logo_url) {
+        localStorage.setItem("bm.logo_url", r.logo_url);
+      } else {
+        localStorage.removeItem("bm.logo_url");
+      }
+      setNotice("Logo atualizada.");
+      toast.success("Logo salva.", { id: tid });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar logo.";
+      setSettingsError(msg);
+      toast.error("Falha ao salvar logo.", { id: tid, description: msg });
+    } finally {
+      setLogoBusy(false);
+    }
+  };
+
+  // Live preview validation for Logo
+  useEffect(() => {
+    const url = logoUrlInput.trim();
+    if (!url) { setLogoPreviewStatus("idle"); return; }
+    if (!/^https?:\/\/|^\/__l5e\//.test(url)) { setLogoPreviewStatus("invalid"); return; }
+    setLogoPreviewStatus("loading");
+    const img = new Image();
+    let cancelled = false;
+    img.onload = () => { if (!cancelled) setLogoPreviewStatus("ok"); };
+    img.onerror = () => { if (!cancelled) setLogoPreviewStatus("error"); };
+    img.src = url;
+    return () => { cancelled = true; };
+  }, [logoUrlInput]);
 
   // Live preview validation: probe the URL by loading it in a hidden Image
   useEffect(() => {
@@ -994,6 +1041,92 @@ function MasterPanel() {
           </div>
         </div>
       </section>
+
+      {/* LOGO DO APP — Customização da marca */}
+      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 ring-1 ring-primary/40">
+            <KeyRound className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Logo do Aplicativo</h2>
+            <p className="max-w-2xl text-xs text-muted-foreground">
+              Troque a identidade visual do Busca Mágica. A logo aparece no cabeçalho, 
+              páginas de autenticação e no painel master.
+            </p>
+          </div>
+        </div>
+        <form onSubmit={saveLogo} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+          <div className="relative">
+            <input
+              type="url"
+              placeholder="https://sua-logo.com/imagem.png"
+              value={logoUrlInput}
+              onChange={(e) => setLogoUrlInput(e.target.value)}
+              maxLength={2048}
+              className="w-full rounded-xl bg-glass px-4 py-2.5 text-sm outline-none ring-1 ring-border focus:ring-2 focus:ring-primary/70"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {logoPreviewStatus === "loading" && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+              {logoPreviewStatus === "ok" && <Check className="h-4 w-4 text-green-500" />}
+              {(logoPreviewStatus === "error" || logoPreviewStatus === "invalid") && <Ban className="h-4 w-4 text-destructive" />}
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={logoBusy}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60"
+          >
+            {logoBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Salvar Logo
+          </button>
+        </form>
+
+        <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="flex-1 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Prévia da nova logo</h3>
+            <div className="flex items-center gap-6 rounded-xl bg-muted/30 p-4 ring-1 ring-border">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] text-muted-foreground">Ícone</span>
+                <div className="grid h-16 w-16 place-items-center rounded-lg bg-background ring-1 ring-border">
+                  {logoPreviewStatus === "ok" ? (
+                    <img src={logoUrlInput} alt="Preview" className="h-10 w-10 object-contain" />
+                  ) : (
+                    <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] text-muted-foreground">Header</span>
+                <div className="flex items-center gap-2 rounded-lg bg-background px-4 py-3 ring-1 ring-border">
+                  {logoPreviewStatus === "ok" ? (
+                    <>
+                      <img src={logoUrlInput} alt="Preview" className="h-8 w-8 object-contain" />
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-extrabold text-foreground">Busca</span>
+                        <span className="text-lg font-extrabold text-primary">Mágica</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-8 w-32 animate-pulse rounded bg-muted/50" />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-xs space-y-2 text-[11px] text-muted-foreground">
+            <p>
+              <strong className="text-foreground">Dica:</strong> Para melhores resultados, use uma imagem quadrada com fundo transparente (.png ou .webp).
+            </p>
+            <p>
+              O sistema salva sua escolha e ela será carregada automaticamente nas próximas visitas.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* AUDIT LOG E GESTÃO DE USUÁRIOS ABAIXO... */}
+
 
 
 

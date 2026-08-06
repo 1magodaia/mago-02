@@ -100,6 +100,7 @@ export type Database = {
           hero_height_mobile: number
           hero_image_url: string | null
           id: number
+          logo_url: string | null
           support_message: string | null
           support_whatsapp: string | null
           unlock_link: string | null
@@ -116,6 +117,7 @@ export type Database = {
           hero_height_mobile?: number
           hero_image_url?: string | null
           id?: number
+          logo_url?: string | null
           support_message?: string | null
           support_whatsapp?: string | null
           unlock_link?: string | null
@@ -132,6 +134,7 @@ export type Database = {
           hero_height_mobile?: number
           hero_image_url?: string | null
           id?: number
+          logo_url?: string | null
           support_message?: string | null
           support_whatsapp?: string | null
           unlock_link?: string | null
@@ -435,9 +438,9 @@ export type Database = {
           hero_height_mobile: number | null
           hero_image_url: string | null
           id: number | null
+          logo_url: string | null
           support_message: string | null
           support_whatsapp: string | null
-          unlock_link: string | null
           updated_at: string | null
         }
         Insert: {
@@ -448,9 +451,9 @@ export type Database = {
           hero_height_mobile?: number | null
           hero_image_url?: string | null
           id?: number | null
+          logo_url?: string | null
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -461,9 +464,9 @@ export type Database = {
           hero_height_mobile?: number | null
           hero_image_url?: string | null
           id?: number | null
+          logo_url?: string | null
           support_message?: string | null
           support_whatsapp?: string | null
-          unlock_link?: string | null
           updated_at?: string | null
         }
         Relationships: []

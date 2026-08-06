@@ -12,6 +12,7 @@ export interface AppSettings {
   hero_height_desktop: number;
   hero_height_mobile: number;
   hero_fit: "cover" | "contain";
+  logo_url: string | null;
   updated_at: string | null;
 }
 
@@ -34,7 +35,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
   });
   const { data } = await supabase
     .from("public_app_settings")
-    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
+    .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, logo_url, updated_at")
     .eq("id", 1)
     .maybeSingle();
   const d = data as (Partial<AppSettings> & { hero_height_desktop?: number; hero_height_mobile?: number; hero_fit?: string }) | null;
@@ -47,6 +48,7 @@ export const getAppSettings = createServerFn({ method: "GET" }).handler(async ()
     hero_height_desktop: d?.hero_height_desktop ?? 320,
     hero_height_mobile: d?.hero_height_mobile ?? 200,
     hero_fit: (d?.hero_fit === "contain" ? "contain" : "cover"),
+    logo_url: d?.logo_url ?? null,
     updated_at: d?.updated_at ?? null,
   };
 
@@ -79,6 +81,15 @@ const inputSchema = z.object({
   hero_height_desktop: z.number().int().min(120).max(720).optional(),
   hero_height_mobile: z.number().int().min(100).max(480).optional(),
   hero_fit: z.enum(["cover", "contain"]).optional(),
+  logo_url: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((s) => s === "" || /^https?:\/\/|^\/__l5e\//.test(s), {
+      message: "Use uma URL http(s) válida.",
+    })
+    .nullable()
+    .optional(),
   reason: z.string().trim().max(500).nullable().optional(),
 });
 
@@ -109,18 +120,19 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       ...(data.hero_height_desktop !== undefined ? { hero_height_desktop: data.hero_height_desktop } : {}),
       ...(data.hero_height_mobile !== undefined ? { hero_height_mobile: data.hero_height_mobile } : {}),
       ...(data.hero_fit !== undefined ? { hero_fit: data.hero_fit } : {}),
-    };
+      ...(data.logo_url !== undefined ? { logo_url: data.logo_url || null } : {}),
+    } as any;
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
-      .single();
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, logo_url, updated_at")
+      .single() as any;
     if (error) throw new Error(error.message);
 
-    const newWa = row?.support_whatsapp ?? null;
-    const newMsg = row?.support_message ?? null;
+    const newWa = (row as any)?.support_whatsapp ?? null;
+    const newMsg = (row as any)?.support_message ?? null;
     const oldWa = prev?.support_whatsapp ?? null;
     const oldMsg = prev?.support_message ?? null;
     const waChanged = data.support_whatsapp !== undefined && newWa !== oldWa;
@@ -148,6 +160,7 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       hero_height_desktop: r?.hero_height_desktop ?? 320,
       hero_height_mobile: r?.hero_height_mobile ?? 200,
       hero_fit: (r?.hero_fit === "contain" ? "contain" : "cover"),
+      logo_url: r?.logo_url ?? null,
       updated_at: r?.updated_at ?? null,
     };
 
