@@ -343,6 +343,23 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
 
       {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
       {lead.audit && <EmailBlock email={lead.audit.email} />}
+      
+      {!lead.audit && (
+        <div className="group/pro relative overflow-hidden rounded-xl bg-glass p-3 ring-1 ring-border/50">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent blur-sm" />
+          <div className="relative z-10 flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
+                <ShieldCheck className="h-3 w-3" />
+                DADOS EXCLUSIVOS PRO
+              </div>
+              <div className="h-2 w-32 rounded bg-white/5 animate-pulse" />
+              <div className="h-2 w-24 rounded bg-white/5 animate-pulse" />
+            </div>
+            <Sparkles className="h-5 w-5 text-primary/20" />
+          </div>
+        </div>
+      )}
 
 
       {lead.audit && (
