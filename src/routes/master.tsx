@@ -95,6 +95,7 @@ function MasterPanel() {
   const exportWaCsv = useServerFn(exportWhatsappChangeLogCsv);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -1133,7 +1134,105 @@ import {
   type WizardResult,
 } from "@/lib/ai-keys.functions";
 
-import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2, Eye, EyeOff, Wand2, AlertTriangle } from "lucide-react";
+import { 
+  Plus, 
+  Trash2, 
+  PlayCircle, 
+  KeySquare, 
+  Zap, 
+  CheckCircle2, 
+  Eye, 
+  EyeOff, 
+  Wand2, 
+  AlertTriangle,
+  History,
+  Activity
+} from "lucide-react";
+
+function SystemHistoryModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { supabase } = useAuth();
+
+  useEffect(() => {
+    if (open) {
+      setLoading(true);
+      const fetchLogs = async () => {
+        const { data } = await supabase
+          .from("admin_audit_log")
+          .select("*, profiles!target_user_id(email, full_name)")
+          .order("created_at", { ascending: false })
+          .limit(50);
+        setLogs(data ?? []);
+        setLoading(false);
+      };
+      fetchLogs();
+    }
+  }, [open, supabase]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="flex h-full max-h-[80vh] w-full max-w-4xl flex-col rounded-3xl border border-primary/20 bg-DeepNight p-6 shadow-2xl ring-1 ring-white/10">
+        <header className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10">
+              <History className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-widest text-foreground">Histórico de Acessos</h2>
+              <p className="text-xs text-muted-foreground">Log de auditoria do sistema (últimas 50 ações)</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="rounded-full bg-white/5 p-2 text-muted-foreground hover:bg-white/10 hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto pr-2 scrollbar-magical">
+          {loading ? (
+            <div className="grid h-full place-items-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary/30" />
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="grid h-full place-items-center text-sm text-muted-foreground">
+              Nenhum registro encontrado.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {logs.map((log) => (
+                <div key={log.id} className="rounded-2xl bg-white/[0.02] p-4 ring-1 ring-white/5 transition hover:bg-white/[0.04]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1 h-2 w-2 rounded-full ${log.action.includes('error') || log.action.includes('blocked') ? 'bg-red-500' : 'bg-primary'}`} />
+                      <div>
+                        <div className="text-sm font-bold text-foreground">
+                          {log.action.replace(/_/g, ' ').toUpperCase()}
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          {log.profiles?.email || 'Sistema'} 
+                          {log.details && (
+                            <span className="ml-2 rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[10px]">
+                              {JSON.stringify(log.details)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <time className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/60">
+                      {new Date(log.created_at).toLocaleString('pt-BR')}
+                    </time>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
