@@ -1232,9 +1232,9 @@ function Home() {
             <button
               onClick={runSearch}
               disabled={loading}
-              className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-elevated ring-2 ring-primary/40 transition hover:brightness-110 disabled:opacity-60"
+              className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4 items-center gap-3 rounded-full bg-primary px-8 py-4 text-base font-black uppercase tracking-widest text-primary-foreground shadow-glow-primary ring-2 ring-primary/40 transition-all hover:scale-[1.05] hover:brightness-110 active:scale-95 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
               Buscar aqui
             </button>
           )}
