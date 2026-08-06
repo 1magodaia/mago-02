@@ -61,9 +61,9 @@ export function LogoWordmark({
     return (
       <div className="flex flex-col items-center gap-2">
         <LogoIcon className="h-40 w-40 sm:h-56 sm:w-56" />
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm">Busca</span>
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary drop-shadow-glow-primary">Mágica</span>
+        <div className="flex items-baseline gap-2 mt-2">
+          <span className="text-4xl sm:text-6xl font-black tracking-tighter text-foreground drop-shadow-sm">Busca</span>
+          <span className="text-4xl sm:text-6xl font-black tracking-tighter text-primary drop-shadow-glow-primary">Mágica</span>
         </div>
       </div>
     );
