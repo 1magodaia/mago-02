@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAppSettings } from "@/lib/settings.functions";
 import logoIcon from "../assets/logo-icon.png.asset.json";
+import logoFixed from "../assets/logo-fixed.png.asset.json";
 import logoFull from "../assets/logo-full.png.asset.json";
 
 interface LogoProps {
