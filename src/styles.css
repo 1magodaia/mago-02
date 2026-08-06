@@ -40,6 +40,7 @@
   --shadow-glow-emerald: 0 0 40px -8px color-mix(in oklab, var(--emerald) 60%, transparent);
   --shadow-glow-warn: 0 0 40px -10px color-mix(in oklab, var(--warn) 55%, transparent);
   --shadow-elevated: 0 20px 60px -20px oklch(0 0 0 / 0.7);
+  --shadow-logo: 0 0 30px 5px color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
 :root {
