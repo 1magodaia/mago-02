@@ -84,7 +84,9 @@ function relTime(iso: string | null | undefined): string | null {
 
 import { classifyLink } from "@/lib/link-classify";
 
-export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
+import { memo } from "react";
+
+export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -201,7 +203,11 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(); } }}
+      tabIndex={0}
+      role="button"
+      aria-pressed={selected}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
