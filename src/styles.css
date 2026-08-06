@@ -41,6 +41,7 @@
   --shadow-glow-primary: 0 0 40px -8px color-mix(in oklab, var(--primary) 60%, transparent);
   --shadow-glow-emerald: 0 0 40px -8px color-mix(in oklab, var(--emerald) 60%, transparent);
   --shadow-glow-warn: 0 0 40px -10px color-mix(in oklab, var(--warn) 55%, transparent);
+  --shadow-glow-white: 0 0 30px -5px oklch(1 0 0 / 0.3);
   --shadow-elevated: 0 20px 60px -20px oklch(0 0 0 / 0.7);
   --animate-magical-pulse: magical-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float-slow: float-slow 10s ease-in-out infinite;
