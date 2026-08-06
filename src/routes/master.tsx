@@ -1246,50 +1246,6 @@ function SystemHistoryModal({ open, onClose }: { open: boolean; onClose: () => v
   );
 }
 
-        <div className="flex-1 overflow-y-auto pr-2 scrollbar-magical">
-          {loading ? (
-            <div className="grid h-full place-items-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary/30" />
-            </div>
-          ) : logs.length === 0 ? (
-            <div className="grid h-full place-items-center text-sm text-muted-foreground">
-              Nenhum registro encontrado.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {logs.map((log) => (
-                <div key={log.id} className="rounded-2xl bg-white/[0.02] p-4 ring-1 ring-white/5 transition hover:bg-white/[0.04]">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className={`mt-1 h-2 w-2 rounded-full ${log.action.includes('error') || log.action.includes('blocked') ? 'bg-red-500' : 'bg-primary'}`} />
-                      <div>
-                        <div className="text-sm font-bold text-foreground">
-                          {log.action.replace(/_/g, ' ').toUpperCase()}
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {log.profiles?.email || 'Sistema'} 
-                          {log.details && (
-                            <span className="ml-2 rounded-md bg-white/5 px-1.5 py-0.5 font-mono text-[10px]">
-                              {JSON.stringify(log.details)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <time className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground/60">
-                      {new Date(log.created_at).toLocaleString('pt-BR')}
-                    </time>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
   active:       "bg-emerald-500/15 text-emerald-300 ring-emerald-400/40",
