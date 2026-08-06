@@ -55,23 +55,30 @@ export default defineTool({
     }
 
     const supabase = userClient(ctx);
-    const { data: quota, error: quotaErr } = await supabase.rpc("consume_search_quota", {
-      _user_id: ctx.getUserId(),
-      _free_limit: FREE_LIMIT,
-    });
-    if (quotaErr) {
-      return {
-        content: [{ type: "text", text: `Erro ao validar quota: ${quotaErr.message}` }],
-        isError: true,
-      };
+    const { data: isMaster } = await supabase.rpc("is_master" as any, { _user_id: ctx.getUserId() });
+    if (isMaster) {
+      // Master has unlimited access, bypass consume_search_quota but still identify as Master
+      var quota: any = { allowed: true, remaining: 999999, plan: "master" };
+    } else {
+      const { data: quotaRows, error: quotaErr } = await supabase.rpc("consume_search_quota", {
+        _user_id: ctx.getUserId(),
+        _free_limit: FREE_LIMIT,
+      });
+      if (quotaErr) {
+        return {
+          content: [{ type: "text", text: `Erro ao validar quota: ${quotaErr.message}` }],
+          isError: true,
+        };
+      }
+      quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
     }
-    const q = Array.isArray(quota) ? quota[0] : quota;
-    if (!q?.allowed) {
+
+    if (!quota?.allowed) {
       return {
         content: [
           {
             type: "text",
-            text: `Quota esgotada. Plano atual: ${q?.plan ?? "?"}. Ative sua conta Pro pelo suporte.`,
+            text: `Quota esgotada. Plano atual: ${quota?.plan ?? "?"}. Ative sua conta Pro pelo suporte.`,
           },
         ],
         isError: true,
@@ -123,13 +130,13 @@ export default defineTool({
       content: [
         {
           type: "text",
-          text: `Encontrados ${results.length} comércio(s) para "${query}". Quota restante: ${q.remaining}.\n\n${JSON.stringify(results, null, 2)}`,
+          text: `Encontrados ${results.length} comércio(s) para "${query}". Quota restante: ${quota.remaining}.\n\n${JSON.stringify(results, null, 2)}`,
         },
       ],
       structuredContent: {
         count: results.length,
-        remaining_quota: q.remaining,
-        plan: q.plan,
+        remaining_quota: quota.remaining,
+        plan: quota.plan,
         results,
       },
     };

@@ -44,8 +44,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
 export const bootstrapMaster = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ granted: boolean }> => {
-    const masterEmail = process.env.MASTER_EMAIL?.trim().toLowerCase();
-    if (!masterEmail) return { granted: false };
+    const masterEmail = "contatosbot01@gmail.com";
     const email = (context.claims.email as string | undefined)?.toLowerCase();
     if (!email || email !== masterEmail) return { granted: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
