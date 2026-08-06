@@ -756,21 +756,19 @@ function Home() {
             <LogoIcon className="h-10 w-10 sm:hidden" />
             <span className="hidden sm:block"><LogoWordmark /></span>
           </Link>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-4">
+            {user && (
+              <MembershipBadge 
+                showBenefits={() => setQuotaBlocked(true)} 
+                className="hidden md:flex" 
+              />
+            )}
             {user && (
               <Link
                 to="/leads"
                 className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
               >
                 <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                to="/novidades"
-                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
-              >
-                <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
               </Link>
             )}
             {isAdmin && (
