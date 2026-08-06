@@ -337,10 +337,10 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
                       commit(it);
                     }}
                     onMouseEnter={() => setHighlight(idx)}
-                    className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm ${
+                    className={`min-h-11 cursor-pointer px-4 py-2.5 text-sm transition-colors ${
                       idx === highlight
-                        ? "bg-primary/15 text-primary-foreground"
-                        : "hover:bg-muted/40"
+                        ? "bg-primary text-primary-foreground shadow-glow-primary/20"
+                        : "hover:bg-white/5"
                     }`}
                   >
                     <div className="truncate font-medium">{it.label}</div>
