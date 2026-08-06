@@ -126,13 +126,18 @@ function AuthPage() {
   };
 
   return (
-    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10 scrollbar-magical bg-background">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10 scrollbar-magical bg-background lg:flex-row lg:gap-20">
       {/* Background Blobs with enhanced colors */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="float-slow absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
         <div className="float-slow absolute top-1/2 -right-24 h-96 w-96 -translate-y-1/2 rounded-full bg-warn/10 blur-[120px]" style={{ animationDelay: '-3s' }} />
         <div className="float-slow absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" style={{ animationDelay: '-5s' }} />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.pattern')] opacity-[0.03] mix-blend-overlay" />
+      </div>
+
+      {/* Left Column: Pro Teaser (Desktop only) */}
+      <div className="relative z-10 hidden w-full max-w-sm lg:block">
+        <ProTeaserAuth />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
