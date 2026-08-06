@@ -5,7 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Tight", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", "Georgia", serif;
+  --font-heading: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
