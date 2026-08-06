@@ -113,7 +113,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
       minChars = 1,
       maxItems = 8,
       leading,
-      wrapperClassName = "flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 ring-border focus-within:ring-2 focus-within:ring-primary/70",
+      wrapperClassName = "flex items-center gap-2 rounded-2xl bg-glass px-4 py-3 ring-1 ring-border bm-input-focus",
       className = "w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground",
       autocomplete = true,
       onKeyDown,
