@@ -189,8 +189,8 @@ function ProWelcomeModal({ onClose }: { onClose: () => void }) {
   const waHref = `https://wa.me/${digits}?text=${msg}`;
 
   return (
-    <div className="fixed inset-0 z-[9998] grid place-items-center bg-black/80 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="glass-panel relative w-full max-w-lg rounded-2xl border border-primary/50 p-8 text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[9998] grid place-items-center bg-black/60 p-4 backdrop-blur-2xl" onClick={onClose}>
+      <div className="glass-panel relative w-full max-w-lg rounded-3xl border border-primary/40 p-10 text-center shadow-elevated slide-up-fade" onClick={e => e.stopPropagation()}>
         <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl bg-primary/20 ring-1 ring-primary/60">
           <ShieldCheck className="h-8 w-8 text-primary" />
         </div>
