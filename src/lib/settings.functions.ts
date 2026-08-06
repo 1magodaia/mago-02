@@ -112,13 +112,14 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       ...(data.hero_height_desktop !== undefined ? { hero_height_desktop: data.hero_height_desktop } : {}),
       ...(data.hero_height_mobile !== undefined ? { hero_height_mobile: data.hero_height_mobile } : {}),
       ...(data.hero_fit !== undefined ? { hero_fit: data.hero_fit } : {}),
+      ...(data.unlock_link !== undefined ? { unlock_link: data.unlock_link || null } : {}),
     };
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
-      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, updated_at")
+      .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, unlock_link, updated_at")
       .single();
     if (error) throw new Error(error.message);
 
