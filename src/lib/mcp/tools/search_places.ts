@@ -78,7 +78,7 @@ export default defineTool({
         content: [
           {
             type: "text",
-            text: `Quota esgotada. Plano atual: ${q?.plan ?? "?"}. Ative sua conta Pro pelo suporte.`,
+            text: `Quota esgotada. Plano atual: ${quota?.plan ?? "?"}. Ative sua conta Pro pelo suporte.`,
           },
         ],
         isError: true,
@@ -130,13 +130,13 @@ export default defineTool({
       content: [
         {
           type: "text",
-          text: `Encontrados ${results.length} comércio(s) para "${query}". Quota restante: ${q.remaining}.\n\n${JSON.stringify(results, null, 2)}`,
+          text: `Encontrados ${results.length} comércio(s) para "${query}". Quota restante: ${quota.remaining}.\n\n${JSON.stringify(results, null, 2)}`,
         },
       ],
       structuredContent: {
         count: results.length,
-        remaining_quota: q.remaining,
-        plan: q.plan,
+        remaining_quota: quota.remaining,
+        plan: quota.plan,
         results,
       },
     };
