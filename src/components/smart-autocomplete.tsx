@@ -297,7 +297,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
         </label>
         {showPanel && (
           <div
-            className="absolute left-0 right-0 top-full mt-1 w-full overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-elevated"
+            className="absolute left-0 right-0 top-full z-[1000] mt-1 w-full overflow-hidden rounded-xl border border-white/10 bg-black/60 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-200"
             style={{ zIndex: 2147483000 }}
           >
 
