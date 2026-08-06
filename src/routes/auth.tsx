@@ -7,6 +7,7 @@ import {
   ArrowRight, CheckCircle2, UserPlus, Star, ChevronRight
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { LogoIcon } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
@@ -54,11 +55,8 @@ function AuthPage() {
       if (safeRedirect && typeof window !== "undefined") {
         try { sessionStorage.setItem("bm.postLoginRedirect", safeRedirect); } catch { /* quota */ }
       }
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth`,
-        }
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth`,
       });
       if (error) throw error;
     } catch (err) {
