@@ -44,32 +44,32 @@
 }
 
 :root {
-  --radius: 0.9rem;
-  /* Brand: extraído da logo Busca Mágica — Roxo real + Dourado + Fundo noite */
-  --background: oklch(0.11 0.03 275);            /* ~#0A0B1F noite profunda */
-  --foreground: oklch(0.98 0.005 275);           /* branco leve */
-  --card: oklch(0.16 0.035 278 / 0.9);           /* painel roxo-escuro */
+  --radius: 1rem;
+  /* Brand: Busca Mágica — Deep space violet with gold and neon accents */
+  --background: oklch(0.08 0.02 270);            /* #050512 deeper space */
+  --foreground: oklch(0.98 0.005 275);           /* crisp white */
+  --card: oklch(0.12 0.03 275 / 0.85);           /* translucent space card */
   --card-foreground: oklch(0.98 0.005 275);
-  --popover: oklch(0.13 0.035 278);
+  --popover: oklch(0.1 0.03 275);
   --popover-foreground: oklch(0.98 0.005 275);
-  --primary: oklch(0.58 0.22 285);               /* ~#6B46E0 Roxo Mágico */
+  --primary: oklch(0.62 0.22 285);               /* #7C5CFF brighter magic purple */
   --primary-foreground: oklch(0.99 0.005 275);
-  --secondary: oklch(0.22 0.04 280);
+  --secondary: oklch(0.18 0.04 280);
   --secondary-foreground: oklch(0.98 0.005 275);
-  --muted: oklch(0.2 0.03 280);
-  --muted-foreground: oklch(0.72 0.02 280);
-  --accent: oklch(0.58 0.22 285);
+  --muted: oklch(0.16 0.02 275);
+  --muted-foreground: oklch(0.65 0.02 275);
+  --accent: oklch(0.62 0.22 285);
   --accent-foreground: oklch(0.99 0.005 275);
-  --destructive: oklch(0.65 0.24 25);
+  --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(1 0 0);
-  --emerald: oklch(0.72 0.16 158);               /* saúde/OK — verde suave */
-  --emerald-foreground: oklch(0.12 0.02 275);
-  --warn: oklch(0.8 0.14 75);                    /* ~#E4A94A Dourado da logo */
-  --warn-foreground: oklch(0.18 0.03 275);
-  --border: oklch(1 0 0 / 0.09);
-  --input: oklch(1 0 0 / 0.1);
-  --ring: oklch(0.58 0.22 285);
-  --glass: oklch(1 0 0 / 0.04);
+  --emerald: oklch(0.78 0.16 160);               /* vibrant neon green */
+  --emerald-foreground: oklch(0.1 0.02 275);
+  --warn: oklch(0.82 0.16 85);                   /* brighter magic gold */
+  --warn-foreground: oklch(0.1 0.02 275);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.06);
+  --ring: oklch(0.62 0.22 285 / 0.5);
+  --glass: oklch(1 0 0 / 0.03);
 }
 
 @layer base {

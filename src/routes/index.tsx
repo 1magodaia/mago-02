@@ -126,7 +126,7 @@ function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onCl
       aria-modal="true"
       aria-labelledby="quota-block-title"
       aria-describedby="quota-block-desc"
-      className="fixed inset-0 z-[9999] grid place-items-center bg-black/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] grid place-items-center bg-black/90 p-4 backdrop-blur-xl"
       onClick={onClose}
     >
       <div
