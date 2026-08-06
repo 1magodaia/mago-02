@@ -48,9 +48,30 @@ export const bootstrapMaster = createServerFn({ method: "POST" })
     if (!masterEmail) return { granted: false };
     const email = (context.claims.email as string | undefined)?.toLowerCase();
     if (!email || email !== masterEmail) return { granted: false };
+    
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
+    
+    // Check for other masters first to prevent master proliferation if needed
+    // But for now, just ensure the matching email is always master
+    const { data: existingRoles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "master");
+
+    if (existingRoles && existingRoles.length > 0) return { granted: true };
+
+    const { error } = await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: context.userId, role: "master" }, { onConflict: "user_id,role" });
-    return { granted: true };
+    
+    if (!error) {
+      await supabaseAdmin.from("admin_audit_log").insert({
+        actor_id: context.userId,
+        action: "master_bootstrapped",
+        details: { email }
+      });
+    }
+
+    return { granted: !error };
   });
