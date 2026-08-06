@@ -72,7 +72,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
               onError={() => setError(true)}
             />
             {!ready && (
-              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/20 via-background to-accent/20" />
+              <div className="absolute inset-0 animate-pulse bg-black" />
             )}
           </>
         ) : (
