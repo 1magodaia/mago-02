@@ -4,10 +4,16 @@ import { getAppSettings } from "@/lib/settings.functions";
 
 /** Floating WhatsApp support button. Reads number from public app_settings.
  *  Hidden when no number configured. */
-export function SupportWidget() {
+export function SupportWidget({ standalone = true, onClose }: { standalone?: boolean; onClose?: () => void }) {
   const [whatsapp, setWhatsapp] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("Olá! Preciso de ajuda com o Busca Mágica.");
   const [open, setOpen] = useState(false);
+
+  const isVisible = standalone ? open : true;
+  const handleClose = () => {
+    if (standalone) setOpen(false);
+    onClose?.();
+  };
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +38,7 @@ export function SupportWidget() {
 
   return (
     <>
-      {open && (
+      {isVisible && (
         <div
           className="fixed right-4 z-40 w-72 rounded-2xl border border-border bg-popover p-4 shadow-2xl sm:right-6"
           style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 5.5rem)" }}
@@ -45,7 +51,7 @@ export function SupportWidget() {
               </p>
             </div>
             <button
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
               aria-label="Fechar"
               className="rounded-full p-1 text-muted-foreground hover:bg-white/5 hover:text-foreground"
             >
@@ -63,14 +69,16 @@ export function SupportWidget() {
           </a>
         </div>
       )}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Falar com o desenvolvedor"
-        className="fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl ring-4 ring-[#25D366]/25 transition hover:scale-105 sm:right-6"
-        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
-      >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-      </button>
+      {standalone && (
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Falar com o desenvolvedor"
+          className="fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl ring-4 ring-[#25D366]/25 transition hover:scale-105 sm:right-6"
+          style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+        >
+          {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        </button>
+      )}
     </>
   );
 }
