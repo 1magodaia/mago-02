@@ -21,7 +21,7 @@ export function SupportHub() {
   }, [activeTab]);
 
   return (
-    <div className="fixed right-4 z-[100] sm:right-6 bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
+    <div className="fixed right-4 z-[100] sm:right-6 bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] transition-all duration-300">
       <div className="relative flex flex-col items-end gap-2 pb-4">
         
         {isOpen && (
