@@ -1220,6 +1220,7 @@ function Home() {
         )}
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
+        {/* Mapa — Renderizado dinamicamente para performance */}
         <section
           className={`glass-card relative overflow-hidden transition-all duration-500 ${
             rawResults.length > 0
@@ -1230,16 +1231,42 @@ function Home() {
           aria-label="Mapa"
         >
           <ClientOnly fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
-            <Suspense fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
-              <MapOverlay />
-              <MapView
-                center={center}
-                radiusKm={radiusKm}
-                leads={filtered}
-                selectedId={selected}
-                onSelect={setSelected}
-                onMapClick={onMapPin}
-              />
+            <Suspense fallback={
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0B1F]/60 backdrop-blur-md">
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
+                  <MapIcon className="h-10 w-10 text-primary/40 animate-pulse relative z-10" />
+                </div>
+                <div className="h-1.5 w-32 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+                  <div className="h-full w-1/2 animate-shimmer bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                </div>
+                <span className="mt-3 text-[10px] font-black uppercase tracking-widest text-primary/60">Carregando Mapa...</span>
+              </div>
+            }>
+              {/* Lazy Loading: Só renderiza o mapa no mobile se a tab de mapa estiver ativa ou se estiver em desktop */}
+              {(typeof window !== "undefined" && (window.innerWidth >= 1024 || mobileTab === "map" || rawResults.length === 0)) ? (
+                <>
+                  <MapOverlay />
+                  <MapView
+                    center={center}
+                    radiusKm={radiusKm}
+                    leads={filtered}
+                    selectedId={selected}
+                    onSelect={setSelected}
+                    onMapClick={onMapPin}
+                  />
+                </>
+              ) : (
+                <div className="absolute inset-0 grid place-items-center bg-white/[0.02]">
+                  <button 
+                    onClick={() => setMobileTab("map")}
+                    className="flex flex-col items-center gap-3 rounded-2xl bg-primary/10 p-6 ring-1 ring-primary/30 transition-all hover:bg-primary/20"
+                  >
+                    <MapIcon className="h-8 w-8 text-primary" />
+                    <span className="text-xs font-black uppercase tracking-widest text-primary">Ativar Visualização do Mapa</span>
+                  </button>
+                </div>
+              )}
             </Suspense>
           </ClientOnly>
 
