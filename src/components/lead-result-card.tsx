@@ -17,6 +17,7 @@ import {
   Search,
   Sparkles,
   Star,
+  ShieldCheck,
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
