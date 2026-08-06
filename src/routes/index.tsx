@@ -736,10 +736,24 @@ function Home() {
 
   // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
   // a home para evitar flash da tela de busca a usuários deslogados.
-  if (authLoading || !user) {
+  if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Carregando" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-6">
+          <LogoIcon className="h-16 w-16 magical-pulse" />
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sincronizando Magia...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <ProTeaser />
       </div>
     );
   }
