@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { getAppSettings } from "@/lib/settings.functions";
 import logoIcon from "../assets/logo-icon.png.asset.json";
 import logoFull from "../assets/logo-full.png.asset.json";
 
@@ -8,15 +10,37 @@ interface LogoProps {
 }
 
 export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
-  // Use a URL fornecida pelo usuário se disponível, caso contrário usa o asset padrão
-  const logoUrl = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTg5MTgzLCJleHAiOjE3ODU5OTI3ODN9.__XKav0p1-R-xrdBznz7nRMjJSdb0mdabVvGrnpLLV8";
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Tenta carregar do localStorage primeiro para resposta rápida
+    const cached = localStorage.getItem("bm.logo_url");
+    if (cached) setLogoUrl(cached);
+
+    // Depois busca do servidor para garantir que está atualizado
+    getAppSettings().then(settings => {
+      if (settings.logo_url !== cached) {
+        setLogoUrl(settings.logo_url);
+        if (settings.logo_url) {
+          localStorage.setItem("bm.logo_url", settings.logo_url);
+        } else {
+          localStorage.removeItem("bm.logo_url");
+        }
+      }
+    }).catch(console.error);
+  }, []);
+
+  // Fallback para a URL hardcoded se nenhuma outra estiver disponível e for a oficial do projeto
+  const defaultLogoUrl = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/a3b2f739-9749-41b5-8424-006ec53ad2d7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2EzYjJmNzM5LTk3NDktNDFiNS04NDI0LTAwNmVjNTNhZDJkNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTg5MTgzLCJleHAiOjE3ODU5OTI3ODN9.__XKav0p1-R-xrdBznz7nRMjJSdb0mdabVvGrnpLLV8";
+  
+  const finalLogoUrl = logoUrl || defaultLogoUrl;
 
   return (
     <div className={`relative group ${className}`}>
       {/* Efeito de brilho pulsante atrás da logo */}
       <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse group-hover:bg-primary/40 transition-all duration-700" />
       <img
-        src={logoUrl || logoIcon.url}
+        src={finalLogoUrl || logoIcon.url}
         alt="Busca Mágica"
         className="relative z-10 h-full w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
         draggable={false}
