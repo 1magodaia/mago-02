@@ -70,8 +70,8 @@ export function LogoWordmark({
   }
 
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
-      <LogoIcon className="h-12 w-12 sm:h-16 sm:w-16" />
+    <div className={`flex items-center gap-3 ${className}`}>
+      <LogoIcon className="h-10 w-10 sm:h-12 sm:w-12" />
       <div className="flex items-baseline gap-1">
         <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">Busca</span>
         <span className="text-xl sm:text-3xl font-extrabold tracking-tight text-primary drop-shadow-glow-primary">Mágica</span>
