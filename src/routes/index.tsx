@@ -84,16 +84,16 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Busca Mágica — Prospecção de comércios locais" },
+      { title: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
       {
         name: "description",
         content:
-          "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
+          "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
-      { property: "og:title", content: "Busca Mágica — Prospecção de comércios locais" },
+      { property: "og:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
       {
         property: "og:description",
-        content: "Encontre comércios com presença digital fraca via Google Places. Auditoria de site (WHOIS + sitemap), score de oportunidade e exportação em CSV.",
+        content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
