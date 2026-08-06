@@ -1348,43 +1348,5 @@ function ProTeaser() {
   );
 }
 
-function ProTeaser() {
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-primary/40 bg-primary/5 p-8 text-center ring-1 ring-primary/20 backdrop-blur-sm transition-all hover:border-primary/60 hover:bg-primary/10">
-      <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl transition-all group-hover:scale-110" />
-      
-      <div className="relative z-10">
-        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-primary/15 text-primary shadow-glow-primary">
-          <Sparkles className="h-8 w-8 animate-pulse" />
-        </div>
-        
-        <h3 className="text-lg font-black uppercase tracking-[0.2em] text-primary">Libere o Poder Mágico</h3>
-        
-        <div className="mt-6 space-y-3 text-left">
-          {[
-            "Buscas ilimitadas em todo o Brasil",
-            "Extração de e-mails reais de sites",
-            "Auditoria avançada de presença digital",
-            "Exportação total para Excel/CSV",
-            "Histórico completo e filtros salvos"
-          ].map((text, i) => (
-            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-              <span>{text}</span>
-            </div>
-          ))}
-        </div>
-
-        <Link
-          to="/auth"
-          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-xs font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
-        >
-          <Zap className="h-4 w-4 fill-current" />
-          QUERO SER PRO AGORA
-        </Link>
-      </div>
-    </div>
-  );
-}
 
 
