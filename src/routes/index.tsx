@@ -740,7 +740,7 @@ function Home() {
             ) : (
               <Link
                 to="/auth"
-                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
               >
                 <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
               </Link>
