@@ -870,7 +870,7 @@ function Home() {
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-neon-primary active:scale-95 disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-neon-primary hover:neon-primary active:scale-95 disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
             Buscar Leads
@@ -1068,17 +1068,15 @@ function Home() {
             className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
             aria-label="Resultados"
           >
-            {loading && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-                <p className="mt-2">Consultando Google Places...</p>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => <LeadSkeleton key={i} />)}
               </div>
-            )}
-            {!loading && filtered.length === 0 && (
+            ) : filtered.length === 0 ? (
               <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
                 Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
               </div>
-            )}
+            ) : null}
             {filtered.map((lead) => {
               const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
               return (
@@ -1111,6 +1109,12 @@ function Home() {
                 </span>
               </p>
             )}
+          </section>
+        )}
+
+        {rawResults.length === 0 && !loading && (
+          <section className="mx-auto max-w-md py-12 px-4">
+            {!query && !isPro && <ProTeaser />}
           </section>
         )}
 
