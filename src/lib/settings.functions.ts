@@ -12,6 +12,7 @@ export interface AppSettings {
   hero_height_desktop: number;
   hero_height_mobile: number;
   hero_fit: "cover" | "contain";
+  unlock_link: string | null;
   updated_at: string | null;
 }
 
