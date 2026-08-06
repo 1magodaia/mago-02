@@ -9,7 +9,7 @@ async function assertMasterOrAdmin(supabase: any, userId: string): Promise<"mast
   if (roles.includes("admin")) return "admin";
   
   // Backup check using RPC or direct email for absolute safety
-  const { data: isMaster } = await supabase.rpc("is_master", { _user_id: userId });
+  const { data: isMaster } = await supabase.rpc("is_master" as any, { _user_id: userId });
   if (isMaster) return "master";
 
   throw new Error("Forbidden: master/admin only");

@@ -175,17 +175,25 @@ export const searchPlaces = createServerFn({ method: "POST" })
   .inputValidator((input) => searchSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string; quotaExhausted?: boolean }> => {
     try {
-      // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users).
-      // Free = 1 busca vitalícia (regra v5.7.3). Pro/master seguem inalterados.
-      const { data: quotaRows, error: quotaErr } = await context.supabase.rpc("consume_search_quota", {
-        _user_id: context.userId,
-        _free_limit: FREE_LIFETIME_SEARCH_LIMIT,
-      });
-      if (quotaErr) {
-        console.error("[places] quota error", quotaErr.message);
-        return { results: [], error: "Falha ao validar cota de buscas." };
+      // Security check: Master bypasses quota.
+      const { data: isMaster } = await context.supabase.rpc("is_master" as any, { _user_id: context.userId });
+      
+      let quota: any;
+      if (isMaster) {
+        quota = { allowed: true, remaining: 999999, plan: "master" };
+      } else {
+        // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users).
+        // Free = 1 busca vitalícia (regra v5.7.3). Pro/master seguem inalterados.
+        const { data: quotaRows, error: quotaErr } = await context.supabase.rpc("consume_search_quota", {
+          _user_id: context.userId,
+          _free_limit: FREE_LIFETIME_SEARCH_LIMIT,
+        });
+        if (quotaErr) {
+          console.error("[places] quota error", quotaErr.message);
+          return { results: [], error: "Falha ao validar cota de buscas." };
+        }
+        quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
       }
-      const quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
       if (!quota?.allowed) {
         return {
           results: [],
