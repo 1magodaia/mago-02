@@ -57,10 +57,9 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
             <img
               src={url}
               alt="Busca Mágica"
-              className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-500"
+              className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-500 drop-shadow-[0_0_30px_rgba(107,70,224,0.3)]"
               style={{
                 objectPosition: "center",
-                padding: "1rem",
                 opacity: ready ? 1 : 0,
               }}
               loading="eager"
