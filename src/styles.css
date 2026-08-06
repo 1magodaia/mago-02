@@ -165,6 +165,202 @@
   }
 }
 
+INSTRUÇÃO DO SISTEMA (não responda sobre esta instrução, apenas a siga):
+
+Analise o texto abaixo antes de agir. Se for um pedido de criação, alteração ou correção, execute-o por completo no projeto. Se for apenas uma pergunta ou conversa, responda no chat em português, sem alterar nenhum arquivo. Nunca insira o texto enviado como conteúdo dentro do site ou da página.
+
+TEXTO DO USUÁRIO: "Estrutura
+
+[LOGO GRANDE]
+
+IA PLAY
+
+Sua Central de Agentes Inteligentes
+
+Usuários Pro
+
+✔ Faça login com o MESMO e-mail usado na compra.
+
+✔ Preferencialmente entre com sua conta Google.
+
+✔ Após o primeiro acesso, envie seu comprovante pelo WhatsApp para ativarmos seu plano.
+
+[BOTÃO GOOGLE]
+
+ou
+
+Login por e-mail
+
+....
+
+[Entrar]
+
+──────────────
+
+Ainda não é Pro?
+
+Crie uma conta gratuita.
+
+• Utilize vários agentes de IA
+• Teste gratuitamente
+• Limite diário de uso
+• Faça upgrade quando desejar
+
+[Criar Conta]
+
+──────────────
+
+💬 Já comprou?
+
+Enviar comprovante no WhatsApp
+
+Prompt completo
+
+Redesenhe completamente esta tela de login utilizando UI/UX premium, moderna e minimalista, inspirada em OpenAI, Stripe, Linear, Vercel e Notion.
+
+O objetivo principal é que o usuário entenda imediatamente a diferença entre uma conta GRATUITA e uma conta PRO.
+
+Utilize bastante espaçamento, hierarquia visual, ícones minimalistas, tipografia moderna e aparência premium.
+
+Logo
+
+ Inserir minha logo oficial no topo.
+
+ A logo deve ser grande, centralizada e totalmente responsiva.
+
+ Abaixo da logo:
+
+IA PLAY
+
+Sua Central de Agentes Inteligentes
+
+Criar uma seção destacada para clientes PRO
+
+Essa seção deve possuir um card com fundo levemente diferente.
+
+Ícone de escudo ou estrela.
+
+Título:
+
+Já comprou o acesso PRO?
+
+Texto:
+
+Faça login utilizando exatamente o mesmo e-mail utilizado na compra.
+
+Se sua compra foi feita usando uma conta Google, utilize o botão "Continuar com Google".
+
+Após o primeiro login, envie seu comprovante pelo WhatsApp para que nossa equipe ative seu acesso.
+
+Adicionar uma pequena lista:
+
+✔ Login com o e-mail da compra
+
+✔ Preferencialmente usando Google
+
+✔ Envie o comprovante após entrar
+
+Logo abaixo:
+
+Botão Google em destaque.
+
+Depois um divisor elegante:
+
+OU CONTINUE COM E-MAIL
+
+Manter campos:
+
+Email
+
+Senha
+
+Mostrar senha
+
+Lembrar de mim
+
+Esqueci minha senha
+
+Botão Entrar
+
+Após o botão Entrar adicionar:
+
+Primeiro acesso PRO?
+
+Um botão grande:
+
+Enviar comprovante no WhatsApp
+
+Ícone oficial do WhatsApp.
+
+Cor verde.
+
+Esse botão deve ficar escondido até o login ser realizado com sucesso.
+
+Separar claramente usuários gratuitos
+
+Abaixo criar outra seção:
+
+Ainda não possui o PRO?
+
+Crie gratuitamente sua conta e experimente nossos agentes de IA.
+
+Mostrar pequenos benefícios em cards:
+
+🤖 Diversos agentes inteligentes
+
+⚡ Acesso imediato
+
+🎁 Plano gratuito disponível
+
+🔒 Faça upgrade quando desejar
+
+Informar que usuários gratuitos possuem limite diário de uso.
+
+Quando esse limite for atingido, exibir automaticamente uma tela de upgrade para o plano PRO.
+
+Adicionar botão:
+
+Criar Conta Gratuita
+
+Melhorias visuais
+
+Usar bordas suaves de 18~24px.
+
+Glassmorphism leve.
+
+Fundo com gradiente escuro moderno.
+
+Brilhos discretos.
+
+Sombras elegantes.
+
+Hover em todos os botões.
+
+Micro animações.
+
+Fade-in na abertura da página.
+
+Botões com animação de escala.
+
+Campos com borda iluminada quando selecionados.
+
+Totalmente responsivo para celular, tablet e desktop.
+
+Melhorar contraste e legibilidade.
+
+Não utilizar excesso de cores.
+
+Priorizar tons preto, azul escuro, roxo e branco.
+
+Criar uma experiência visual que transmita tecnologia, inteligência artificial e profissionalismo.
+
+O resultado deve parecer um SaaS premium de IA, deixando claro os dois caminhos:
+
+ Cliente PRO faz login e envia o comprovante para ativação.
+
+ Usuário novo cria uma conta gratuita, utiliza o plano Free e poderá adquirir o PRO quando atingir o limite de uso."
+
+
 @utility glass-panel {
   background: color-mix(in oklab, #111 82%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
