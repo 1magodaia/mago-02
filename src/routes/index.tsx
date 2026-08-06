@@ -1152,3 +1152,72 @@ function Home() {
     </div>
   );
 }
+
+function SearchHistory({ items, onSelect }: { items: string[], onSelect: (q: string) => void }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2 px-1">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Recentes:</span>
+      {items.map((q, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(q)}
+          className="rounded-full bg-glass px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border transition hover:bg-primary/10 hover:text-primary hover:ring-primary/40"
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ProBadge() {
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 ring-1 ring-primary/40 shadow-neon-primary/20">
+      <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Conta PRO</span>
+    </div>
+  );
+}
+
+function FreeQuotaBadge({ used }: { used: number }) {
+  return (
+    <div className="flex items-center gap-1.5 rounded-full bg-warn/10 px-3 py-1 ring-1 ring-warn/30">
+      <AlertCircle className="h-3.5 w-3.5 text-warn" />
+      <span className="text-[10px] font-bold uppercase tracking-widest text-warn">
+        Busca Free: {used}/{FREE_LIFETIME_SEARCH_LIMIT}
+      </span>
+    </div>
+  );
+}
+
+function MapOverlay() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center bg-black/20 backdrop-blur-[1px] transition-opacity duration-1000 animate-out fade-out fill-mode-forwards">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-black/60 p-6 text-white shadow-2xl ring-1 ring-white/20">
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-8 w-8 animate-bounce rounded-full border-2 border-white/40 flex items-center justify-center">
+              <span className="text-xs">👆</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase">Mover</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-8 w-8 animate-pulse rounded-full border-2 border-white/40 flex items-center justify-center">
+              <span className="text-xs">🤏</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase">Zoom</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
