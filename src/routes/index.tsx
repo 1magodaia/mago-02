@@ -208,7 +208,7 @@ function ProWelcomeModal({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-3 rounded-xl bg-glass p-4 text-left ring-1 ring-border">
             <Mail className="h-5 w-5 text-primary shrink-0" />
             <div>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Ou envie para</
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Ou envie para</p>
               <p className="text-sm font-medium text-foreground">contato@buscamagica.app</p>
             </div>
           </div>
