@@ -743,12 +743,26 @@ function Home() {
   // a home para evitar flash da tela de busca a usuários deslogados.
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-6">
-          <LogoIcon className="h-16 w-16 magical-pulse" />
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sincronizando Magia...</span>
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0B1F]">
+        {/* Immersive Loading Background */}
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-[#0A0B1F] animate-noise mix-blend-overlay opacity-40" />
+          <div className="absolute top-[-10%] left-[-5%] h-[60%] w-[60%] rounded-full bg-primary/20 blur-[120px] animate-float-slow" />
+          <div className="absolute bottom-[-15%] right-[-5%] h-[60%] w-[60%] rounded-full bg-warn/10 blur-[120px] animate-float-slow" style={{ animationDelay: '-5s' }} />
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center gap-8 animate-in fade-in duration-1000">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full animate-pulse" />
+            <LogoIcon className="h-24 w-24 relative z-10 animate-float-magical" />
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-1 w-48 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+              <div className="h-full w-1/3 animate-shimmer bg-gradient-to-r from-transparent via-primary to-transparent" />
+            </div>
+            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-primary glow-text animate-pulse">
+              Sincronizando Magia...
+            </span>
           </div>
         </div>
       </div>
@@ -770,7 +784,7 @@ function Home() {
 
       {/* NAV — sticky com safe-area; alvos de toque ≥44px no mobile */}
       <nav
-        className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+        className="sticky top-0 z-50 border-b border-white/5 bg-[#0A0B1F]/80 backdrop-blur-2xl supports-[backdrop-filter]:bg-[#0A0B1F]/60"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
@@ -788,7 +802,7 @@ function Home() {
             {user && (
               <Link
                 to="/leads"
-                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
+                className="hidden h-9 items-center gap-1.5 rounded-full bg-white/[0.03] px-3 text-xs font-bold text-foreground ring-1 ring-white/10 hover:bg-white/5 sm:inline-flex"
               >
                 <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
               </Link>
@@ -810,7 +824,7 @@ function Home() {
             ) : user ? (
               <div className="group relative">
                 <button
-                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-glass px-4 text-sm font-semibold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-white/[0.03] px-4 text-sm font-bold text-foreground ring-1 ring-white/10 hover:bg-white/5 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
                   aria-label="Menu da conta"
                 >
                   <UserIcon className="h-4 w-4 text-primary sm:h-3.5 sm:w-3.5" />
@@ -847,7 +861,7 @@ function Home() {
 
                 <Link
                   to="/auth"
-                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-black uppercase tracking-widest text-primary-foreground hover:brightness-110 shadow-glow-primary transition-all hover:scale-105 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
                 >
                   <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
                 </Link>
@@ -893,44 +907,68 @@ function Home() {
 
 
 
-        {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div id="search-input" className="glass-panel relative z-50 mt-6 grid gap-3 rounded-2xl p-4 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto]">
-          <SmartAutocomplete
+        {/* BLOCO PRINCIPAL DE BUSCA - Redesenhado Premium */}
+        <div id="search-input" className="glass-card relative z-50 mt-8 grid gap-4 p-6 ring-1 ring-primary/20 md:grid-cols-[1.2fr_1.4fr_auto]">
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Categoria</label>
+            <div className="relative group">
+              <SmartAutocomplete
+                value={query}
+                onChange={setQuery}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                placeholder="Ex: Padaria, Pet Shop..."
+                aria-label="Categoria de comércio"
+                staticList={CATEGORY_SUGGESTIONS}
+                minChars={1}
+                wrapperClassName="flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 ring-white/10 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05]"
+                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
+                leading={<Filter className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden />}
+              />
+            </div>
+          </div>
 
-            value={query}
-            onChange={setQuery}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Categoria (padaria, pet shop, advogado...)"
-            aria-label="Categoria de comércio"
-            staticList={CATEGORY_SUGGESTIONS}
-            minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
-          />
-          <SmartAutocomplete
-            value={region}
-            onChange={setRegion}
-            onSelect={onSelectRegion}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Cidade, bairro ou endereço"
-            aria-label="Região"
-            asyncSource={regionSource}
-            disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
-          />
+          <div className="space-y-2">
+            <label className="text-[11px] font-black uppercase tracking-widest text-primary glow-text ml-1">Região</label>
+            <div className="relative group">
+              <SmartAutocomplete
+                value={region}
+                onChange={setRegion}
+                onSelect={onSelectRegion}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
+                placeholder="Cidade ou Bairro..."
+                aria-label="Região"
+                asyncSource={regionSource}
+                disabled={usingGps}
+                wrapperClassName={`flex h-14 items-center gap-3 rounded-2xl bg-white/[0.02] px-4 ring-1 transition-all focus-within:ring-primary/40 focus-within:bg-white/[0.05] ${usingGps ? "opacity-50 ring-border" : "ring-white/10"}`}
+                className="w-full bg-transparent text-base font-bold text-foreground outline-none placeholder:text-muted-foreground/50"
+                leading={<MapPin className="h-5 w-5 text-primary" aria-hidden />}
+              />
+              <button
+                onClick={useGps}
+                disabled={locating}
+                title="Usar minha localização"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl bg-primary/10 p-2 text-primary transition-all hover:bg-primary/20 disabled:opacity-50"
+              >
+                {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
 
-
-
-          <button
-            onClick={runSearch}
-            disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-glow-primary active:scale-95 disabled:opacity-60 group relative overflow-hidden"
-          >
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
-            Buscar Leads
-          </button>
+          <div className="flex items-end">
+            <button
+              onClick={runSearch}
+              disabled={loading}
+              className="h-14 min-w-[160px] w-full rounded-2xl bg-primary px-8 text-base font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-60 group relative overflow-hidden"
+            >
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
+              {loading ? <Loader2 className="h-6 w-6 animate-spin mx-auto" /> : (
+                <div className="flex items-center justify-center gap-2">
+                  <Zap className="h-5 w-5 fill-current" />
+                  <span>BUSCAR</span>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Search History Quick Access */}
@@ -1121,16 +1159,23 @@ function Home() {
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
         {rawResults.length > 0 && (
           <section
-            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
+            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 scrollbar-magical content-auto`}
             aria-label="Resultados"
           >
             {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => <LeadSkeleton key={i} />)}
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, i) => <LeadSkeleton key={i} />)}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              <div className="glass-card p-10 text-center relative overflow-hidden group">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-white/5 text-muted-foreground/50">
+                  <Filter className="h-6 w-6" />
+                </div>
+                <p className="text-sm font-bold text-foreground mb-1">Nenhum lead encontrado</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Tente ampliar o raio de busca ou ajustar os filtros de avaliação e site.
+                </p>
               </div>
             ) : null}
             {filtered.map((lead) => {
@@ -1176,7 +1221,7 @@ function Home() {
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
         <section
-          className={`glass-panel relative overflow-hidden rounded-2xl ${
+          className={`glass-card relative overflow-hidden ${
             rawResults.length > 0
               ? `${mobileTab === "map" ? "block h-[55svh] max-h-[calc(100dvh-12rem)]" : "hidden"} lg:sticky lg:top-4 lg:block lg:h-[calc(100vh-8rem)]`
               : "block h-[65svh] max-h-[calc(100dvh-10rem)] lg:h-[calc(100vh-14rem)]"
@@ -1184,8 +1229,8 @@ function Home() {
           style={{ marginBottom: "max(1rem, env(safe-area-inset-bottom))" }}
           aria-label="Mapa"
         >
-          <ClientOnly fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
-            <Suspense fallback={<div className="grid h-full place-items-center text-xs text-muted-foreground">Carregando mapa...</div>}>
+          <ClientOnly fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
+            <Suspense fallback={<div className="grid h-full place-items-center"><Loader2 className="h-8 w-8 animate-spin text-primary/30" /></div>}>
               <MapOverlay />
               <MapView
                 center={center}
@@ -1211,9 +1256,9 @@ function Home() {
             <button
               onClick={runSearch}
               disabled={loading}
-              className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-elevated ring-2 ring-primary/40 transition hover:brightness-110 disabled:opacity-60"
+              className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4 items-center gap-3 rounded-full bg-primary px-8 py-4 text-base font-black uppercase tracking-widest text-primary-foreground shadow-glow-primary ring-2 ring-primary/40 transition-all hover:scale-[1.05] hover:brightness-110 active:scale-95 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
               Buscar aqui
             </button>
           )}

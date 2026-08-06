@@ -84,7 +84,9 @@ function relTime(iso: string | null | undefined): string | null {
 
 import { classifyLink } from "@/lib/link-classify";
 
-export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
+import { memo } from "react";
+
+export const LeadResultCard = memo(function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -201,13 +203,17 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 ${selected ? "border-primary/60 ring-2 ring-primary/40" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect?.(); } }}
+      tabIndex={0}
+      role="button"
+      aria-pressed={selected}
+      className={`glass-card group relative flex cursor-pointer flex-col gap-3 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-glow-primary/20 focus:focus-ring ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-[#0A0B1F]/80" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
-      <header className="flex items-start justify-between gap-3">
+      <header className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} animate-pulse`} />
               {meta.label}
             </span>
             {(() => {
@@ -312,9 +318,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
-            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-2xl bg-[#0A0B1F]/60 px-3 py-2 text-center ring-1 ring-white/10 shadow-inner group-hover:ring-primary/40 transition-colors">
+            <div className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Score</div>
+            <div className={`font-black text-2xl tabular-nums tracking-tighter glow-text ${meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
@@ -346,18 +352,25 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       {lead.audit && <EmailBlock email={lead.audit.email} />}
       
       {!lead.audit && (
-        <div className="group/pro relative overflow-hidden rounded-xl bg-glass p-3 ring-1 ring-border/50">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent blur-sm" />
-          <div className="relative z-10 flex items-center justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
-                <ShieldCheck className="h-3 w-3" />
+        <div className="group/pro relative overflow-hidden rounded-2xl bg-[#0A0B1F]/40 p-5 ring-1 ring-white/10 transition-all hover:bg-[#0A0B1F]/60">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover/pro:opacity-100 transition-opacity duration-500" />
+          <div className="relative z-10 flex items-center justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-primary glow-text">
+                <ShieldCheck className="h-3.5 w-3.5" />
                 DADOS EXCLUSIVOS PRO
               </div>
-              <div className="h-2 w-32 rounded bg-white/5 animate-pulse" />
-              <div className="h-2 w-24 rounded bg-white/5 animate-pulse" />
+              <div className="h-2.5 w-full max-w-[180px] rounded-full bg-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              </div>
+              <div className="h-2.5 w-full max-w-[120px] rounded-full bg-white/5 relative overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+              </div>
             </div>
-            <Sparkles className="h-5 w-5 text-primary/20" />
+            <div className="flex flex-col items-center gap-1">
+              <Sparkles className="h-6 w-6 text-primary/30 animate-pulse" />
+              <span className="text-[9px] font-bold text-primary/40 uppercase">Bloqueado</span>
+            </div>
           </div>
         </div>
       )}
@@ -559,7 +572,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       </footer>
     </article>
   );
-}
+});
 
 const PRICE_LABELS: Record<number, string> = {
   0: "Grátis",
