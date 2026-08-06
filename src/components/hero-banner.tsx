@@ -39,7 +39,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
         configurada no /master (cover ou contain).
       */}
       <style>{`
-        .bm-hero-wrap { height: var(--hero-h-mobile); }
+        .bm-hero-wrap { height: var(--hero-h-mobile); padding: 1rem; }
         .bm-hero-img { object-fit: contain; background: transparent; }
         /* Mobile em paisagem: reduz o hero para não sobrepor busca/CTA */
         @media (max-width: 767px) and (orientation: landscape){
