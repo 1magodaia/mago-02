@@ -77,6 +77,9 @@ export const Route = createFileRoute("/master")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [
+      { rel: "canonical", href: "https://buscamagica.lovable.app/master" }
+    ]
   }),
   component: MasterPanel,
 });

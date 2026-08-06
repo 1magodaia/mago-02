@@ -19,7 +19,11 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Acesse sua conta para prospectar leads com auditoria digital." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
+    links: [
+      { rel: "canonical", href: "https://buscamagica.lovable.app/auth" }
+    ]
   }),
   component: AuthPage,
 });

@@ -97,7 +97,11 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "keywords", content: "prospecção, b2b, leads, google places, auditoria digital, seo local" },
     ],
+    links: [
+      { rel: "canonical", href: "https://buscamagica.lovable.app/" }
+    ]
   }),
   component: Home,
 });

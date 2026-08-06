@@ -79,44 +79,50 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0A0B1F" },
-      { title: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
-      { property: "og:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
-      { name: "twitter:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
-      { name: "description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
-      { property: "og:description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
-      { name: "twitter:description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2SkscptTwBXNWzX4oatZDLgpWMT2/social-images/social-1784866552161-full-fixed.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2SkscptTwBXNWzX4oatZDLgpWMT2/social-images/social-1784866552161-full-fixed.webp" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:type", content: "website" },
-      // PWA / Add to Home Screen (iOS Safari — Android usa o manifest)
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "Busca Mágica" },
-      { name: "mobile-web-app-capable", content: "yes" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      {
-        rel: "stylesheet",
-        href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-      },
-      { rel: "icon", href: "/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: favicon.url },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
-      },
-    ],
-  }),
+  head: () => {
+    const canonical = typeof window !== "undefined" ? window.location.pathname : "/";
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+        { name: "theme-color", content: "#0A0B1F" },
+        { title: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
+        { property: "og:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
+        { name: "twitter:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
+        { name: "description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
+        { property: "og:description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
+        { name: "twitter:description", content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção." },
+        { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2SkscptTwBXNWzX4oatZDLgpWMT2/social-images/social-1784866552161-full-fixed.webp" },
+        { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2SkscptTwBXNWzX4oatZDLgpWMT2/social-images/social-1784866552161-full-fixed.webp" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "Busca Mágica" },
+        { name: "author", content: "Busca Mágica" },
+        // PWA / Add to Home Screen (iOS Safari — Android usa o manifest)
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+        { name: "apple-mobile-web-app-title", content: "Busca Mágica" },
+        { name: "mobile-web-app-capable", content: "yes" },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        {
+          rel: "stylesheet",
+          href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+        },
+        { rel: "icon", href: "/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png", type: "image/png" },
+        { rel: "apple-touch-icon", href: favicon.url },
+        { rel: "manifest", href: "/manifest.webmanifest" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
+        },
+        { rel: "canonical", href: `https://buscamagica.lovable.app${canonical}` },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -125,9 +131,40 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Busca Mágica",
+              "url": "https://buscamagica.lovable.app",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://buscamagica.lovable.app/?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Busca Mágica",
+              "url": "https://buscamagica.lovable.app",
+              "logo": "https://buscamagica.lovable.app/__l5e/assets-v1/ecd44b51-e4ba-45e0-aaa1-81a1b03ca487/favicon.png",
+              "sameAs": [
+                "https://www.instagram.com/buscamagica"
+              ]
+            })
+          }}
+        />
       </head>
       <body>
         {children}
