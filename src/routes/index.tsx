@@ -40,11 +40,11 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 import { useServerFn } from "@tanstack/react-start";
 import { toTerms } from "@/lib/highlight";
-import { addHistory, cacheGet, cacheSet, exportToCsv } from "@/lib/storage";
+import { addHistory, cacheGet, cacheSet, exportToCsv, isContacted, isFavorite } from "@/lib/storage";
 import { haversineKm } from "@/lib/geo";
 import { LogoIcon, LogoWordmark } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
-import { FREE_LIFETIME_SEARCH_LIMIT } from "@/lib/profile.functions";
+import { FREE_LIFETIME_SEARCH_LIMIT, type Profile } from "@/lib/profile.functions";
 import { TutorialModal, resetTutorial } from "@/components/tutorial-modal";
 import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
