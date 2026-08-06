@@ -1,5 +1,5 @@
-import logoIcon from "../assets/logo-icon.png.asset.json";
-import logoFull from "../assets/logo-full.png.asset.json";
+const NEW_LOGO_URL = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/b54cd6fc-fef2-4b9a-a779-3b97246162b7.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L2I1NGNkNmZjLWZlZjItNGI5YS1hNzc5LTNiOTcyNDYxNjJiNy5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg1OTc4NTI5LCJleHAiOjE3ODU5ODIxMjl9.DHaQqVQgzbBiBQOqNAXJnUITa1_-aDrnZEw7OIOjfVI";
+
 
 interface LogoProps {
   className?: string;
@@ -10,13 +10,14 @@ interface LogoProps {
 export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
   return (
     <img
-      src={logoIcon.url}
+      src={NEW_LOGO_URL}
       alt="Busca Mágica"
       className={className}
       draggable={false}
     />
   );
 }
+
 
 export function LogoWordmark({
   className = "",
@@ -28,13 +29,14 @@ export function LogoWordmark({
   if (variant === "full") {
     return (
       <img
-        src={logoFull.url}
+        src={NEW_LOGO_URL}
         alt="Busca Mágica"
         className={className || "h-24 w-auto"}
         draggable={false}
       />
     );
   }
+
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <LogoIcon className="h-12 w-12 sm:h-14 sm:w-14" />
