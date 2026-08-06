@@ -156,7 +156,7 @@ function AuthPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-700">
-        <div className="glass-panel rounded-[32px] border-white/10 bg-white/[0.04] p-10 shadow-elevated backdrop-blur-3xl relative overflow-hidden">
+        <div className="glass-panel rounded-[32px] border-white/10 bg-[#0A0B1F]/60 p-10 shadow-elevated backdrop-blur-3xl relative overflow-hidden">
           {/* Subtle Inner Glow */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
           
@@ -188,7 +188,7 @@ function AuthPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Seu nome"
-                  className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
+                  className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
                 />
               </div>
             )}
@@ -202,7 +202,7 @@ function AuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
+                className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
               />
             </div>
 
@@ -217,7 +217,7 @@ function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
+                    className="w-full rounded-2xl bg-white/[0.01] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.04] focus:ring-4 focus:ring-primary/10"
                   />
                   <button
                     type="button"
@@ -315,7 +315,7 @@ function AuthPage() {
                 Enviar comprovante no WhatsApp
               </a>
             ) : (
-              <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6 text-center shadow-inner relative overflow-hidden group">
+              <div className="rounded-[24px] border border-white/10 bg-[#0A0B1F]/40 p-6 text-center shadow-inner relative overflow-hidden group">
                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <p className="text-xs font-black text-white mb-2 flex items-center justify-center gap-2 uppercase tracking-tight relative z-10">
                   <Star className="h-3.5 w-3.5 text-warn fill-warn animate-pulse" /> Já adquiriu o Mago Busca PRO?
@@ -337,7 +337,7 @@ function AuthPage() {
               { icon: <ShieldCheck className="h-3.5 w-3.5" />, text: "Limite diário" },
               { icon: <ChevronRight className="h-3.5 w-3.5" />, text: "Upgrade para PRO" }
             ].map((b, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-lg bg-white/[0.03] p-2.5 border border-white/5">
+              <div key={i} className="flex items-center gap-2 rounded-lg bg-[#0A0B1F]/40 p-2.5 border border-white/5">
                 <div className="text-primary">{b.icon}</div>
                 <span className="text-[10px] text-gray-300 font-medium">{b.text}</span>
               </div>
