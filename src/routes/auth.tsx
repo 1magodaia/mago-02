@@ -136,8 +136,8 @@ function AuthPage() {
             {mode === "forgot" && "Recuperar senha"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "login" && "Acesse sua conta para começar a prospectar."}
-            {mode === "signup" && "Comece grátis. Sem cartão de crédito."}
+            {mode === "login" && "Acesse sua conta para começar a prospectar. Se você é Pro, ative seu acesso com o comprovante."}
+            {mode === "signup" && "Comece grátis. Limite de 1 busca vitalícia total no modo Free."}
             {mode === "forgot" && "Enviaremos um link para você redefinir."}
           </p>
 

@@ -182,6 +182,7 @@ function MasterPanel() {
           setSupportMsg(s.support_message ?? "");
           setCitationsEnabled(s.citations_enabled);
           setCitationsLimit(s.citations_daily_limit);
+          setUnlockLink(s.unlock_link ?? "");
           setHeroImageUrl(s.hero_image_url ?? "");
           setHeroHeightDesktop(s.hero_height_desktop ?? 320);
           setHeroHeightMobile(s.hero_height_mobile ?? 200);
@@ -226,6 +227,7 @@ function MasterPanel() {
           support_message: supportMsg || null,
           citations_enabled: citationsEnabled,
           citations_daily_limit: citationsLimit,
+          unlock_link: unlockLink.trim() || null,
           reason: reason.trim() || null,
         },
       });
@@ -233,6 +235,7 @@ function MasterPanel() {
       setSupportMsg(r.support_message ?? "");
       setCitationsEnabled(r.citations_enabled);
       setCitationsLimit(r.citations_daily_limit);
+      setUnlockLink(r.unlock_link ?? "");
       setNotice("Configurações atualizadas.");
       setReason("");
       setWaLogPage(1);
