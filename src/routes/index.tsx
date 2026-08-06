@@ -786,16 +786,22 @@ function Home() {
                 </div>
               </div>
             ) : (
-              <Link
-                to="/auth"
-                className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
-              >
-                <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
-              </Link>
+              <div className="flex items-center gap-2">
+                {!isPro && !isMaster && !isAdmin && (
+                  <FreeQuotaBadge used={profile?.total_searches ?? 0} />
+                )}
+                <Link
+                  to="/auth"
+                  className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground hover:brightness-110 active:scale-95 sm:h-9 sm:px-3 sm:text-xs"
+                >
+                  <LogIn className="h-4 w-4 sm:h-3.5 sm:w-3.5" /> Entrar
+                </Link>
+              </div>
             )}
           </div>
         </div>
       </nav>
+
 
       {/* FAB Master — acesso rápido no mobile para admins */}
       {isAdmin && (
@@ -863,12 +869,19 @@ function Home() {
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-neon-primary active:scale-95 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+            Buscar Leads
           </button>
         </div>
+
+        {/* Search History Quick Access */}
+        <SearchHistory 
+          items={typeof window !== "undefined" ? JSON.parse(localStorage.getItem('bm.history') || '[]').slice(0, 5) : []} 
+          onSelect={(q) => setQuery(q)}
+        />
+
 
         {/* AÇÕES RÁPIDAS */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
