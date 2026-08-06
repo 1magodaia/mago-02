@@ -92,6 +92,13 @@
   }
 }
 
+@layer utilities {
+  .bm-input-focus {
+    @apply focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary/40 transition-all duration-300;
+  }
+}
+
+
 @utility glass-panel {
   background: color-mix(in oklch, var(--background) 40%, transparent);
   backdrop-filter: blur(24px) saturate(160%);
