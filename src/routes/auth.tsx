@@ -138,42 +138,45 @@ function AuthPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-700">
-        <div className="glass-panel rounded-[24px] border-white/5 bg-white/[0.03] p-8 shadow-elevated backdrop-blur-2xl">
+        <div className="glass-panel rounded-[32px] border-white/10 bg-white/[0.04] p-10 shadow-elevated backdrop-blur-3xl relative overflow-hidden">
+          {/* Subtle Inner Glow */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-10">
             <Link to="/" className="group mb-8 block relative">
-              <div className="absolute inset-0 -m-4 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 -m-8 bg-primary/25 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <img 
                 src={logoAsset.url} 
                 alt="Mago Busca"
-                className="h-32 w-auto animate-float-magical relative z-10 select-none pointer-events-none transition-transform duration-500 group-hover:scale-105"
+                className="h-40 w-auto animate-float-magical relative z-10 select-none pointer-events-none transition-transform duration-700 group-hover:scale-110"
               />
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
+            <h1 className="text-3xl font-black tracking-tighter text-white mb-3 font-heading uppercase">
               {mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta Free" : "Recuperar Senha"}
             </h1>
-            <p className="text-sm text-muted-foreground/80 max-w-[300px] leading-relaxed">
-              Acesse sua conta para utilizar todos os recursos do Mago Busca.
+            <p className="text-sm text-muted-foreground/90 max-w-[320px] leading-relaxed">
+              Descubra o poder da prospecção mágica com o Mago Busca.
             </p>
           </div>
 
           <form onSubmit={handle} className="space-y-4">
             {mode === "signup" && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground ml-1">Nome Completo</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">Nome Completo</label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Seu nome"
-                  className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white outline-none border border-white/10 transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
                 />
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted-foreground ml-1">📧 E-mail</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">📧 E-mail</label>
               <input
                 type="email"
                 required
@@ -181,13 +184,13 @@ function AuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white outline-none border border-white/10 transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
               />
             </div>
 
             {mode !== "forgot" && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground ml-1">🔒 Senha</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 ml-1">🔒 Senha</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -196,7 +199,7 @@ function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-white outline-none border border-white/10 transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-2xl bg-white/[0.03] px-5 py-4 text-sm text-white outline-none border border-white/5 transition-all focus:border-primary/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-primary/10"
                   />
                   <button
                     type="button"
@@ -238,7 +241,7 @@ function AuthPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-white shadow-glow-primary transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50"
+              className="w-full rounded-2xl bg-primary py-4.5 text-base font-black tracking-widest text-white shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : (
                 mode === "login" ? "ENTRAR" : mode === "signup" ? "CRIAR CONTA FREE" : "ENVIAR LINK"
@@ -252,7 +255,7 @@ function AuthPage() {
               type="button"
               onClick={handleGoogle}
               disabled={googleLoading}
-              className="flex w-full items-center justify-center gap-3 rounded-xl bg-white py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all hover:bg-gray-50 active:scale-95 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-3 rounded-2xl bg-white py-4 text-sm font-bold text-gray-900 shadow-sm transition-all hover:bg-gray-50 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
             >
               {googleLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -294,12 +297,13 @@ function AuthPage() {
                 Enviar comprovante no WhatsApp
               </a>
             ) : (
-              <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-center">
-                <p className="text-[11px] font-bold text-white mb-1 flex items-center justify-center gap-1">
-                  <Star className="h-3 w-3 text-warn fill-warn" /> Já adquiriu o Mago Busca PRO?
+              <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-6 text-center shadow-inner relative overflow-hidden group">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <p className="text-xs font-black text-white mb-2 flex items-center justify-center gap-2 uppercase tracking-tight relative z-10">
+                  <Star className="h-3.5 w-3.5 text-warn fill-warn animate-pulse" /> Já adquiriu o Mago Busca PRO?
                 </p>
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  Faça login utilizando o mesmo e-mail usado na compra. Após entrar, envie seu comprovante pelo WhatsApp para ativar sua licença.
+                <p className="text-[11px] text-muted-foreground leading-relaxed relative z-10 font-medium">
+                  Faça login com o e-mail da compra. Após entrar, envie seu comprovante pelo WhatsApp para ativação instantânea.
                 </p>
               </div>
             )}
