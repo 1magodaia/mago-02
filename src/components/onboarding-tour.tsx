@@ -29,8 +29,9 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     position: "bottom"
   },
   {
-    targetId: "pro-upgrade-trigger",
+    targetId: "pro-upgrade-link",
     title: "Vire Pro",
+
     description: "Desbloqueie extração de e-mails, exportação CSV e muito mais.",
     position: "top"
   }
