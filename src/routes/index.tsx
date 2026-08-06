@@ -274,6 +274,8 @@ function Home() {
   const [citationsEnabled, setCitationsEnabled] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [supportWa, setSupportWa] = useState<string | null>(null);
+  const [unlockLink, setUnlockLink] = useState<string | null>(null);
+  const [showProWelcome, setShowProWelcome] = useState(false);
   const [supportUpdatedAt, setSupportUpdatedAt] = useState<string | null>(null);
   const _initHero = typeof window !== "undefined" ? readHeroCache() : null;
   const [heroImageUrl, setHeroImageUrl] = useState<string>(_initHero?.url ?? heroDefault.url);
