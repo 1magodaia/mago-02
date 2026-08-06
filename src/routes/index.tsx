@@ -26,6 +26,7 @@ import {
   Star,
   User as UserIcon,
   Zap,
+  Sparkles,
 } from "lucide-react";
 
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
