@@ -50,7 +50,7 @@ export function LogoIcon({ className = "h-12 w-12", animate = true }: LogoProps 
   return (
     <EnhancedLogoImg
       src={NEW_LOGO_URL}
-      alt="Busca Mágica"
+      alt="Busca Magica"
       className={className}
       animate={animate}
     />
@@ -69,7 +69,7 @@ export function LogoWordmark({
     return (
       <EnhancedLogoImg
         src={NEW_LOGO_URL}
-        alt="Busca Mágica"
+        alt="Busca Magica"
         className={className || "h-24 w-auto"}
       />
     );
@@ -80,7 +80,7 @@ export function LogoWordmark({
       <LogoIcon className="h-12 w-12 sm:h-14 sm:w-14" />
       <div className="flex items-baseline gap-1">
         <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">Busca</span>
-        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Mágica</span>
+        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-primary">Magica</span>
       </div>
     </div>
   );
