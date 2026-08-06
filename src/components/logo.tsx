@@ -37,6 +37,9 @@ function EnhancedLogoImg({
           "h-full w-full object-contain transition-all duration-1000 ease-out",
           isLoaded ? "blur-0 scale-100 opacity-100" : "blur-lg scale-90 opacity-0"
         )}
+        style={{
+          filter: isLoaded ? "drop-shadow(0 0 15px rgba(107, 70, 224, 0.4))" : "none"
+        }}
         draggable={false}
       />
     </div>

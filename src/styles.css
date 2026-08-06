@@ -79,6 +79,28 @@
   animation: var(--animate-slide-up-fade);
 }
 
+@utility magical-glow {
+  box-shadow: 0 0 20px 2px color-mix(in oklab, var(--primary) 30%, transparent);
+  transition: box-shadow 0.3s ease;
+  &:hover {
+    box-shadow: 0 0 30px 5px color-mix(in oklab, var(--primary) 50%, transparent);
+  }
+}
+
+@utility particle-bg {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, var(--primary) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
 @utility scrollbar-magical {
   &::-webkit-scrollbar {
     width: 6px;

@@ -1,7 +1,10 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { Play, Info } from "lucide-react";
 
 // Cache de URLs já carregadas com sucesso nesta sessão — evita flash e re-download.
 const LOADED_URLS = new Set<string>();
+
+const BRAND_VIDEO_URL = "https://juhfpndomqvdqxmasssi.supabase.co/storage/v1/object/sign/past/Anime_mago_globe_business_1080p_202608052205.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81OTJhNTMxZS05YzA2LTRkNDEtYjU1NC1iZDRkNjY3ZDZiYjEiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwYXN0L0FuaW1lX21hZ29fZ2xvYmVfYnVzaW5lc3NfMTA4MHBfMjAyNjA4MDUyMjA1Lm1wNCIsInNjb3BlIjoiZG93bmxvYWQiLCJpYXQiOjE3ODU5ODEwMzAsImV4cCI6MTc4NTk4NDYzMH0.fxtt-D291M9_Wc96lCIuzjmA0ogDpzHd34OKiGr1RqA";
 
 type Props = {
   url: string;
@@ -11,13 +14,13 @@ type Props = {
 };
 
 /**
- * Hero: exibe apenas a arte oficial (flyer) sem textos sobrepostos.
- * A arte já contém a identidade da marca; qualquer texto adicional
- * conflita com o próprio flyer e foi removido por pedido do usuário.
+ * Hero: exibe a arte oficial e um teaser de vídeo "Como funciona" (Mago IA).
  */
 function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
   const [error, setError] = useState(false);
   const [ready, setReady] = useState(() => !url || LOADED_URLS.has(url));
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setError(false);
@@ -83,6 +86,33 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
           <div className="h-full w-full bg-gradient-to-br from-primary/25 via-background to-accent/20" />
         )}
       </div>
+
+      {/* Video Teaser Overlay */}
+      {!showVideo ? (
+        <button 
+          onClick={() => setShowVideo(true)}
+          className="absolute bottom-4 right-4 z-[10] flex items-center gap-2 rounded-full bg-primary/90 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white shadow-glow-primary backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+        >
+          <Play className="h-3 w-3 fill-current" />
+          Como funciona
+        </button>
+      ) : (
+        <div className="absolute inset-0 z-[20] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-in fade-in zoom-in duration-300">
+          <button 
+            onClick={() => setShowVideo(false)}
+            className="absolute right-4 top-4 z-[30] rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+          >
+            <Info className="h-5 w-5 rotate-45" />
+          </button>
+          <video 
+            ref={videoRef}
+            src={BRAND_VIDEO_URL} 
+            autoPlay 
+            controls 
+            className="max-h-full max-w-full rounded-2xl shadow-2xl"
+          />
+        </div>
+      )}
     </section>
   );
 }

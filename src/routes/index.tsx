@@ -26,6 +26,7 @@ import {
   Star,
   User as UserIcon,
   Zap,
+  Sparkles,
 } from "lucide-react";
 
 import { searchPlaces, type PlaceResult } from "@/lib/places.functions";
@@ -50,6 +51,7 @@ import { SPORT_BY_ID } from "@/lib/sports-categories";
 import type { SportCategory } from "@/lib/sports-categories";
 import heroDefault from "@/assets/hero-banner.png.asset.json";
 import { HeroBanner } from "@/components/hero-banner";
+import { MembershipBadge } from "@/components/membership-badge";
 
 const HERO_CACHE_KEY = "bm.heroSettings.v1";
 type HeroCache = {
@@ -148,26 +150,56 @@ function FreeQuotaBlock({ supportWa, unlockLink, onClose }: { supportWa: string 
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-primary/15 ring-1 ring-primary/40">
           <Ban className="h-7 w-7 text-primary" />
         </div>
-        <h2 className="text-lg font-extrabold text-foreground">
+        <h2 className="text-xl font-black text-foreground">
           Seu acesso limitado expirou
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           {unlockLink 
-            ? "Desbloqueie agora para continuar prospectando comércios sem limites."
-            : "Ative sua conta pelo WhatsApp para liberar acesso completo e continuar prospectando."}
+            ? "O modo Free permite testar o app. Para prospecção profissional ilimitada, ative o Pro."
+            : "Ative sua conta pelo WhatsApp para liberar acesso completo e prospectar leads sem limites."}
         </p>
+
+        {/* Plan Comparison */}
+        <div className="mt-6 rounded-2xl bg-white/5 p-4 text-left ring-1 ring-border text-[11px]">
+          <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5">
+            <span className="font-bold text-muted-foreground uppercase">Benefícios</span>
+            <div className="flex gap-4 font-black">
+              <span className="text-muted-foreground">Free</span>
+              <span className="text-primary">Pro</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Buscas mensais</span>
+              <div className="flex gap-8"><span>1</span> <span className="font-bold">∞</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Exportação CSV</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Auditoria Completa (Scraping)</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+            <div className="flex justify-between">
+              <span>Histórico de buscas</span>
+              <div className="flex gap-8"><span>Não</span> <span className="font-bold">Sim</span></div>
+            </div>
+          </div>
+        </div>
+
         {actionHref ? (
           <a
             href={actionHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 text-sm font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
           >
-            {unlockLink ? <ShieldCheck className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
-            {unlockLink ? "Desbloquear meu acesso" : "Ativar no WhatsApp"}
+            {unlockLink ? <ShieldCheck className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+            {unlockLink ? "DESBLOQUEAR ACESSO PRO" : "ATUALIZAR VIA WHATSAPP"}
           </a>
         ) : (
-          <p className="mt-5 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
+          <p className="mt-6 rounded-xl bg-glass px-4 py-3 text-xs text-muted-foreground ring-1 ring-border">
             Link de ativação indisponível. Fale com o administrador.
           </p>
         )}
@@ -704,10 +736,24 @@ function Home() {
 
   // Enquanto a sessão carrega ou o redirect para /auth ocorre, não renderize
   // a home para evitar flash da tela de busca a usuários deslogados.
-  if (authLoading || !user) {
+  if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Carregando" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-6">
+          <LogoIcon className="h-16 w-16 magical-pulse" />
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sincronizando Magia...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <ProTeaser />
       </div>
     );
   }
@@ -725,21 +771,19 @@ function Home() {
             <LogoIcon className="h-10 w-10 sm:hidden" />
             <span className="hidden sm:block"><LogoWordmark /></span>
           </Link>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-4">
+            {user && (
+              <MembershipBadge 
+                showBenefits={() => setQuotaBlocked(true)} 
+                className="hidden md:flex" 
+              />
+            )}
             {user && (
               <Link
                 to="/leads"
                 className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
               >
                 <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> Meus leads
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                to="/novidades"
-                className="hidden h-9 items-center gap-1.5 rounded-full bg-glass px-3 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5 sm:inline-flex"
-              >
-                <GitBranch className="h-3.5 w-3.5 text-primary" /> Novidades
               </Link>
             )}
             {isAdmin && (
@@ -870,8 +914,9 @@ function Home() {
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-neon-primary hover:neon-primary active:scale-95 disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:brightness-110 hover:shadow-glow-primary active:scale-95 disabled:opacity-60 group relative overflow-hidden"
           >
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
             Buscar Leads
           </button>
@@ -1165,7 +1210,11 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock supportWa={supportWa} unlockLink={unlockLink} onClose={() => setQuotaBlocked(false)} />
+        <FreeQuotaBlock 
+          supportWa={supportWa} 
+          unlockLink={unlockLink} 
+          onClose={() => setQuotaBlocked(false)} 
+        />
       )}
       {showProWelcome && <ProWelcomeModal onClose={() => setShowProWelcome(false)} />}
     </div>
@@ -1262,22 +1311,42 @@ function LeadSkeleton() {
 
 function ProTeaser() {
   return (
-    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center ring-1 ring-primary/20">
-      <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10">
-        <Zap className="h-6 w-6 text-primary" />
+    <div className="group relative overflow-hidden rounded-3xl border border-primary/40 bg-primary/5 p-8 text-center ring-1 ring-primary/20 backdrop-blur-sm transition-all hover:border-primary/60 hover:bg-primary/10">
+      <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl transition-all group-hover:scale-110" />
+      
+      <div className="relative z-10">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-primary/15 text-primary shadow-glow-primary">
+          <Sparkles className="h-8 w-8 animate-pulse" />
+        </div>
+        
+        <h3 className="text-lg font-black uppercase tracking-[0.2em] text-primary">Libere o Poder Mágico</h3>
+        
+        <div className="mt-6 space-y-3 text-left">
+          {[
+            "Buscas ilimitadas em todo o Brasil",
+            "Extração de e-mails reais de sites",
+            "Auditoria avançada de presença digital",
+            "Exportação total para Excel/CSV",
+            "Histórico completo e filtros salvos"
+          ].map((text, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        <Link
+          to="/auth"
+          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 text-xs font-black uppercase tracking-[0.2em] text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] active:scale-95"
+        >
+          <Zap className="h-4 w-4 fill-current" />
+          QUERO SER PRO AGORA
+        </Link>
       </div>
-      <h3 className="text-sm font-black uppercase tracking-widest text-primary">Seja PRO</h3>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Auditoria completa, extração de e-mails, exportação CSV e buscas ilimitadas para escalar sua prospecção.
-      </p>
-      <Link
-        to="/auth"
-        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground transition hover:brightness-110"
-      >
-        Conhecer Planos
-      </Link>
     </div>
   );
 }
+
 
 

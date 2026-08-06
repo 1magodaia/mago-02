@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff, Sparkles, ShieldCheck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LogoWordmark } from "@/components/logo";
@@ -126,13 +126,18 @@ function AuthPage() {
   };
 
   return (
-    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10 scrollbar-magical bg-background">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10 scrollbar-magical bg-background lg:flex-row lg:gap-20">
       {/* Background Blobs with enhanced colors */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="float-slow absolute -top-24 -left-24 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
         <div className="float-slow absolute top-1/2 -right-24 h-96 w-96 -translate-y-1/2 rounded-full bg-warn/10 blur-[120px]" style={{ animationDelay: '-3s' }} />
         <div className="float-slow absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" style={{ animationDelay: '-5s' }} />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.pattern')] opacity-[0.03] mix-blend-overlay" />
+      </div>
+
+      {/* Left Column: Pro Teaser (Desktop only) */}
+      <div className="relative z-10 hidden w-full max-w-sm lg:block">
+        <ProTeaserAuth />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -303,6 +308,34 @@ function AuthPage() {
               </button>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProTeaserAuth() {
+  return (
+    <div className="group relative overflow-hidden rounded-3xl border border-primary/40 bg-primary/5 p-8 text-center ring-1 ring-primary/20 backdrop-blur-sm transition-all hover:border-primary/60 hover:bg-primary/10">
+      <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl transition-all group-hover:scale-110" />
+      <div className="relative z-10">
+        <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl bg-primary/15 text-primary shadow-glow-primary">
+          <Sparkles className="h-8 w-8 animate-pulse" />
+        </div>
+        <h3 className="text-lg font-black uppercase tracking-[0.2em] text-primary">Libere o Poder</h3>
+        <div className="mt-6 space-y-3 text-left">
+          {[
+            "Buscas ilimitadas em todo o Brasil",
+            "Extração de e-mails reais de sites",
+            "Auditoria avançada de presença digital",
+            "Exportação total para Excel/CSV",
+            "Histórico completo e filtros salvos"
+          ].map((text, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+              <span>{text}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

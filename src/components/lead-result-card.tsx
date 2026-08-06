@@ -15,7 +15,9 @@ import {
   Phone,
   RefreshCw,
   Search,
+  Sparkles,
   Star,
+  ShieldCheck,
   Zap,
 } from "lucide-react";
 import type { ScoredLead } from "@/lib/scoring";
@@ -342,6 +344,23 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
 
       {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
       {lead.audit && <EmailBlock email={lead.audit.email} />}
+      
+      {!lead.audit && (
+        <div className="group/pro relative overflow-hidden rounded-xl bg-glass p-3 ring-1 ring-border/50">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent blur-sm" />
+          <div className="relative z-10 flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary/80">
+                <ShieldCheck className="h-3 w-3" />
+                DADOS EXCLUSIVOS PRO
+              </div>
+              <div className="h-2 w-32 rounded bg-white/5 animate-pulse" />
+              <div className="h-2 w-24 rounded bg-white/5 animate-pulse" />
+            </div>
+            <Sparkles className="h-5 w-5 text-primary/20" />
+          </div>
+        </div>
+      )}
 
 
       {lead.audit && (
@@ -383,10 +402,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60 transition-all hover:scale-105"
           >
-            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-            {lead.audit ? "Reauditar" : "Auditar"}
+            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+            {lead.audit ? "Reescanear" : "Audit IA"}
           </button>
         )}
         {resolvedHref && (
@@ -395,10 +414,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             href={resolvedHref}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            onClick={(e) => {
+              // Abre instantâneo sem bloquear a thread UI
+            }}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 transition-all hover:scale-105 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
