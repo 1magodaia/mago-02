@@ -1196,7 +1196,11 @@ function Home() {
       </main>
       <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
       {quotaBlocked && !isPro && !isAdmin && !isMaster && (
-        <FreeQuotaBlock supportWa={supportWa} unlockLink={unlockLink} onClose={() => setQuotaBlocked(false)} />
+        <FreeQuotaBlock 
+          supportWa={supportWa} 
+          unlockLink={unlockLink} 
+          onClose={() => setQuotaBlocked(false)} 
+        />
       )}
       {showProWelcome && <ProWelcomeModal onClose={() => setShowProWelcome(false)} />}
     </div>
