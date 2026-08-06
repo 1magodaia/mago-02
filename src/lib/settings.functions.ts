@@ -121,18 +121,18 @@ export const updateAppSettings = createServerFn({ method: "POST" })
       ...(data.hero_height_mobile !== undefined ? { hero_height_mobile: data.hero_height_mobile } : {}),
       ...(data.hero_fit !== undefined ? { hero_fit: data.hero_fit } : {}),
       ...(data.logo_url !== undefined ? { logo_url: data.logo_url || null } : {}),
-    };
+    } as any;
 
     const { data: row, error } = await context.supabase
       .from("app_settings")
       .update(patch)
       .eq("id", 1)
       .select("support_whatsapp, support_message, citations_enabled, citations_daily_limit, hero_image_url, hero_height_desktop, hero_height_mobile, hero_fit, logo_url, updated_at")
-      .single();
+      .single() as any;
     if (error) throw new Error(error.message);
 
-    const newWa = row?.support_whatsapp ?? null;
-    const newMsg = row?.support_message ?? null;
+    const newWa = (row as any)?.support_whatsapp ?? null;
+    const newMsg = (row as any)?.support_message ?? null;
     const oldWa = prev?.support_whatsapp ?? null;
     const oldMsg = prev?.support_message ?? null;
     const waChanged = data.support_whatsapp !== undefined && newWa !== oldWa;
