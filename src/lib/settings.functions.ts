@@ -99,9 +99,10 @@ export const updateAppSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => inputSchema.parse(raw))
   .handler(async ({ data, context }): Promise<AppSettings> => {
+    const { data: isMaster } = await context.supabase.rpc("is_master", { _user_id: context.userId });
     const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
     const set = new Set((roles ?? []).map((r) => r.role as string));
-    if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
+    if (!set.has("admin") && !set.has("master") && !isMaster) throw new Error("Forbidden");
 
     const { data: prev } = await context.supabase
       .from("app_settings")
@@ -195,9 +196,10 @@ export interface WhatsappChangeLogPage {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function assertAdmin(supabase: any, userId: string) {
+  const { data: isMaster } = await supabase.rpc("is_master", { _user_id: userId });
   const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   const set = new Set(((roles ?? []) as { role: string }[]).map((r) => r.role));
-  if (!set.has("admin") && !set.has("master")) throw new Error("Forbidden");
+  if (!set.has("admin") && !set.has("master") && !isMaster) throw new Error("Forbidden");
 }
 
 
