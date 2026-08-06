@@ -176,6 +176,23 @@
   }
 }
 
+@utility content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 200px;
+}
+
+@utility focus-ring {
+  @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background transition-all;
+}
+
+@utility glass-card {
+  @apply rounded-3xl border border-white/10 bg-[#0A0B1F]/60 shadow-elevated backdrop-blur-3xl;
+}
+
+@utility glow-text {
+  text-shadow: 0 0 10px color-mix(in oklab, var(--primary) 40%, transparent);
+}
+
 :root {
   --radius: 0.9rem;
   /* Brand: extraído da logo Busca Mágica — Roxo real + Dourado + Fundo noite */
