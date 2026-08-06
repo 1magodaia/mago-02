@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LogoIcon } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
+import logoAsset from "@/assets/logo-mago.png.asset.json";
 
 const searchSchema = z.object({ redirect: z.string().optional() });
 
@@ -128,24 +129,31 @@ function AuthPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0A0B1F] px-4 py-8">
-      {/* Premium Background Blurs */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-primary/10 blur-[100px]" />
+      {/* Premium Background Blurs & Texture */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 animate-noise mix-blend-overlay" />
+        <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-primary/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0B1F]/50 to-[#0A0B1F]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-500">
-        <div className="glass-panel rounded-[24px] border-white/5 bg-white/5 p-8 shadow-elevated backdrop-blur-xl">
+      <div className="relative z-10 w-full max-w-[440px] animate-in fade-in zoom-in duration-700">
+        <div className="glass-panel rounded-[24px] border-white/5 bg-white/[0.03] p-8 shadow-elevated backdrop-blur-2xl">
           {/* Header */}
-          <div className="flex flex-col items-center text-center mb-8">
-            <Link to="/" className="mb-6 transition-transform hover:scale-105 active:scale-95">
-              <LogoIcon className="h-20 w-auto drop-shadow-[0_0_15px_rgba(107,70,224,0.3)]" />
+          <div className="flex flex-col items-center text-center mb-10">
+            <Link to="/" className="group mb-8 block relative">
+              <div className="absolute inset-0 -m-4 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <img 
+                src={logoAsset.url} 
+                alt="Mago Busca"
+                className="h-32 w-auto animate-float-magical relative z-10 select-none pointer-events-none transition-transform duration-500 group-hover:scale-105"
+              />
             </Link>
             <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
               {mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta Free" : "Recuperar Senha"}
             </h1>
-            <p className="text-sm text-muted-foreground max-w-[280px]">
-              Encontre arquivos, links e conteúdos em segundos com o poder da Busca Mágica.
+            <p className="text-sm text-muted-foreground/80 max-w-[300px] leading-relaxed">
+              Acesse sua conta para utilizar todos os recursos do Mago Busca.
             </p>
           </div>
 
