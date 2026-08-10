@@ -84,14 +84,14 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    title: "Busca Mágica — Encontre leads com inteligência e elegância",
+    title: "/skill:accessibility analisando o app, consegue gerar persona publico alvo pra essse produto?",
     meta: [
       {
         name: "description",
         content:
           "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
-      { property: "og:title", content: "Busca Mágica — Encontre leads com inteligência e elegância" },
+      { property: "og:title", content: "/skill:accessibility analisando o app, consegue gerar persona publico alvo pra essse produto?" },
       {
         property: "og:description",
         content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
