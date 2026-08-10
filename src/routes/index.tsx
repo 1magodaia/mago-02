@@ -31,6 +31,7 @@ import { getAppSettings } from "@/lib/settings.functions";
 import { reverseGeocode } from "@/lib/geocode.functions";
 import { autocompleteRegion, resolvePlace } from "@/lib/places-suggest.functions";
 import { SmartAutocomplete, type SuggestionItem } from "@/components/smart-autocomplete";
+import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
@@ -84,13 +85,13 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Busca Mágica — descreva como esta o app" },
+      { title: "Busca Mágica — Encontre leads com inteligência e elegância" },
       {
         name: "description",
         content:
           "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
-      { property: "og:title", content: "Busca Mágica — descreva como esta o app" },
+      { property: "og:title", content: "Busca Mágica — Encontre leads com inteligência e elegância" },
       {
         property: "og:description",
         content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
@@ -785,40 +786,46 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
-          <SmartAutocomplete
-            value={query}
-            onChange={setQuery}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Categoria (padaria, pet shop, advogado...)"
-            aria-label="Categoria de comércio"
-            staticList={CATEGORY_SUGGESTIONS}
-            minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
-          />
-          <SmartAutocomplete
-            value={region}
-            onChange={setRegion}
-            onSelect={onSelectRegion}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Cidade, bairro ou endereço"
-            aria-label="Região"
-            asyncSource={regionSource}
-            disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
-          />
+        <div className="glass-panel relative z-50 mt-6 flex flex-col gap-4 rounded-3xl p-4 md:flex-row md:items-center md:p-2 shadow-2xl ring-1 ring-white/10 transition-all duration-500 hover:shadow-glow-primary">
+          <div className="flex flex-[1.2] items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-primary/50 transition-all duration-300">
+            <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
+            <SmartAutocomplete
+              value={query}
+              onChange={setQuery}
+              onKeyDown={(e) => e.key === "Enter" && runSearch()}
+              placeholder="O que você busca? (ex: Academias, Padarias)"
+              aria-label="Categoria de comércio"
+              staticList={CATEGORY_SUGGESTIONS}
+              minChars={1}
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground"
+            />
+          </div>
 
+          <div className="h-8 w-px bg-white/10 hidden md:block" />
 
+          <div className="flex-[1.4]">
+            <SmartAutocomplete
+              value={region}
+              onChange={setRegion}
+              onSelect={onSelectRegion}
+              onKeyDown={(e) => e.key === "Enter" && runSearch()}
+              placeholder="Onde? (Cidade ou bairro)"
+              aria-label="Região"
+              asyncSource={regionSource}
+              disabled={usingGps}
+              wrapperClassName={`flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset transition-all duration-300 ${usingGps ? "opacity-50 ring-white/5" : "ring-white/10 focus-within:ring-2 focus-within:ring-primary/50"}`}
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+              leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+            />
+          </div>
 
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:scale-[1.02] hover:neon-primary active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            Buscar Leads
           </button>
         </div>
 
@@ -1017,30 +1024,31 @@ function Home() {
                 Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
               </div>
             )}
-            {filtered.map((lead) => {
-              const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
-              return (
-                <div key={lead.place_id} className="space-y-1">
-                  {sport && (
-                    <div className="flex">
-                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
-                        <span>{sport.emoji}</span>
-                        <span>{sport.label}</span>
-                      </span>
-                    </div>
-                  )}
-                  <LeadResultCard
-                    lead={lead}
-                    selected={selected === lead.place_id}
-                    onSelect={() => setSelected(lead.place_id)}
-                    onUpdate={updateOne}
-                    citationsAvailable={citationsAvailable}
-                    highlight={highlightTerms}
-                  />
-
-                </div>
-              );
-            })}
+            <BentoGrid className="grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-3 md:auto-rows-auto">
+              {filtered.map((lead) => {
+                const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+                return (
+                  <div key={lead.place_id} className="space-y-1">
+                    {sport && (
+                      <div className="flex">
+                        <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                          <span>{sport.emoji}</span>
+                          <span>{sport.label}</span>
+                        </span>
+                      </div>
+                    )}
+                    <LeadResultCard
+                      lead={lead}
+                      selected={selected === lead.place_id}
+                      onSelect={() => setSelected(lead.place_id)}
+                      onUpdate={updateOne}
+                      citationsAvailable={citationsAvailable}
+                      highlight={highlightTerms}
+                    />
+                  </div>
+                );
+              })}
+            </BentoGrid>
             {filtered.length > 0 && (
               <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
                 <Info className="h-3 w-3" aria-hidden />
