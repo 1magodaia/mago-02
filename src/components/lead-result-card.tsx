@@ -199,7 +199,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.02]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:bg-white/[0.02] ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.01]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
