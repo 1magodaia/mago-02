@@ -786,40 +786,46 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
-          <SmartAutocomplete
-            value={query}
-            onChange={setQuery}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Categoria (padaria, pet shop, advogado...)"
-            aria-label="Categoria de comércio"
-            staticList={CATEGORY_SUGGESTIONS}
-            minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
-          />
-          <SmartAutocomplete
-            value={region}
-            onChange={setRegion}
-            onSelect={onSelectRegion}
-            onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Cidade, bairro ou endereço"
-            aria-label="Região"
-            asyncSource={regionSource}
-            disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
-          />
+        <div className="glass-panel relative z-50 mt-6 flex flex-col gap-4 rounded-3xl p-4 md:flex-row md:items-center md:p-2 shadow-2xl ring-1 ring-white/10 transition-all duration-500 hover:shadow-glow-primary">
+          <div className="flex flex-[1.2] items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-primary/50 transition-all duration-300">
+            <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
+            <SmartAutocomplete
+              value={query}
+              onChange={setQuery}
+              onKeyDown={(e) => e.key === "Enter" && runSearch()}
+              placeholder="O que você busca? (ex: Academias, Padarias)"
+              aria-label="Categoria de comércio"
+              staticList={CATEGORY_SUGGESTIONS}
+              minChars={1}
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground"
+            />
+          </div>
 
+          <div className="h-8 w-px bg-white/10 hidden md:block" />
 
+          <div className="flex-[1.4]">
+            <SmartAutocomplete
+              value={region}
+              onChange={setRegion}
+              onSelect={onSelectRegion}
+              onKeyDown={(e) => e.key === "Enter" && runSearch()}
+              placeholder="Onde? (Cidade ou bairro)"
+              aria-label="Região"
+              asyncSource={regionSource}
+              disabled={usingGps}
+              wrapperClassName={`flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset transition-all duration-300 ${usingGps ? "opacity-50 ring-white/5" : "ring-white/10 focus-within:ring-2 focus-within:ring-primary/50"}`}
+              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+              leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+            />
+          </div>
 
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:scale-[1.02] hover:neon-primary active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            Buscar Leads
           </button>
         </div>
 
