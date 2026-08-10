@@ -90,7 +90,7 @@ export const Route = createFileRoute("/")({
         content:
           "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
-      { property: "og:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
+      { property: "og:title", content: "Busca Mágica — descreva como esta o app" },
       {
         property: "og:description",
         content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
