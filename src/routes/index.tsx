@@ -84,21 +84,21 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    title: "Busca Mágica — analise todo app",
+    title: "Busca Mágica — Análise e Prospecção Inteligente",
     meta: [
       {
         name: "description",
         content:
-          "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
+          "Busca Mágica: SaaS B2B para encontrar negócios com vulnerabilidades digitais. Auditoria de site, Google Places, score de oportunidade e exportação CSV.",
       },
-      { property: "og:title", content: "Busca Mágica — analise todo app" },
+      { property: "og:title", content: "Busca Mágica — Análise e Prospecção Inteligente" },
       {
         property: "og:description",
-        content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
+        content: "Identifique leads quentes com nossa auditoria automática e score de presença digital. Otimize sua prospecção hoje.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "keywords", content: "prospecção, b2b, leads, google places, auditoria digital, seo local" },
+      { name: "keywords", content: "prospecção B2B, leads qualificados, auditoria digital, busca geográfica, CRM vendas" },
     ],
     links: [
       { rel: "canonical", href: "https://buscamagica.lovable.app/" }
