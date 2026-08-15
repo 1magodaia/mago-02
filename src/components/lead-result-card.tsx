@@ -310,10 +310,33 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
+          <div className="group/score relative rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border hover:bg-white/5 transition-colors">
             <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
             <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+            
+            {/* Score Breakdown Tooltip */}
+            <div className="invisible absolute right-full top-0 mr-3 z-50 w-64 rounded-xl bg-popover p-3 opacity-0 shadow-2xl ring-1 ring-border transition-all group-hover/score:visible group-hover/score:opacity-100">
+              <div className="mb-2 border-b border-border pb-2">
+                <div className="text-xs font-bold text-foreground">Análise de Oportunidade</div>
+                <div className="text-[10px] text-muted-foreground">O que compõe este score? (Base 20)</div>
+              </div>
+              <ul className="space-y-1.5">
+                {lead.reasons.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                    <span>{r}</span>
+                  </li>
+                ))}
+                {lead.reasons.length === 0 && (
+                  <li className="text-[11px] text-muted-foreground">Presença digital saudável detectada.</li>
+                )}
+              </ul>
+              <div className="mt-3 rounded-lg bg-primary/10 p-2 text-[10px] font-medium text-primary ring-1 ring-primary/30">
+                Score alto indica vulnerabilidades digitais que você pode resolver.
+              </div>
+            </div>
           </div>
+
         </div>
       </header>
 
