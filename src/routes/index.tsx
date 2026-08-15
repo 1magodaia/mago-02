@@ -110,6 +110,14 @@ export const Route = createFileRoute("/")({
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
 
+interface AdvancedFilters {
+  noInstagram: boolean;
+  noWhatsapp: boolean;
+  noGmb: boolean; // interpret as no rating/reviews
+  noRecentReviews: boolean;
+}
+
+
 
 
 
