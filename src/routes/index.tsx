@@ -225,6 +225,13 @@ function Home() {
   const [minReviews, setMinReviews] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>("score");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [advFilters, setAdvFilters] = useState<AdvancedFilters>({
+    noInstagram: false,
+    noWhatsapp: false,
+    noGmb: false,
+    noRecentReviews: false,
+  });
+
   const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
 
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
