@@ -17,6 +17,7 @@ export interface ScoredLead extends PlaceResult {
  * Score de oportunidade. Mais alto = mais quente.
  * Base 20. Sem site: +40. Poucas avaliações (<10): +15. Sem rating: +10.
  * Se audit rodou: sem IG/FB detectado: +10. Sitemap parado >180d: +10.
+ * Novos pesos (v2.1): CNPJ Inativo/Baixado: -50 (lead frio).
  */
 export function scoreLead(place: PlaceResult, audit?: DigitalAudit): ScoredLead {
   let score = 20;
@@ -62,6 +63,13 @@ export function scoreLead(place: PlaceResult, audit?: DigitalAudit): ScoredLead 
     if (!audit.whatsapp_link) {
       score += 5;
       reasons.push("Sem WhatsApp detectado");
+    }
+    if (audit.cnpj_info) {
+      const situacao = audit.cnpj_info.situacao_cadastral?.toUpperCase();
+      if (situacao && situacao !== "ATIVA") {
+        score -= 50;
+        reasons.push(`CNPJ ${audit.cnpj_info.situacao_cadastral} (empresa possivelmente inativa)`);
+      }
     }
   }
 
