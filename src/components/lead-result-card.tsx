@@ -4,6 +4,7 @@ import {
   Bookmark,
   BookmarkCheck,
   CheckCircle2,
+  ChevronDown,
   Copy,
   ExternalLink,
   Flame,
@@ -18,6 +19,7 @@ import {
   Star,
   Zap,
 } from "lucide-react";
+
 import type { ScoredLead } from "@/lib/scoring";
 import { Highlight } from "@/lib/highlight";
 import { HelpTip } from "@/components/help-tip";
