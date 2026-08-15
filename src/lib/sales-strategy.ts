@@ -15,6 +15,17 @@ export function generateSalesStrategy(lead: ScoredLead): SalesStrategy {
   const isDown = lead.audit?.site_reachable === false;
   const noSocial = lead.audit && !lead.audit.instagram && !lead.audit.facebook;
   const staleReviews = lead.latest_review_at && (Date.now() - Date.parse(lead.latest_review_at)) / 86400000 > 180;
+  const isInactiveCnpj = lead.audit?.cnpj_info?.situacao_cadastral?.toUpperCase() && 
+                         lead.audit?.cnpj_info?.situacao_cadastral?.toUpperCase() !== "ATIVA";
+
+  // Prioridade 0: Lead Frio (CNPJ Inativo)
+  if (isInactiveCnpj) {
+    return {
+      action: "Baixa prioridade.",
+      argument: "O CNPJ desta empresa consta como inativo na Receita Federal. Verifique se o comércio ainda existe antes de abordar.",
+      followUp: "Descartar ou validar presencialmente."
+    };
+  }
 
   // Prioridade 1: Oportunidades Críticas (Sem site ou Site fora do ar)
   if (!hasSite || isDown) {

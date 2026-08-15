@@ -127,7 +127,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     if (!lead.website) return;
     setAuditing(true);
     try {
-      const audit = await auditWebsite({ data: { website: lead.website, phone: lead.phone ?? undefined } });
+      const audit = await auditWebsite({ 
+        data: { 
+          website: lead.website, 
+          phone: lead.phone ?? undefined,
+          place_id: lead.place_id 
+        } 
+      });
       onUpdate?.(scoreLead(lead, audit));
     } catch (err) {
       console.error(err);

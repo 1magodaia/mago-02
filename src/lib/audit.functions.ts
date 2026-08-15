@@ -4,6 +4,7 @@ import { z } from "zod";
 const auditSchema = z.object({
   website: z.string().url().max(500),
   phone: z.string().max(50).optional(),
+  place_id: z.string().optional(), // Novo: permite vincular auditoria ao lead correto
 });
 
 export interface CnpjInfo {
@@ -345,8 +346,43 @@ export const auditWebsite = createServerFn({ method: "POST" })
       }
     }
 
+    // Persistência em Banco (Lovable Cloud)
+    // Se temos CNPJ ou links novos, atualizamos a tabela leads.
+    // Usamos supabaseAdmin (importado dinamicamente no handler) para garantir gravação.
+    if (cnpjDigits || email || socials.instagram || socials.facebook || socials.whatsapp) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const query = supabaseAdmin.from("leads").update({
+          email: email || undefined,
+          instagram_handle: socials.instagram || undefined,
+          whatsapp: socials.whatsapp || undefined,
+          audit_data: { socials, email, cnpj: cnpjDigits, last_audit: now } as any
+        });
+        
+        if (data.place_id) {
+          await query.eq("id", data.place_id);
+        } else {
+          await query.eq("website", data.website);
+        }
+      } catch (e) {
+        console.error("Erro ao persistir auditoria:", e);
+      }
+    }
+
 
     const cnpj_info = cnpjDigits ? await fetchCnpjInfo(cnpjDigits) : null;
+
+    // Atualiza com dados ricos da Receita se disponíveis
+    if (cnpj_info) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const query = supabaseAdmin.from("leads").update({
+          audit_data: { socials, email, cnpj: cnpjDigits, cnpj_rich: cnpj_info, last_audit: now } as any
+        });
+        if (data.place_id) await query.eq("id", data.place_id);
+        else await query.eq("website", data.website);
+      } catch {}
+    }
 
     const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
     const whatsapp_link = socials.whatsapp ?? waFromPhone;
