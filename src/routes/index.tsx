@@ -110,6 +110,14 @@ export const Route = createFileRoute("/")({
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
 
+interface AdvancedFilters {
+  noInstagram: boolean;
+  noWhatsapp: boolean;
+  noGmb: boolean; // interpret as no rating/reviews
+  noRecentReviews: boolean;
+}
+
+
 
 
 
@@ -217,6 +225,13 @@ function Home() {
   const [minReviews, setMinReviews] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>("score");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [advFilters, setAdvFilters] = useState<AdvancedFilters>({
+    noInstagram: false,
+    noWhatsapp: false,
+    noGmb: false,
+    noRecentReviews: false,
+  });
+
   const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
 
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
@@ -551,10 +566,40 @@ function Home() {
     if (siteFilter === "with_site") list = list.filter((l) => !!l.website);
     if (minRating > 0) list = list.filter((l) => (l.rating ?? 0) >= minRating);
     if (minReviews > 0) list = list.filter((l) => (l.user_ratings_total ?? 0) >= minReviews);
+    
+    // Advanced Filters
+    if (advFilters.noInstagram) {
+      list = list.filter((l) => {
+        // Sem instagram: audit disse que não tem, ou campo website do google é site real (não IG) e não rodou audit ainda.
+        // Se o website for IG, ele TEM instagram.
+        const isIg = l.website && l.website.includes("instagram.com");
+        if (isIg) return false;
+        if (l.audit && l.audit.instagram) return false;
+        return true;
+      });
+    }
+    if (advFilters.noWhatsapp) {
+      list = list.filter((l) => {
+        if (l.audit && l.audit.whatsapp_link) return false;
+        return true;
+      });
+    }
+    if (advFilters.noGmb) {
+      list = list.filter((l) => (l.rating == null || (l.user_ratings_total ?? 0) < 5));
+    }
+    if (advFilters.noRecentReviews) {
+      list = list.filter((l) => {
+        if (!l.latest_review_at) return true;
+        const days = (Date.now() - Date.parse(l.latest_review_at)) / 86400000;
+        return days > 180;
+      });
+    }
+
     list = list.filter((l) => {
       if (l.lat == null || l.lng == null) return true;
       return haversineKm(center, { lat: l.lat, lng: l.lng }) <= radiusKm;
     });
+
     list.sort((a, b) => {
       if (sortBy === "score") return b.opportunity_score - a.opportunity_score;
       if (sortBy === "rating") return (b.rating ?? 0) - (a.rating ?? 0);
@@ -876,73 +921,115 @@ function Home() {
         {showAdvanced && (
           <div
             id="filtros-avancados"
-            className="glass-panel mt-3 flex flex-wrap items-center gap-2 rounded-2xl p-3"
+            className="glass-panel mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-4"
           >
-            <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-              Raio
-              <input
-                type="range"
-                min={1}
-                max={20}
-                value={radiusKm}
-                onChange={(e) => setRadiusKm(Number(e.target.value))}
-                className="w-24 accent-[color:var(--primary)]"
-                aria-label="Raio de busca em quilômetros"
-              />
-              <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
-            </label>
+            <div className="flex flex-wrap items-center gap-3 w-full border-b border-white/5 pb-3">
+              <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+                Raio
+                <input
+                  type="range"
+                  min={1}
+                  max={20}
+                  value={radiusKm}
+                  onChange={(e) => setRadiusKm(Number(e.target.value))}
+                  className="w-24 accent-[color:var(--primary)]"
+                  aria-label="Raio de busca em quilômetros"
+                />
+                <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
+              </label>
 
-            <select
-              value={siteFilter}
-              onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
-              aria-label="Filtro de site"
-              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
-            >
-              <option className="bg-background text-foreground" value="any">Site: qualquer</option>
-              <option className="bg-background text-foreground" value="no_site">Sem site</option>
-              <option className="bg-background text-foreground" value="with_site">Com site</option>
-            </select>
+              <select
+                value={siteFilter}
+                onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
+                aria-label="Filtro de site"
+                className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
+              >
+                <option className="bg-background text-foreground" value="any">Site: qualquer</option>
+                <option className="bg-background text-foreground" value="no_site">Sem site</option>
+                <option className="bg-background text-foreground" value="with_site">Com site</option>
+              </select>
 
-            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-              <Star className="h-3 w-3 text-warn" aria-hidden />
-              ≥
-              <input
-                type="number"
-                min={0}
-                max={5}
-                step={0.5}
-                value={minRating}
-                onChange={(e) => setMinRating(Number(e.target.value))}
-                aria-label="Nota mínima"
-                className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
-              />
-            </label>
+              <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+                <Star className="h-3 w-3 text-warn" aria-hidden />
+                ≥
+                <input
+                  type="number"
+                  min={0}
+                  max={5}
+                  step={0.5}
+                  value={minRating}
+                  onChange={(e) => setMinRating(Number(e.target.value))}
+                  aria-label="Nota mínima"
+                  className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
+                />
+              </label>
 
-            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-              Avaliações ≥
-              <input
-                type="number"
-                min={0}
-                step={5}
-                value={minReviews}
-                onChange={(e) => setMinReviews(Number(e.target.value))}
-                aria-label="Número mínimo de avaliações"
-                className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
-              />
-            </label>
+              <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+                Avaliações ≥
+                <input
+                  type="number"
+                  min={0}
+                  step={5}
+                  value={minReviews}
+                  onChange={(e) => setMinReviews(Number(e.target.value))}
+                  aria-label="Número mínimo de avaliações"
+                  className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
+                />
+              </label>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortKey)}
-              aria-label="Ordenação"
-              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
-            >
-              <option className="bg-background text-foreground" value="score">Ordenar: Oportunidade</option>
-              <option className="bg-background text-foreground" value="distance">Ordenar: Distância</option>
-              <option className="bg-background text-foreground" value="rating">Ordenar: Avaliação</option>
-              <option className="bg-background text-foreground" value="name">Ordenar: Nome</option>
-            </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortKey)}
+                aria-label="Ordenação"
+                className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
+              >
+                <option className="bg-background text-foreground" value="score">Ordenar: Oportunidade</option>
+                <option className="bg-background text-foreground" value="distance">Ordenar: Distância</option>
+                <option className="bg-background text-foreground" value="rating">Ordenar: Avaliação</option>
+                <option className="bg-background text-foreground" value="name">Ordenar: Nome</option>
+              </select>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 w-full pt-1">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={advFilters.noInstagram}
+                  onChange={(e) => setAdvFilters(f => ({ ...f, noInstagram: e.target.checked }))}
+                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
+                />
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Instagram</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={advFilters.noWhatsapp}
+                  onChange={(e) => setAdvFilters(f => ({ ...f, noWhatsapp: e.target.checked }))}
+                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
+                />
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem WhatsApp</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={advFilters.noGmb}
+                  onChange={(e) => setAdvFilters(f => ({ ...f, noGmb: e.target.checked }))}
+                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
+                />
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Perfil Completo (GMB)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={advFilters.noRecentReviews}
+                  onChange={(e) => setAdvFilters(f => ({ ...f, noRecentReviews: e.target.checked }))}
+                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
+                />
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Avaliações Recentes</span>
+              </label>
+            </div>
           </div>
+
         )}
 
         {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}

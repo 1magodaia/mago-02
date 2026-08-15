@@ -9,10 +9,19 @@ const auditSchema = z.object({
 export interface CnpjInfo {
   cnpj: string;                 // formatted XX.XXX.XXX/XXXX-XX
   razao_social: string | null;
+  nome_fantasia: string | null;
   data_abertura: string | null; // ISO date (YYYY-MM-DD)
   situacao_cadastral: string | null; // "Ativa"|"Baixada"|"Suspensa"|"Inapta"|...
+  cnae_principal_codigo: number | null;
+  cnae_principal_descricao: string | null;
+  capital_social: number | null;
+  qsa: Array<{
+    nome: string;
+    qualificacao: string;
+  }> | null;
   source: "site+brasilapi";
 }
+
 
 export interface DigitalAudit {
   site_reachable: boolean;
@@ -181,10 +190,19 @@ async function fetchCnpjInfo(digits: string): Promise<CnpjInfo | null> {
   return {
     cnpj: formatCnpj(digits),
     razao_social: data.razao_social ?? null,
+    nome_fantasia: data.nome_fantasia ?? null,
     data_abertura: data.data_inicio_atividade ?? null,
     situacao_cadastral: data.descricao_situacao_cadastral ?? null,
+    cnae_principal_codigo: data.cnae_fiscal ?? null,
+    cnae_principal_descricao: data.cnae_fiscal_descricao ?? null,
+    capital_social: data.capital_social ?? null,
+    qsa: data.qsa?.map((m: any) => ({
+      nome: m.nome_socio,
+      qualificacao: m.qualificacao_socio,
+    })) ?? null,
     source: "site+brasilapi",
   };
+
 }
 
 async function fetchSitemapLastMod(origin: string): Promise<string | null> {
