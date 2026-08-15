@@ -356,7 +356,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
           email: email || undefined,
           instagram_handle: socials.instagram || undefined,
           whatsapp: socials.whatsapp || undefined,
-          audit_data: { socials, email, cnpj: cnpjDigits, last_audit: now }
+          audit_data: { socials, email, cnpj: cnpjDigits, last_audit: now } as any
         });
         
         if (data.place_id) {
@@ -377,7 +377,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const query = supabaseAdmin.from("leads").update({
-          audit_data: { socials, email, cnpj: cnpjDigits, cnpj_rich: cnpj_info, last_audit: now }
+          audit_data: { socials, email, cnpj: cnpjDigits, cnpj_rich: cnpj_info, last_audit: now } as any
         });
         if (data.place_id) await query.eq("id", data.place_id);
         else await query.eq("website", data.website);
