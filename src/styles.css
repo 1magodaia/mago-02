@@ -5,8 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "DM Sans", "Space Grotesk", system-ui, sans-serif;
-  --font-heading: "Space Grotesk", sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Figtree", "Inter", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -46,32 +45,32 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Deep Space Blue Premium Palette */
-  --background: oklch(0.14 0.03 235);            /* #0F172A Deep Navy */
-  --foreground: oklch(0.98 0.01 235);           /* #F8FAFC Ghost White */
-  --card: oklch(0.18 0.04 235 / 0.9);           /* #1E293B Semi-transparent Navy */
-  --card-foreground: oklch(0.98 0.01 235);
-  --popover: oklch(0.16 0.03 235);
-  --popover-foreground: oklch(0.98 0.01 235);
-  --primary: oklch(0.6 0.18 260);               /* #7C3AED Modern Violet */
-  --primary-foreground: oklch(0.99 0.01 235);
-  --secondary: oklch(0.22 0.04 235);
-  --secondary-foreground: oklch(0.98 0.01 235);
-  --muted: oklch(0.25 0.03 235);
-  --muted-foreground: oklch(0.7 0.02 235);
-  --accent: oklch(0.6 0.18 260);
-  --accent-foreground: oklch(0.99 0.01 235);
-  --destructive: oklch(0.55 0.18 25);
+  --radius: 1rem;
+  /* Brand: Busca Mágica — Deep space violet with gold and neon accents */
+  --background: oklch(0.08 0.02 270);            /* #050512 deeper space */
+  --foreground: oklch(0.98 0.005 275);           /* crisp white */
+  --card: oklch(0.12 0.03 275 / 0.85);           /* translucent space card */
+  --card-foreground: oklch(0.98 0.005 275);
+  --popover: oklch(0.1 0.03 275);
+  --popover-foreground: oklch(0.98 0.005 275);
+  --primary: oklch(0.62 0.22 285);               /* #7C5CFF brighter magic purple */
+  --primary-foreground: oklch(0.99 0.005 275);
+  --secondary: oklch(0.18 0.04 280);
+  --secondary-foreground: oklch(0.98 0.005 275);
+  --muted: oklch(0.16 0.02 275);
+  --muted-foreground: oklch(0.65 0.02 275);
+  --accent: oklch(0.62 0.22 285);
+  --accent-foreground: oklch(0.99 0.005 275);
+  --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(1 0 0);
-  --emerald: oklch(0.75 0.15 160);              /* Calmer Neon Green */
-  --emerald-foreground: oklch(0.14 0.03 235);
-  --warn: oklch(0.8 0.12 85);                   /* Muted Premium Gold */
-  --warn-foreground: oklch(0.14 0.03 235);
-  --border: oklch(1 0 0 / 0.1);
-  --input: oklch(1 0 0 / 0.08);
-  --ring: oklch(0.6 0.18 260 / 0.4);
-  --glass: oklch(1 0 0 / 0.04);
+  --emerald: oklch(0.78 0.16 160);               /* vibrant neon green */
+  --emerald-foreground: oklch(0.1 0.02 275);
+  --warn: oklch(0.82 0.16 85);                   /* brighter magic gold */
+  --warn-foreground: oklch(0.1 0.02 275);
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(1 0 0 / 0.06);
+  --ring: oklch(0.62 0.22 285 / 0.5);
+  --glass: oklch(1 0 0 / 0.03);
 }
 
 @layer base {

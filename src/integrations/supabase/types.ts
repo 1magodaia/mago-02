@@ -196,7 +196,6 @@ export type Database = {
       leads: {
         Row: {
           address: string | null
-          audit_data: Json | null
           category: string | null
           city: string | null
           created_at: string
@@ -218,7 +217,6 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          audit_data?: Json | null
           category?: string | null
           city?: string | null
           created_at?: string
@@ -240,7 +238,6 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          audit_data?: Json | null
           category?: string | null
           city?: string | null
           created_at?: string

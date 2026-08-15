@@ -31,7 +31,6 @@ import { getAppSettings } from "@/lib/settings.functions";
 import { reverseGeocode } from "@/lib/geocode.functions";
 import { autocompleteRegion, resolvePlace } from "@/lib/places-suggest.functions";
 import { SmartAutocomplete, type SuggestionItem } from "@/components/smart-autocomplete";
-import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { CATEGORY_SUGGESTIONS } from "@/lib/autocomplete-categories";
 
 
@@ -84,21 +83,21 @@ const MapView = lazy(() => import("@/components/google-map-view"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    title: "Busca Mágica — Análise e Prospecção Inteligente",
     meta: [
+      { title: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
       {
         name: "description",
         content:
-          "Busca Mágica: SaaS B2B para encontrar negócios com vulnerabilidades digitais. Auditoria de site, Google Places, score de oportunidade e exportação CSV.",
+          "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
-      { property: "og:title", content: "Busca Mágica — Análise e Prospecção Inteligente" },
+      { property: "og:title", content: "Busca Mágica — Encontre comércios locais com presença digital fraca" },
       {
         property: "og:description",
-        content: "Identifique leads quentes com nossa auditoria automática e score de presença digital. Otimize sua prospecção hoje.",
+        content: "Descubra comércios próximos com pouca visibilidade online. Auditoria automática de site, Google Places, score de oportunidade e exportação CSV para prospecção.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "keywords", content: "prospecção B2B, leads qualificados, auditoria digital, busca geográfica, CRM vendas" },
+      { name: "keywords", content: "prospecção, b2b, leads, google places, auditoria digital, seo local" },
     ],
     links: [
       { rel: "canonical", href: "https://buscamagica.lovable.app/" }
@@ -109,14 +108,6 @@ export const Route = createFileRoute("/")({
 
 type SortKey = "score" | "distance" | "rating" | "name";
 type SiteFilter = "any" | "no_site" | "with_site";
-
-interface AdvancedFilters {
-  noInstagram: boolean;
-  noWhatsapp: boolean;
-  noGmb: boolean; // interpret as no rating/reviews
-  noRecentReviews: boolean;
-}
-
 
 
 
@@ -225,13 +216,6 @@ function Home() {
   const [minReviews, setMinReviews] = useState(0);
   const [sortBy, setSortBy] = useState<SortKey>("score");
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [advFilters, setAdvFilters] = useState<AdvancedFilters>({
-    noInstagram: false,
-    noWhatsapp: false,
-    noGmb: false,
-    noRecentReviews: false,
-  });
-
   const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
 
   const [rawResults, setRawResults] = useState<ScoredLead[]>([]);
@@ -566,40 +550,10 @@ function Home() {
     if (siteFilter === "with_site") list = list.filter((l) => !!l.website);
     if (minRating > 0) list = list.filter((l) => (l.rating ?? 0) >= minRating);
     if (minReviews > 0) list = list.filter((l) => (l.user_ratings_total ?? 0) >= minReviews);
-    
-    // Advanced Filters
-    if (advFilters.noInstagram) {
-      list = list.filter((l) => {
-        // Sem instagram: audit disse que não tem, ou campo website do google é site real (não IG) e não rodou audit ainda.
-        // Se o website for IG, ele TEM instagram.
-        const isIg = l.website && l.website.includes("instagram.com");
-        if (isIg) return false;
-        if (l.audit && l.audit.instagram) return false;
-        return true;
-      });
-    }
-    if (advFilters.noWhatsapp) {
-      list = list.filter((l) => {
-        if (l.audit && l.audit.whatsapp_link) return false;
-        return true;
-      });
-    }
-    if (advFilters.noGmb) {
-      list = list.filter((l) => (l.rating == null || (l.user_ratings_total ?? 0) < 5));
-    }
-    if (advFilters.noRecentReviews) {
-      list = list.filter((l) => {
-        if (!l.latest_review_at) return true;
-        const days = (Date.now() - Date.parse(l.latest_review_at)) / 86400000;
-        return days > 180;
-      });
-    }
-
     list = list.filter((l) => {
       if (l.lat == null || l.lng == null) return true;
       return haversineKm(center, { lat: l.lat, lng: l.lng }) <= radiusKm;
     });
-
     list.sort((a, b) => {
       if (sortBy === "score") return b.opportunity_score - a.opportunity_score;
       if (sortBy === "rating") return (b.rating ?? 0) - (a.rating ?? 0);
@@ -831,46 +785,40 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 flex flex-col gap-4 rounded-3xl p-4 md:flex-row md:items-center md:p-2 shadow-2xl ring-1 ring-white/10 transition-all duration-500 hover:shadow-glow-primary">
-          <div className="flex flex-[1.2] items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset ring-white/10 focus-within:ring-2 focus-within:ring-primary/50 transition-all duration-300">
-            <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
-            <SmartAutocomplete
-              value={query}
-              onChange={setQuery}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="O que você busca? (ex: Academias, Padarias)"
-              aria-label="Categoria de comércio"
-              staticList={CATEGORY_SUGGESTIONS}
-              minChars={1}
-              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
+          <SmartAutocomplete
+            value={query}
+            onChange={setQuery}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Categoria (padaria, pet shop, advogado...)"
+            aria-label="Categoria de comércio"
+            staticList={CATEGORY_SUGGESTIONS}
+            minChars={1}
+            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+          />
+          <SmartAutocomplete
+            value={region}
+            onChange={setRegion}
+            onSelect={onSelectRegion}
+            onKeyDown={(e) => e.key === "Enter" && runSearch()}
+            placeholder="Cidade, bairro ou endereço"
+            aria-label="Região"
+            asyncSource={regionSource}
+            disabled={usingGps}
+            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+          />
 
-          <div className="h-8 w-px bg-white/10 hidden md:block" />
 
-          <div className="flex-[1.4]">
-            <SmartAutocomplete
-              value={region}
-              onChange={setRegion}
-              onSelect={onSelectRegion}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Onde? (Cidade ou bairro)"
-              aria-label="Região"
-              asyncSource={regionSource}
-              disabled={usingGps}
-              wrapperClassName={`flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset transition-all duration-300 ${usingGps ? "opacity-50 ring-white/5" : "ring-white/10 focus-within:ring-2 focus-within:ring-primary/50"}`}
-              className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-              leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
-            />
-          </div>
 
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-primary px-8 text-sm font-bold text-primary-foreground transition-all hover:scale-[1.02] hover:neon-primary active:scale-[0.98] disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar Leads
+            Buscar
           </button>
         </div>
 
@@ -921,115 +869,73 @@ function Home() {
         {showAdvanced && (
           <div
             id="filtros-avancados"
-            className="glass-panel mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-4"
+            className="glass-panel mt-3 flex flex-wrap items-center gap-2 rounded-2xl p-3"
           >
-            <div className="flex flex-wrap items-center gap-3 w-full border-b border-white/5 pb-3">
-              <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-                Raio
-                <input
-                  type="range"
-                  min={1}
-                  max={20}
-                  value={radiusKm}
-                  onChange={(e) => setRadiusKm(Number(e.target.value))}
-                  className="w-24 accent-[color:var(--primary)]"
-                  aria-label="Raio de busca em quilômetros"
-                />
-                <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
-              </label>
+            <label className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              Raio
+              <input
+                type="range"
+                min={1}
+                max={20}
+                value={radiusKm}
+                onChange={(e) => setRadiusKm(Number(e.target.value))}
+                className="w-24 accent-[color:var(--primary)]"
+                aria-label="Raio de busca em quilômetros"
+              />
+              <span className="font-bold text-primary tabular-nums">{radiusKm}km</span>
+            </label>
 
-              <select
-                value={siteFilter}
-                onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
-                aria-label="Filtro de site"
-                className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
-              >
-                <option className="bg-background text-foreground" value="any">Site: qualquer</option>
-                <option className="bg-background text-foreground" value="no_site">Sem site</option>
-                <option className="bg-background text-foreground" value="with_site">Com site</option>
-              </select>
+            <select
+              value={siteFilter}
+              onChange={(e) => setSiteFilter(e.target.value as SiteFilter)}
+              aria-label="Filtro de site"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
+            >
+              <option className="bg-background text-foreground" value="any">Site: qualquer</option>
+              <option className="bg-background text-foreground" value="no_site">Sem site</option>
+              <option className="bg-background text-foreground" value="with_site">Com site</option>
+            </select>
 
-              <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-                <Star className="h-3 w-3 text-warn" aria-hidden />
-                ≥
-                <input
-                  type="number"
-                  min={0}
-                  max={5}
-                  step={0.5}
-                  value={minRating}
-                  onChange={(e) => setMinRating(Number(e.target.value))}
-                  aria-label="Nota mínima"
-                  className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
-                />
-              </label>
+            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              <Star className="h-3 w-3 text-warn" aria-hidden />
+              ≥
+              <input
+                type="number"
+                min={0}
+                max={5}
+                step={0.5}
+                value={minRating}
+                onChange={(e) => setMinRating(Number(e.target.value))}
+                aria-label="Nota mínima"
+                className="w-10 bg-transparent text-xs font-bold text-foreground outline-none"
+              />
+            </label>
 
-              <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
-                Avaliações ≥
-                <input
-                  type="number"
-                  min={0}
-                  step={5}
-                  value={minReviews}
-                  onChange={(e) => setMinReviews(Number(e.target.value))}
-                  aria-label="Número mínimo de avaliações"
-                  className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
-                />
-              </label>
+            <label className="flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
+              Avaliações ≥
+              <input
+                type="number"
+                min={0}
+                step={5}
+                value={minReviews}
+                onChange={(e) => setMinReviews(Number(e.target.value))}
+                aria-label="Número mínimo de avaliações"
+                className="w-12 bg-transparent text-xs font-bold text-foreground outline-none"
+              />
+            </label>
 
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortKey)}
-                aria-label="Ordenação"
-                className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
-              >
-                <option className="bg-background text-foreground" value="score">Ordenar: Oportunidade</option>
-                <option className="bg-background text-foreground" value="distance">Ordenar: Distância</option>
-                <option className="bg-background text-foreground" value="rating">Ordenar: Avaliação</option>
-                <option className="bg-background text-foreground" value="name">Ordenar: Nome</option>
-              </select>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4 w-full pt-1">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={advFilters.noInstagram}
-                  onChange={(e) => setAdvFilters(f => ({ ...f, noInstagram: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
-                />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Instagram</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={advFilters.noWhatsapp}
-                  onChange={(e) => setAdvFilters(f => ({ ...f, noWhatsapp: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
-                />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem WhatsApp</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={advFilters.noGmb}
-                  onChange={(e) => setAdvFilters(f => ({ ...f, noGmb: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
-                />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Perfil Completo (GMB)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={advFilters.noRecentReviews}
-                  onChange={(e) => setAdvFilters(f => ({ ...f, noRecentReviews: e.target.checked }))}
-                  className="h-4 w-4 rounded border-border bg-glass text-primary focus:ring-primary/50"
-                />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">Sem Avaliações Recentes</span>
-              </label>
-            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              aria-label="Ordenação"
+              className="rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border [color-scheme:dark]"
+            >
+              <option className="bg-background text-foreground" value="score">Ordenar: Oportunidade</option>
+              <option className="bg-background text-foreground" value="distance">Ordenar: Distância</option>
+              <option className="bg-background text-foreground" value="rating">Ordenar: Avaliação</option>
+              <option className="bg-background text-foreground" value="name">Ordenar: Nome</option>
+            </select>
           </div>
-
         )}
 
         {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}
@@ -1111,31 +1017,30 @@ function Home() {
                 Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
               </div>
             )}
-            <BentoGrid className="grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-3 md:auto-rows-auto">
-              {filtered.map((lead) => {
-                const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
-                return (
-                  <div key={lead.place_id} className="space-y-1">
-                    {sport && (
-                      <div className="flex">
-                        <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
-                          <span>{sport.emoji}</span>
-                          <span>{sport.label}</span>
-                        </span>
-                      </div>
-                    )}
-                    <LeadResultCard
-                      lead={lead}
-                      selected={selected === lead.place_id}
-                      onSelect={() => setSelected(lead.place_id)}
-                      onUpdate={updateOne}
-                      citationsAvailable={citationsAvailable}
-                      highlight={highlightTerms}
-                    />
-                  </div>
-                );
-              })}
-            </BentoGrid>
+            {filtered.map((lead) => {
+              const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
+              return (
+                <div key={lead.place_id} className="space-y-1">
+                  {sport && (
+                    <div className="flex">
+                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                        <span>{sport.emoji}</span>
+                        <span>{sport.label}</span>
+                      </span>
+                    </div>
+                  )}
+                  <LeadResultCard
+                    lead={lead}
+                    selected={selected === lead.place_id}
+                    onSelect={() => setSelected(lead.place_id)}
+                    onUpdate={updateOne}
+                    citationsAvailable={citationsAvailable}
+                    highlight={highlightTerms}
+                  />
+
+                </div>
+              );
+            })}
             {filtered.length > 0 && (
               <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
                 <Info className="h-3 w-3" aria-hidden />
