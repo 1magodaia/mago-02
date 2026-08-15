@@ -566,10 +566,40 @@ function Home() {
     if (siteFilter === "with_site") list = list.filter((l) => !!l.website);
     if (minRating > 0) list = list.filter((l) => (l.rating ?? 0) >= minRating);
     if (minReviews > 0) list = list.filter((l) => (l.user_ratings_total ?? 0) >= minReviews);
+    
+    // Advanced Filters
+    if (advFilters.noInstagram) {
+      list = list.filter((l) => {
+        // Sem instagram: audit disse que não tem, ou campo website do google é site real (não IG) e não rodou audit ainda.
+        // Se o website for IG, ele TEM instagram.
+        const isIg = l.website && l.website.includes("instagram.com");
+        if (isIg) return false;
+        if (l.audit && l.audit.instagram) return false;
+        return true;
+      });
+    }
+    if (advFilters.noWhatsapp) {
+      list = list.filter((l) => {
+        if (l.audit && l.audit.whatsapp_link) return false;
+        return true;
+      });
+    }
+    if (advFilters.noGmb) {
+      list = list.filter((l) => (l.rating == null || (l.user_ratings_total ?? 0) < 5));
+    }
+    if (advFilters.noRecentReviews) {
+      list = list.filter((l) => {
+        if (!l.latest_review_at) return true;
+        const days = (Date.now() - Date.parse(l.latest_review_at)) / 86400000;
+        return days > 180;
+      });
+    }
+
     list = list.filter((l) => {
       if (l.lat == null || l.lng == null) return true;
       return haversineKm(center, { lat: l.lat, lng: l.lng }) <= radiusKm;
     });
+
     list.sort((a, b) => {
       if (sortBy === "score") return b.opportunity_score - a.opportunity_score;
       if (sortBy === "rating") return (b.rating ?? 0) - (a.rating ?? 0);
