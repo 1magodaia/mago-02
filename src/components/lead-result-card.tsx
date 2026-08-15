@@ -351,6 +351,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         );
       })()}
       <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
+      <SalesStrategyBlock lead={lead} />
+
 
 
       {lead.reasons.length > 0 && (
@@ -622,7 +624,45 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
   );
 }
 
+import { generateSalesStrategy } from "@/lib/sales-strategy";
+
+function SalesStrategyBlock({ lead }: { lead: ScoredLead }) {
+  const [show, setShow] = useState(false);
+  const strategy = generateSalesStrategy(lead);
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+      <button
+        onClick={(e) => { e.stopPropagation(); setShow(!show); }}
+        className="flex w-full items-center justify-between text-[11px] font-bold text-primary"
+      >
+        <span className="flex items-center gap-1.5">
+          <Zap className="h-3 w-3" /> ESTRATÉGIA DE VENDA (IA)
+        </span>
+        <ChevronDown className={`h-3 w-3 transition-transform ${show ? "rotate-180" : ""}`} />
+      </button>
+      {show && (
+        <div className="mt-2 space-y-2 text-[11px] animate-in fade-in slide-in-from-top-1">
+          <div>
+            <span className="text-muted-foreground block font-semibold uppercase text-[9px]">Ação Imediata:</span>
+            <p className="text-foreground">{strategy.action}</p>
+          </div>
+          <div>
+            <span className="text-muted-foreground block font-semibold uppercase text-[9px]">Argumento de Venda:</span>
+            <p className="text-foreground italic">"{strategy.argument}"</p>
+          </div>
+          <div className="rounded bg-primary/10 p-1.5 ring-1 ring-primary/20">
+            <span className="text-primary block font-bold uppercase text-[9px]">Follow-up:</span>
+            <p className="text-primary/90">{strategy.followUp}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BusinessStatusBadge({ status }: { status: string | null }) {
+
   const helper = (
     <HelpTip
       title="Status do comércio"
@@ -702,24 +742,66 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
   const situacao = info.situacao_cadastral ?? "—";
   const isAtiva = situacao.toLowerCase().startsWith("ativa");
   return (
-    <div className="rounded-lg bg-glass px-2.5 py-2 ring-1 ring-border">
+    <div className="group/cnpj relative rounded-lg bg-glass px-2.5 py-2 ring-1 ring-border hover:bg-white/5 transition-colors">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
         <HelpTip
-          title="CNPJ / Razão social"
-          text="Dado oficial da Receita Federal, encontrado no site do comércio. Pode, em raros casos, pertencer à agência que fez o site em vez do comércio em si — vale conferir se tiver dúvida."
+          title="Dados Oficiais (Receita Federal)"
+          text="Informações extraídas via BrasilAPI a partir do CNPJ localizado no site. Inclui sócios e atividade principal."
         />
         <span className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ring-1 ${
           isAtiva ? "bg-emerald-500/10 text-emerald-300 ring-emerald-400/30" : "bg-red-500/15 text-red-300 ring-red-400/40"
         }`}>{situacao}</span>
       </div>
+
+      {/* CNPJ Deep Details Tooltip */}
+      <div className="invisible absolute left-0 top-full mt-2 z-50 w-72 rounded-xl bg-popover p-3 opacity-0 shadow-2xl ring-1 ring-border transition-all group-hover/cnpj:visible group-hover/cnpj:opacity-100">
+        <div className="mb-2 border-b border-border pb-2">
+          <div className="text-xs font-bold text-foreground">Ficha Cadastral Simplificada</div>
+          <div className="text-[10px] text-muted-foreground">Fonte: BrasilAPI (Dados Públicos)</div>
+        </div>
+        <div className="space-y-2 text-[11px]">
+          {info.nome_fantasia && (
+            <div>
+              <span className="text-muted-foreground">Nome Fantasia: </span>
+              <span className="text-foreground">{info.nome_fantasia}</span>
+            </div>
+          )}
+          {info.cnae_principal_descricao && (
+            <div>
+              <span className="text-muted-foreground">Atividade Principal: </span>
+              <span className="text-foreground">{info.cnae_principal_descricao}</span>
+            </div>
+          )}
+          {info.qsa && info.qsa.length > 0 && (
+            <div className="pt-1 border-t border-border mt-1">
+              <span className="text-muted-foreground block mb-1">Quadro Societário:</span>
+              <ul className="space-y-1">
+                {info.qsa.map((s, idx) => (
+                  <li key={idx} className="flex justify-between gap-2">
+                    <span className="text-foreground truncate">{s.nome}</span>
+                    <span className="text-[9px] text-muted-foreground shrink-0">{s.qualificacao}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {info.capital_social != null && (
+            <div className="pt-1 text-[10px] text-muted-foreground italic">
+              Capital Social: R$ {info.capital_social.toLocaleString('pt-BR')}
+            </div>
+          )}
+        </div>
+      </div>
+
       {info.data_abertura && (
-        <div className="mt-1 text-[10px] text-muted-foreground/80" title="Data de abertura da empresa na Receita Federal (via BrasilAPI). Refere-se à criação da pessoa jurídica e pode não coincidir com o tempo de operação neste endereço específico.">
-          Abertura: {new Date(info.data_abertura).toLocaleDateString("pt-BR")} · dado da empresa, não do endereço.
+        <div className="mt-1 text-[10px] text-muted-foreground/80" title="Data de abertura da empresa na Receita Federal.">
+          Abertura: {new Date(info.data_abertura).toLocaleDateString("pt-BR")}
         </div>
       )}
     </div>
+
   );
 }
 
