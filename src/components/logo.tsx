@@ -38,15 +38,16 @@ export function LogoIcon({ className = "h-12 w-12" }: LogoProps) {
 
   return (
     <div className={`relative group ${className}`}>
-      {/* Efeito de brilho pulsante atrás da logo */}
-      <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-pulse group-hover:bg-primary/50 transition-all duration-1000" />
+      {/* Efeito de brilho pulsante atrás da logo — roxo da marca */}
+      <div className="absolute inset-0 bg-brand/30 blur-2xl rounded-full animate-pulse group-hover:bg-brand/50 transition-all duration-1000" />
       <img
         src={finalLogoUrl || logoIcon.url}
         alt="Busca Mágica"
-        className="relative z-10 h-full w-full object-contain drop-shadow-[0_0_20px_rgba(124,92,255,0.4)] transition-all duration-700 group-hover:scale-105 group-hover:drop-shadow-[0_0_35px_rgba(124,92,255,0.6)]"
+        className="relative z-10 h-full w-full object-contain drop-shadow-[0_0_20px_rgba(124,92,255,0.45)] transition-all duration-700 group-hover:scale-105 group-hover:drop-shadow-[0_0_35px_rgba(124,92,255,0.65)]"
         draggable={false}
       />
     </div>
+
   );
 }
 
