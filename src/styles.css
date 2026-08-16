@@ -50,30 +50,33 @@
 
 :root {
   --radius: 1rem;
-  /* Brand: Busca Mágica — Deep space violet with gold and neon accents */
-  --background: oklch(0.08 0.02 270);            /* #050512 deeper space */
-  --foreground: oklch(0.98 0.005 275);           /* crisp white */
-  --card: oklch(0.12 0.03 275 / 0.85);           /* translucent space card */
-  --card-foreground: oklch(0.98 0.005 275);
-  --popover: oklch(0.1 0.03 275);
-  --popover-foreground: oklch(0.98 0.005 275);
-  --primary: oklch(0.62 0.22 285);               /* #7C5CFF brighter magic purple */
-  --primary-foreground: oklch(0.99 0.005 275);
-  --secondary: oklch(0.18 0.04 280);
-  --secondary-foreground: oklch(0.98 0.005 275);
-  --muted: oklch(0.16 0.02 275);
-  --muted-foreground: oklch(0.65 0.02 275);
-  --accent: oklch(0.62 0.22 285);
-  --accent-foreground: oklch(0.99 0.005 275);
+  /* Brand: Busca Mágica — Preto profundo, verde neon (ação), amarelo/ouro (destaque),
+     roxo mantido como cor da marca (logo, mago, banner). */
+  --background: oklch(0.06 0.008 260);           /* preto quase absoluto */
+  --foreground: oklch(0.98 0.004 260);
+  --card: oklch(0.13 0.012 260 / 0.85);
+  --card-foreground: oklch(0.98 0.004 260);
+  --popover: oklch(0.11 0.012 260);
+  --popover-foreground: oklch(0.98 0.004 260);
+  --primary: oklch(0.82 0.21 145);               /* verde neon — ações principais */
+  --primary-foreground: oklch(0.14 0.02 150);
+  --secondary: oklch(0.18 0.015 260);
+  --secondary-foreground: oklch(0.98 0.004 260);
+  --muted: oklch(0.16 0.01 260);
+  --muted-foreground: oklch(0.68 0.012 260);
+  --accent: oklch(0.86 0.17 92);                 /* amarelo/ouro — destaques */
+  --accent-foreground: oklch(0.14 0.02 90);
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(1 0 0);
-  --emerald: oklch(0.78 0.16 160);               /* vibrant neon green */
-  --emerald-foreground: oklch(0.1 0.02 275);
-  --warn: oklch(0.82 0.16 85);                   /* brighter magic gold */
-  --warn-foreground: oklch(0.1 0.02 275);
-  --border: oklch(1 0 0 / 0.08);
+  --emerald: oklch(0.82 0.21 145);
+  --emerald-foreground: oklch(0.14 0.02 150);
+  --warn: oklch(0.86 0.17 92);
+  --warn-foreground: oklch(0.14 0.02 90);
+  --brand: oklch(0.62 0.22 285);                 /* roxo da marca — logo/mago/banner */
+  --brand-foreground: oklch(0.99 0.005 275);
+  --border: oklch(1 0 0 / 0.09);
   --input: oklch(1 0 0 / 0.06);
-  --ring: oklch(0.62 0.22 285 / 0.5);
+  --ring: oklch(0.82 0.21 145 / 0.45);
   --glass: oklch(1 0 0 / 0.03);
 }
 
@@ -90,11 +93,13 @@
   body {
     min-height: 100vh;
     background-image:
-      radial-gradient(circle at 15% 0%, color-mix(in oklch, var(--primary) 10%, transparent), transparent 45%),
-      radial-gradient(circle at 90% 10%, color-mix(in oklch, var(--warn) 6%, transparent), transparent 40%);
+      radial-gradient(circle at 12% -5%, color-mix(in oklch, var(--brand) 14%, transparent), transparent 45%),
+      radial-gradient(circle at 88% 8%, color-mix(in oklch, var(--emerald) 7%, transparent), transparent 42%),
+      radial-gradient(circle at 50% 100%, color-mix(in oklch, var(--warn) 5%, transparent), transparent 45%);
     background-attachment: fixed;
   }
 }
+
 
 @layer utilities {
   .bm-input-focus {
