@@ -35,13 +35,17 @@
   --color-emerald-foreground: var(--emerald-foreground);
   --color-warn: var(--warn);
   --color-warn-foreground: var(--warn-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-glass: var(--glass);
   --shadow-glow-primary: 0 0 40px -8px color-mix(in oklch, var(--primary) 60%, transparent);
   --shadow-glow-emerald: 0 0 40px -8px color-mix(in oklch, var(--emerald) 60%, transparent);
   --shadow-glow-warn: 0 0 40px -10px color-mix(in oklch, var(--warn) 55%, transparent);
+  --shadow-glow-brand: 0 0 40px -8px color-mix(in oklch, var(--brand) 60%, transparent);
   --shadow-elevated: 0 20px 60px -20px oklch(0 0 0 / 0.7);
-  --shadow-logo: 0 0 30px 5px color-mix(in oklch, var(--primary) 40%, transparent);
+  --shadow-logo: 0 0 30px 5px color-mix(in oklch, var(--brand) 40%, transparent);
   --shadow-inner-glass: inset 0 0 0 1px oklch(1 0 0 / 0.05);
+
 }
 
 :root {
