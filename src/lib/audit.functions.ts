@@ -18,6 +18,8 @@ export interface DigitalAudit {
   site_reachable: boolean;
   site_status_code: number | null;
   site_secure: boolean; // HTTPS check
+  site_hsts: boolean;   // Strict-Transport-Security check
+  site_sitemap_public: boolean; // Sitemap.xml exposure check
   instagram: string | null;
   facebook: string | null;
   whatsapp_link: string | null;
@@ -235,11 +237,12 @@ async function fetchAndExtract(url: string): Promise<{
   html: string;
   status: number | null;
   reachable: boolean;
+  headers: Headers;
 }> {
   const res = await timedFetch(url);
-  if (!res) return { html: "", status: null, reachable: false };
+  if (!res) return { html: "", status: null, reachable: false, headers: new Headers() };
   const html = res.ok ? await readCapped(res) : "";
-  return { html, status: res.status, reachable: res.ok };
+  return { html, status: res.status, reachable: res.ok, headers: res.headers };
 }
 
 function extractSocialHandleFromUrl(u: URL): { instagram: string | null; facebook: string | null } {
@@ -276,6 +279,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         security_issues: ["URL inválida"],
+        site_secure: false, site_hsts: false, site_sitemap_public: false,
         audited_at: now, note: "URL inválida.",
       };
 
@@ -290,6 +294,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
       return {
         site_reachable: false, site_status_code: null, site_secure: url.protocol === "https:",
+        site_hsts: false, site_sitemap_public: false,
         instagram: directSocial.instagram,
         facebook: directSocial.facebook,
         whatsapp_link: waFromPhone,
@@ -362,14 +367,31 @@ export const auditWebsite = createServerFn({ method: "POST" })
     if (!cnpjDigits && pageRes.reachable) notes.push("CNPJ não encontrado no site");
 
     const security_issues: string[] = [];
+    let site_hsts = false;
+    let site_sitemap_public = false;
+
     if (pageRes.reachable) {
       if (url.protocol !== "https:") security_issues.push("Site não utiliza HTTPS (conexão insegura)");
+      
+      const hsts = pageRes.headers.get("strict-transport-security");
+      if (hsts) site_hsts = true;
+      else security_issues.push("Headers de segurança ausentes (HSTS)");
+
+      if (sitemapLastMod) {
+        site_sitemap_public = true;
+        // Se o sitemap é acessível mas o site é institucional, isso pode ser uma exposição se não for pretendido,
+        // mas aqui tratamos como um ponto de auditoria para saber se o site é atualizado.
+        // No contexto de "vulnerabilidade" do scanner Master, podemos reportar como exposição se desejado.
+        // security_issues.push("Exposição de diretório /sitemap.xml");
+      }
     }
 
     return {
       site_reachable: pageRes.reachable,
       site_status_code: pageRes.status,
       site_secure: url.protocol === "https:",
+      site_hsts,
+      site_sitemap_public,
       instagram: socials.instagram,
       facebook: socials.facebook,
       whatsapp_link,
