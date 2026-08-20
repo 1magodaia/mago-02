@@ -63,6 +63,10 @@ export function scoreLead(place: PlaceResult, audit?: DigitalAudit): ScoredLead 
       score += 5;
       reasons.push("Sem WhatsApp detectado");
     }
+    if (!audit.site_secure && audit.site_reachable) {
+      score += 15;
+      reasons.push("Conexão insegura (sem HTTPS)");
+    }
   }
 
   score = Math.max(0, Math.min(100, score));
@@ -94,6 +98,7 @@ export function classifyOpportunity(
   const fewReviews = (place.user_ratings_total ?? 0) < 10;
   const staleSite = audit && audit.approx_stale_days != null && audit.approx_stale_days > 180;
   const siteDown = hasSite && audit && audit.site_reachable === false;
+  const insecureSite = hasSite && audit && audit.site_secure === false;
 
   if (!hasSite && (!socialObserved || !socialFound)) {
     return {
@@ -117,6 +122,7 @@ export function classifyOpportunity(
   if (siteDown) gaps.push("colocar o site no ar novamente");
   if (staleSite) gaps.push("atualizar o site (parado há meses)");
   if (socialObserved && !socialFound) gaps.push("ativar Instagram/Facebook");
+  if (insecureSite) gaps.push("instalar certificado SSL (HTTPS)");
   if (staleReviews) gaps.push("reativar avaliações no Google");
   if (fewReviews) gaps.push("aumentar o volume de avaliações");
   const focus = gaps.length ? gaps.slice(0, 2).join(" e ") : "completar a presença digital";

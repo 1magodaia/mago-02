@@ -17,16 +17,18 @@ export interface CnpjInfo {
 export interface DigitalAudit {
   site_reachable: boolean;
   site_status_code: number | null;
+  site_secure: boolean; // HTTPS check
   instagram: string | null;
   facebook: string | null;
   whatsapp_link: string | null;
-  whatsapp_source: "site" | "phone" | null; // "site" = link real no HTML; "phone" = derivado do telefone (presumido)
+  whatsapp_source: "site" | "phone" | null;
   email: string | null;
   sitemap_lastmod: string | null;
   domain_registered_at: string | null;
   domain_expires_at: string | null;
   approx_stale_days: number | null;
   cnpj_info: CnpjInfo | null;
+  security_issues: string[]; // Detected vulnerabilities
   audited_at: string;
   note: string;
 }
@@ -266,13 +268,14 @@ export const auditWebsite = createServerFn({ method: "POST" })
       url = new URL(data.website);
     } catch {
       return {
-        site_reachable: false, site_status_code: null,
+        site_reachable: false, site_status_code: null, site_secure: false,
         instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
         whatsapp_source: normalizeWhatsAppFromPhone(data.phone) ? "phone" : null,
         email: null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
+        security_issues: ["URL inválida"],
         audited_at: now, note: "URL inválida.",
       };
 
@@ -286,7 +289,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
     if (directSocial.instagram || directSocial.facebook) {
       const waFromPhone = normalizeWhatsAppFromPhone(data.phone);
       return {
-        site_reachable: false, site_status_code: null,
+        site_reachable: false, site_status_code: null, site_secure: url.protocol === "https:",
         instagram: directSocial.instagram,
         facebook: directSocial.facebook,
         whatsapp_link: waFromPhone,
@@ -294,6 +297,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
         email: null,
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
+        security_issues: [],
         audited_at: now,
         note: `sem site próprio — perfil ${directSocial.instagram ? "Instagram" : "Facebook"} usado como site no Google`,
       };
@@ -357,9 +361,15 @@ export const auditWebsite = createServerFn({ method: "POST" })
     if (cnpjDigits && !cnpj_info) notes.push("CNPJ localizado no site, mas BrasilAPI não respondeu");
     if (!cnpjDigits && pageRes.reachable) notes.push("CNPJ não encontrado no site");
 
+    const security_issues: string[] = [];
+    if (pageRes.reachable) {
+      if (url.protocol !== "https:") security_issues.push("Site não utiliza HTTPS (conexão insegura)");
+    }
+
     return {
       site_reachable: pageRes.reachable,
       site_status_code: pageRes.status,
+      site_secure: url.protocol === "https:",
       instagram: socials.instagram,
       facebook: socials.facebook,
       whatsapp_link,
@@ -370,6 +380,7 @@ export const auditWebsite = createServerFn({ method: "POST" })
       domain_expires_at: rdap.expires,
       approx_stale_days,
       cnpj_info,
+      security_issues,
       audited_at: now,
       note: notes.length ? notes.join(" · ") : "dados obtidos com sucesso",
     };
