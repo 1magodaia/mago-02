@@ -785,7 +785,7 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
+        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary hover:border-primary/30">
           <SmartAutocomplete
             value={query}
             onChange={setQuery}
@@ -794,7 +794,8 @@ function Home() {
             aria-label="Categoria de comércio"
             staticList={CATEGORY_SUGGESTIONS}
             minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+            leading={<Filter className="h-5 w-5 text-primary/70" aria-hidden />}
+            wrapperClassName="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-4 ring-1 ring-border bm-input-focus group/input"
           />
           <SmartAutocomplete
             value={region}
@@ -805,20 +806,18 @@ function Home() {
             aria-label="Região"
             asyncSource={regionSource}
             disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+            wrapperClassName={`flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-4 ring-1 focus-within:ring-2 focus-within:ring-primary/70 group/input ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-base font-semibold outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-5 w-5 text-primary" aria-hidden />}
           />
-
-
 
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+            BUSCAR AGORA
           </button>
         </div>
 
