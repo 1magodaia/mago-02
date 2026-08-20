@@ -81,6 +81,7 @@ export const CATEGORY_SUGGESTIONS: string[] = [
   "Reforma e Construção",
   "Loja de Materiais de Construção",
   "Depósito de Construção",
+  "Depósito de Materiais de Construção",
   "Laje e Pré-moldados",
   "Loja de Móveis",
   "Loja de Decoração",
