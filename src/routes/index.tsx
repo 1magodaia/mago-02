@@ -108,7 +108,7 @@ function Home() {
     <div className="flex h-screen flex-col overflow-hidden bg-[#0B0F17]">
       {/* Header Fixo */}
       <header className="flex h-14 items-center justify-between border-b border-[#1E293B] px-4">
-        <LogoWordmark className="scale-75" />
+        <LogoWordmark className="scale-75 origin-left" />
         <div className="flex items-center gap-2">
           {isAdmin && <Link to="/master" className="text-xs font-bold text-[#8B5CF6]">Master</Link>}
           <button onClick={() => signOut()} className="text-xs text-red-400">Sair</button>
