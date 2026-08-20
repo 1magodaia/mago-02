@@ -204,8 +204,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} shadow-[0_0_8px_currentColor]`} />
               {meta.label}
             </span>
             {(() => {
@@ -284,7 +284,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <PriceLevelBadge level={lead.price_level ?? null} />
             <BusinessStatusBadge status={lead.business_status ?? null} />
           </div>
-          <h3 className="mt-1.5 truncate text-base font-bold text-foreground">
+          <h3 className="mt-2 truncate text-lg font-black tracking-tight text-foreground">
             <Highlight text={lead.name} terms={highlight ?? []} />
           </h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
