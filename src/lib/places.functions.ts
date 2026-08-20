@@ -221,21 +221,24 @@ export const searchPlaces = createServerFn({ method: "POST" })
         regionCode: "BR",
       };
 
-      // Validar lat/lng para evitar 400 se forem inválidos ou fora do alcance
-      if (
-        data.lat != null && 
-        data.lng != null && 
-        !isNaN(data.lat) && 
-        !isNaN(data.lng) &&
-        data.lat >= -90 && data.lat <= 90 &&
-        data.lng >= -180 && data.lng <= 180
-      ) {
-        body.locationBias = {
-          circle: {
-            center: { latitude: data.lat, longitude: data.lng },
-            radius: Math.min(data.radiusKm * 1000, 50000),
-          },
-        };
+      // Se houver regionText (ex: "Vespasiano, MG"), o Google searchText v1 prefere que NÃO enviemos locationBias 
+      // para evitar conflitos de "ambiguidade de localização" que geram erro 400.
+      if (!data.regionText || !data.regionText.trim()) {
+        if (
+          data.lat != null && 
+          data.lng != null && 
+          !isNaN(data.lat) && 
+          !isNaN(data.lng) &&
+          data.lat >= -90 && data.lat <= 90 &&
+          data.lng >= -180 && data.lng <= 180
+        ) {
+          body.locationBias = {
+            circle: {
+              center: { latitude: data.lat, longitude: data.lng },
+              radius: Math.min(data.radiusKm * 1000, 50000),
+            },
+          };
+        }
       }
       
       console.log("[places] DEBUG PAYLOAD:", JSON.stringify(body));
