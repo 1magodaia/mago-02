@@ -172,7 +172,8 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     } catch { /* ignore */ }
   };
 
-  const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, "") : "";
+  const phone = lead?.phone || null;
+  const cleanPhone = phone ? phone.replace(/\D/g, "") : "";
   const isMobile = cleanPhone.length >= 11; // 2 DDD + 9 dígitos
 
   const waLink = lead.audit?.whatsapp_link ?? (isMobile
@@ -188,9 +189,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   // Instagram, Facebook, ou vir embrulhada em redirecionador/tracking.
   // O módulo devolve o destino já normalizado (sem utm/redirects), o tipo
   // e a confiança (confirmed = URL direta; inferred = precisou desembrulhar).
-  const classified = classifyLink(lead.website);
+  const website = lead?.website || null;
+  const classified = classifyLink(website);
   const linkKind = classified.kind;
-  const resolvedHref = classified.url ?? lead.website ?? null;
+  const resolvedHref = classified.url ?? website ?? null;
   const linkInferred = classified.confidence === "inferred";
   const hasRealSite = linkKind === "site";
   // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
