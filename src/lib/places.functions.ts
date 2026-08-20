@@ -51,7 +51,6 @@ interface GPlace {
   location?: { latitude: number; longitude: number };
   internationalPhoneNumber?: string;
   nationalPhoneNumber?: string;
-  formattedPhoneNumber?: string;
   websiteUri?: string;
   rating?: number;
   userRatingCount?: number;
@@ -59,7 +58,7 @@ interface GPlace {
   types?: string[];
   googleMapsUri?: string;
   reviews?: GReview[];
-  priceLevel?: string; // "PRICE_LEVEL_FREE" | "_INEXPENSIVE" | "_MODERATE" | "_EXPENSIVE" | "_VERY_EXPENSIVE" | "_UNSPECIFIED"
+  priceLevel?: string;
 }
 
 function mapPriceLevel(v?: string): number | null {
@@ -119,7 +118,7 @@ function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
     address: p.formattedAddress ?? "",
     lat: p.location?.latitude ?? null,
     lng: p.location?.longitude ?? null,
-    phone: p.formattedPhoneNumber || p.internationalPhoneNumber || p.nationalPhoneNumber || null,
+    phone: p.nationalPhoneNumber || p.internationalPhoneNumber || null,
     website: p.websiteUri || null,
     rating: p.rating ?? 0,
     user_ratings_total: p.userRatingCount ?? 0,
@@ -138,15 +137,14 @@ const PLACE_FIELDS = [
   "displayName",
   "formattedAddress",
   "location",
-  "internationalPhoneNumber",
   "nationalPhoneNumber",
-  "formattedPhoneNumber",
+  "internationalPhoneNumber",
   "websiteUri",
   "rating",
   "userRatingCount",
+  "googleMapsUri",
   "businessStatus",
   "types",
-  "googleMapsUri",
   "reviews",
   "priceLevel",
 ];
