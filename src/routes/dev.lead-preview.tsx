@@ -24,7 +24,7 @@ function make(overrides: Partial<ScoredLead>): ScoredLead {
     business_status: "OPERATIONAL", types: [],
     google_maps_uri: null, latest_review_at: null, reviews: [],
     collected_at: new Date().toISOString(), price_level: null,
-    opportunity_score: 55, status: "warm", tier: "medium",
+    opportunity_score: 55, closing_probability: 60, status: "warm", tier: "medium",
     tier_suggestion: "Fixture", reasons: [],
     ...overrides,
   };

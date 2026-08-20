@@ -117,8 +117,17 @@ function Home() {
     setLoading(true);
     setSearchError(null);
     try {
-      const resp = await searchPlacesFn({ data: { query, regionText: usingGps ? undefined : region, lat: usingGps ? center.lat : undefined, lng: usingGps ? center.lng : undefined, radiusKm } });
-      console.log("[runSearch] API response:", resp);
+      const searchRegion = region?.trim() ? region : undefined;
+      const searchParams = { 
+        query, 
+        regionText: usingGps ? undefined : searchRegion, 
+        lat: center.lat, 
+        lng: center.lng, 
+        radiusKm 
+      };
+      console.log("[runSearch] Triggering search with params:", searchParams);
+      const resp = await searchPlacesFn({ data: searchParams });
+      console.log("[runSearch] API response received:", resp);
       
       if (resp.error) {
         setSearchError(resp.error);

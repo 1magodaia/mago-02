@@ -325,6 +325,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
             <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
             <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+            <div className="text-[9px] font-bold text-muted-foreground mt-0.5">{lead.closing_probability}% Prob.</div>
           </div>
         </div>
       </header>
@@ -357,6 +358,42 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       })()}
 
       <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
+
+      {waLink && (
+        <div className="rounded-xl border border-[#25D366]/20 bg-[#25D366]/5 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase text-[#25D366]">Scripts de Venda (IA)</span>
+            <HelpTip 
+              title="Scripts de Abordagem" 
+              text="Textos prontos baseados na análise do lead para facilitar seu contato inicial via WhatsApp."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const text = `Olá! Vi que o ${lead.name} ${lead.website ? 'já tem um site' : 'ainda não tem um site'} no Google e gostaria de conversar sobre como podemos aumentar seus clientes locais.`;
+                copy("wa", text);
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-glass px-2 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border hover:bg-white/5"
+            >
+              {copied === "wa" ? <CheckCircle2 className="h-3 w-3 text-[#25D366]" /> : <MessageCircle className="h-3 w-3 text-[#25D366]" />}
+              Script Pitch
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const text = `Bom dia! Sou especialista em presença digital e notei que o ${lead.name} tem uma ótima nota (${lead.rating}), mas poderíamos melhorar a captação. Podemos falar?`;
+                copy("wa", text);
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-glass px-2 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border hover:bg-white/5"
+            >
+              {copied === "wa" ? <CheckCircle2 className="h-3 w-3 text-[#25D366]" /> : <Zap className="h-3 w-3 text-[#25D366]" />}
+              Intro Rápida
+            </button>
+          </div>
+        </div>
+      )}
 
 
       {lead.reasons.length > 0 && (
@@ -693,7 +730,7 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
     return (
       <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum CNPJ localizado no site do comércio. Não estimamos esse valor a partir do nome.">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-        CNPJ: não localizado
+        CNPJ: não localizado (Dados Ocultos)
       </div>
     );
   }

@@ -209,12 +209,13 @@ export const searchPlaces = createServerFn({ method: "POST" })
       }
 
       const body: Record<string, unknown> = {
-        textQuery: data.regionText ? `${data.query} em ${data.regionText}` : data.query,
+        textQuery: data.regionText && data.regionText.trim() ? `${data.query} em ${data.regionText}` : data.query,
         pageSize: 20,
         languageCode: "pt-BR",
         regionCode: "BR",
       };
-      if (data.lat != null && data.lng != null) {
+
+      if (data.lat != null && data.lng != null && !isNaN(data.lat) && !isNaN(data.lng)) {
         body.locationBias = {
           circle: {
             center: { latitude: data.lat, longitude: data.lng },
@@ -222,6 +223,8 @@ export const searchPlaces = createServerFn({ method: "POST" })
           },
         };
       }
+      
+      console.log("[places] Sending payload to Google:", JSON.stringify(body, null, 2));
       const res = await callGateway("/places/v1/places:searchText", body, FIELD_MASK);
       if (res.status === 403) await handle403(res);
       if (!res.ok) {
