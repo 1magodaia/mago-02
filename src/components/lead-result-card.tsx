@@ -199,7 +199,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.02]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-5 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/50 hover:shadow-glow-primary hover:bg-white/[0.04] ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.02]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -310,9 +310,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
-            <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-2xl bg-primary/10 px-3 py-2 text-center ring-1 ring-primary/30 group-hover:bg-primary/20 transition-colors">
+            <div className="text-[10px] font-black uppercase tracking-widest text-primary/80">OPORT.</div>
+            <div className={`font-black text-3xl tabular-nums leading-none mt-0.5 ${meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
