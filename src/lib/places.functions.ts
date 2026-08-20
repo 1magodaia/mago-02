@@ -221,30 +221,33 @@ export const searchPlaces = createServerFn({ method: "POST" })
         regionCode: "BR",
       };
 
-      // Validar lat/lng para evitar 400 se forem inválidos ou fora do alcance
-      if (
-        data.lat != null && 
-        data.lng != null && 
-        !isNaN(data.lat) && 
-        !isNaN(data.lng) &&
-        data.lat >= -90 && data.lat <= 90 &&
-        data.lng >= -180 && data.lng <= 180
-      ) {
-        body.locationBias = {
-          circle: {
-            center: { latitude: data.lat, longitude: data.lng },
-            radius: Math.min(data.radiusKm * 1000, 50000),
-          },
-        };
+      // Se houver regionText (ex: "Vespasiano, MG"), o Google searchText v1 prefere que NÃO enviemos locationBias 
+      // para evitar conflitos de "ambiguidade de localização" que geram erro 400.
+      if (!data.regionText || !data.regionText.trim()) {
+        if (
+          data.lat != null && 
+          data.lng != null && 
+          !isNaN(data.lat) && 
+          !isNaN(data.lng) &&
+          data.lat >= -90 && data.lat <= 90 &&
+          data.lng >= -180 && data.lng <= 180
+        ) {
+          body.locationBias = {
+            circle: {
+              center: { latitude: Number(data.lat), longitude: Number(data.lng) },
+              radius: Math.min(Number(data.radiusKm) * 1000, 50000),
+            },
+          };
+        }
       }
       
-      console.log("[places] Sending payload to Google:", JSON.stringify(body, null, 2));
+      console.log("[places] DEBUG PAYLOAD:", JSON.stringify(body));
       const res = await callGateway("/places/v1/places:searchText", body, FIELD_MASK);
       if (res.status === 403) await handle403(res);
       if (!res.ok) {
         const text = await res.text();
         console.error(`[places] ${res.status} ${text}`);
-        return { results: [], error: `Google Places: ${res.status}` };
+        return { results: [], error: `Google Places API Error (${res.status}): ${text}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
       const collectedAt = new Date().toISOString();
