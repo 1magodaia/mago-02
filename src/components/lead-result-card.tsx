@@ -345,7 +345,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
 
 
       {lead.audit && (
-        <div className="grid grid-cols-3 gap-2 rounded-xl bg-glass p-2.5 ring-1 ring-border text-center">
+        <div className="grid grid-cols-3 gap-2 rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10 text-center">
           <div>
             <div className="text-[9px] uppercase text-muted-foreground">Site</div>
             <div className={`text-xs font-semibold ${lead.audit.site_reachable ? "text-primary" : "text-warn"}`}>
@@ -447,7 +447,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       </div>
 
       {citationsAvailable && (
-        <div className="rounded-xl bg-glass p-2.5 ring-1 ring-border">
+        <div className="rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
               <Search className="h-3 w-3 text-warn" /> Citações na web (IA)
@@ -583,8 +583,8 @@ const TIER_META = {
 function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low"; suggestion: string }) {
   const m = TIER_META[tier];
   return (
-    <div className={`flex items-start gap-2 rounded-xl px-3 py-2 ring-1 ${m.bg} ${m.ring}`}>
-      <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/20 shrink-0`}>
+    <div className={`flex items-start gap-3 rounded-xl px-3 py-2.5 bg-white/5 ring-1 ring-white/10`}>
+      <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/40 shrink-0`}>
         <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
         {m.label}
         <HelpTip
@@ -592,8 +592,9 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
           text="Verde = comércio sem presença digital, mais fácil de converter. Amarelo = tem algo, mas incompleto. Laranja = já tem bastante presença digital, oportunidade menor."
         />
       </span>
-      <p className={`text-[11px] leading-snug ${m.text}`}>
-        <span className="font-semibold">Sugestão:</span> {suggestion}
+      <p className={`text-[11px] leading-relaxed text-muted-foreground`}>
+        <span className={`font-bold uppercase tracking-tighter text-[9px] mr-1 ${m.text}`}>Sugestão:</span> 
+        {suggestion}
       </p>
     </div>
   );
@@ -679,7 +680,7 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
   const situacao = info.situacao_cadastral ?? "—";
   const isAtiva = situacao.toLowerCase().startsWith("ativa");
   return (
-    <div className="rounded-lg bg-glass px-2.5 py-2 ring-1 ring-border">
+    <div className="rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
