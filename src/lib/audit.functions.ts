@@ -271,7 +271,8 @@ export const auditWebsite = createServerFn({ method: "POST" })
       url = new URL(data.website);
     } catch {
       return {
-        site_reachable: false, site_status_code: null, site_secure: false,
+        site_reachable: false, site_status_code: null, 
+        site_secure: false, site_hsts: false, site_sitemap_public: false,
         instagram: null, facebook: null,
         whatsapp_link: normalizeWhatsAppFromPhone(data.phone),
         whatsapp_source: normalizeWhatsAppFromPhone(data.phone) ? "phone" : null,
@@ -279,7 +280,6 @@ export const auditWebsite = createServerFn({ method: "POST" })
         sitemap_lastmod: null, domain_registered_at: null, domain_expires_at: null,
         approx_stale_days: null, cnpj_info: null,
         security_issues: ["URL inválida"],
-        site_secure: false, site_hsts: false, site_sitemap_public: false,
         audited_at: now, note: "URL inválida.",
       };
 
