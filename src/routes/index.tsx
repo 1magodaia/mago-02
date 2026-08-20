@@ -137,7 +137,7 @@ function Home() {
         <div className="flex-1">
           <ClientOnly fallback={<div>Mapa carregando...</div>}>
             <Suspense fallback={<div>...</div>}>
-              <MapView center={center} leads={filtered} selectedId={selected} onSelect={setSelected} onMapClick={(c) => { setCenter(c); setPinned(true); }} />
+              <MapView center={center} radiusKm={radiusKm} leads={filtered} selectedId={selected} onSelect={setSelected} onMapClick={(c) => { setCenter(c); setPinned(true); }} />
             </Suspense>
           </ClientOnly>
         </div>
