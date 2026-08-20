@@ -199,13 +199,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.02]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-4 rounded-2xl p-5 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-primary/5 shadow-glow-primary scale-[1.01]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} shadow-[0_0_8px_currentColor]`} />
               {meta.label}
             </span>
             {(() => {
@@ -284,7 +284,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <PriceLevelBadge level={lead.price_level ?? null} />
             <BusinessStatusBadge status={lead.business_status ?? null} />
           </div>
-          <h3 className="mt-1.5 truncate text-base font-bold text-foreground">
+          <h3 className="mt-2 truncate text-lg font-black tracking-tight text-foreground">
             <Highlight text={lead.name} terms={highlight ?? []} />
           </h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -378,14 +378,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {hasRealSite && lead.website && (
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:shadow-primary/20 active:scale-95 disabled:opacity-60"
           >
-            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+            {auditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
             {lead.audit ? "Reauditar" : "Auditar"}
           </button>
         )}
@@ -398,7 +398,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-xs font-bold text-foreground ring-1 transition-all hover:bg-white/5 active:scale-95 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
@@ -406,11 +406,11 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             }
           >
             {linkKind === "instagram" ? (
-              <><Instagram className="h-3 w-3" /> Instagram</>
+              <><Instagram className="h-4 w-4" /> Instagram</>
             ) : linkKind === "facebook" ? (
-              <><Globe className="h-3 w-3" /> Facebook</>
+              <><Globe className="h-4 w-4" /> Facebook</>
             ) : (
-              <><Globe className="h-3 w-3" /> Site</>
+              <><Globe className="h-4 w-4" /> Site</>
             )}
             {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
@@ -419,13 +419,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-xs font-bold text-foreground ring-1 ring-border transition-all hover:bg-white/5 active:scale-95"
           >
-            <Phone className="h-3 w-3" /> Ligar
+            <Phone className="h-4 w-4" /> Ligar
           </a>
         )}
         {waLink && (
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <a
               href={waLink}
               target="_blank"
@@ -434,9 +434,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               title={waVerified
                 ? "Link de WhatsApp encontrado no site oficial"
                 : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+              className={`flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all active:scale-95 ${waVerified ? "bg-primary text-primary-foreground shadow-lg hover:shadow-primary/20" : "bg-primary/20 text-primary ring-1 ring-primary/40 hover:bg-primary/30"}`}
             >
-              <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
+              <MessageCircle className="h-4 w-4" /> {waVerified ? "Whats" : "Whats?"}
             </a>
             <HelpTip
               title={waVerified ? "WhatsApp confirmado" : "WhatsApp presumido"}

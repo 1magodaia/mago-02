@@ -8,6 +8,7 @@ import {
   Crosshair,
   Download,
   Filter,
+  Flame,
   GitBranch,
   Info,
   List,
@@ -669,11 +670,11 @@ function Home() {
 
       {/* NAV — sticky com safe-area; alvos de toque ≥44px no mobile */}
       <nav
-        className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+        className="sticky top-0 z-50 border-b border-border/40 bg-background/70 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/50"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3">
-          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0 transition-transform hover:scale-105 active:scale-95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <Link to="/" aria-label="Busca Mágica — início" className="shrink-0 transition-all duration-300 hover:scale-105 active:scale-95">
             <LogoWordmark />
           </Link>
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -697,9 +698,9 @@ function Home() {
               <Link
                 to="/master"
                 aria-label={isMaster ? "Abrir painel Master" : "Abrir painel Admin"}
-                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary/15 px-5 text-sm font-bold text-primary ring-1 ring-primary/40 hover:bg-primary/25 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
+                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary/10 px-5 text-sm font-bold text-primary ring-1 ring-primary/30 transition-all hover:bg-primary/20 hover:neon-primary active:scale-95 sm:min-w-0 sm:h-10 sm:px-4 sm:text-xs"
               >
-                <Shield className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
+                <Shield className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span>{isMaster ? "Master" : "Admin"}</span>
               </Link>
             )}
@@ -710,30 +711,30 @@ function Home() {
             ) : user ? (
               <div className="group relative">
                 <button
-                  className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-glass px-4 text-sm font-bold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-glass px-4 text-sm font-bold text-foreground ring-1 ring-border/60 transition-all hover:bg-white/10 hover:ring-primary/40 active:scale-95 sm:min-w-0 sm:h-10 sm:px-4 sm:text-xs"
                   aria-label="Menu da conta"
                 >
-                  <UserIcon className="h-5 w-5 text-primary sm:h-3.5 sm:w-3.5" />
+                  <UserIcon className="h-5 w-5 text-primary sm:h-4 sm:w-4" />
                   <span className="max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
                 </button>
-                <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
+                <div className="invisible absolute right-0 top-full z-20 mt-2 w-60 rounded-2xl bg-popover/95 backdrop-blur-xl p-2 opacity-0 shadow-2xl ring-1 ring-border/50 transition-all duration-300 group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
                   <div className="px-3 py-2 text-[11px] text-muted-foreground">{user.email}</div>
                   {searchUsage && (
                     <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
                   )}
-                  <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                  {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
+                  <Link to="/leads" className="flex h-11 items-center rounded-lg px-3 text-sm hover:bg-white/5 active:scale-95">Meus leads</Link>
+                  {isAdmin && <Link to="/novidades" className="flex h-11 items-center rounded-lg px-3 text-sm hover:bg-white/5 active:scale-95">Novidades</Link>}
                   <button
                     onClick={() => { resetTutorial(); setTutorialOpen(true); }}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                    className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm hover:bg-white/5 active:scale-95"
                   >
                     Ver tutorial novamente
                   </button>
                   <button
                     onClick={() => signOut().then(() => nav({ to: "/" }))}
-                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+                    className="mt-1 flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-destructive hover:bg-destructive/10 active:scale-95"
                   >
-                    <LogOut className="h-3.5 w-3.5" /> Sair
+                    <LogOut className="h-4 w-4" /> Sair
                   </button>
                 </div>
               </div>
@@ -785,16 +786,16 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
+        <div className="glass-panel relative z-50 mt-8 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1fr_1.2fr_auto] transition-all duration-500 hover:shadow-glow-primary hover:border-primary/30">
           <SmartAutocomplete
             value={query}
             onChange={setQuery}
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
-            placeholder="Categoria (padaria, pet shop, advogado...)"
+            placeholder="O que você busca? (ex: Padaria, Pet Shop...)"
             aria-label="Categoria de comércio"
             staticList={CATEGORY_SUGGESTIONS}
             minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+            leading={<Filter className="h-4 w-4 text-primary/70" aria-hidden />}
           />
           <SmartAutocomplete
             value={region}
@@ -823,18 +824,18 @@ function Home() {
         </div>
 
         {/* AÇÕES RÁPIDAS */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             onClick={useGps}
             disabled={locating}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
+            className={`flex h-10 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300 disabled:opacity-60 ${
               usingGps && !pinned
-                ? "border-primary bg-primary/15 text-primary"
-                : "border-primary/60 text-primary hover:bg-primary/10"
+                ? "border-primary bg-primary/20 text-primary neon-primary"
+                : "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60"
             }`}
           >
-            <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
-            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ativo" : "Usar minha localização"}
+            <Crosshair className={`h-4 w-4 ${locating ? "animate-spin" : ""}`} />
+            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ATIVO" : "USAR MINHA LOCALIZAÇÃO"}
           </button>
           {usingGps && pinned && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
@@ -858,10 +859,10 @@ function Home() {
             onClick={() => setShowAdvanced((s) => !s)}
             aria-expanded={showAdvanced}
             aria-controls="filtros-avancados"
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="ml-auto flex h-10 items-center gap-2 rounded-full bg-glass px-4 py-2 text-xs font-bold text-foreground ring-1 ring-border/60 transition-all hover:bg-white/10 hover:ring-primary/40"
           >
-            <Filter className="h-3.5 w-3.5" /> Filtros avançados
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+            <Filter className="h-4 w-4" /> FILTROS AVANÇADOS
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showAdvanced ? "rotate-180" : ""}`} />
           </button>
         </div>
 
@@ -940,15 +941,16 @@ function Home() {
 
         {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}
         {(rawResults.length > 0 || loading) && (
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-extrabold tabular-nums text-foreground">{filtered.length}</span>
-              <span className="text-muted-foreground">leads</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary ring-2 ring-primary/30" />
-              <span className="font-bold text-primary">{hotCount}</span>
-              <span className="text-muted-foreground">quentes</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/40 pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black tabular-nums text-foreground">{filtered.length}</span>
+                <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Oportunidades</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 ring-1 ring-primary/30">
+                <Flame className="h-4 w-4 animate-pulse text-primary" />
+                <span className="text-xs font-black text-primary">{hotCount} QUENTES</span>
+              </div>
             </div>
             {remaining != null && !isPro && (
               <span className="text-muted-foreground">· {remaining} busca(s) restantes no mês</span>
@@ -957,10 +959,10 @@ function Home() {
               onClick={doExport}
               disabled={filtered.length === 0}
               title={!isPro ? "Exportação CSV é do plano Pro" : "Baixar todos os leads filtrados em CSV"}
-              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-elevated hover:brightness-110 disabled:opacity-40"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-black text-primary-foreground shadow-elevated transition-all hover:brightness-110 hover:neon-primary active:scale-95 disabled:opacity-40"
             >
-              <Download className="h-3.5 w-3.5" /> Baixar lista (CSV)
-              {!isPro && <span className="ml-1 rounded-full bg-warn/25 px-1.5 py-0.5 text-[9px] text-warn">Pro</span>}
+              <Download className="h-4 w-4" /> EXPORTAR CSV
+              {!isPro && <span className="ml-2 rounded-full bg-black/20 px-2 py-0.5 text-[10px] uppercase">Pro</span>}
             </button>
           </div>
         )}
@@ -1001,29 +1003,35 @@ function Home() {
         }`}
       >
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
-        {rawResults.length > 0 && (
+        {rawResults.length > 0 ? (
           <section
-            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
+            className={`space-y-4 ${mobileTab === 'list' ? 'block' : 'hidden'} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent`}
             aria-label="Resultados"
           >
             {loading && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-                <p className="mt-2">Consultando Google Places...</p>
+              <div className='glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground'>
+                <Loader2 className='mx-auto h-5 w-5 animate-spin text-primary' />
+                <p className='mt-2'>Consultando Google Places...</p>
               </div>
             )}
             {!loading && filtered.length === 0 && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              <div className='glass-panel flex flex-col items-center justify-center rounded-2xl py-20 text-center animate-in fade-in duration-500'>
+                <div className='mb-6 grid h-20 w-20 place-items-center rounded-full bg-warn/10 ring-1 ring-warn/30'>
+                  <AlertCircle className='h-10 w-10 text-warn/60' />
+                </div>
+                <h3 className='text-2xl font-black text-foreground'>Nenhum lead encontrado</h3>
+                <p className='mt-3 max-w-sm px-6 text-base text-muted-foreground'>
+                  Tente expandir o raio de busca ou utilizar termos mais genéricos para encontrar mais comércios.
+                </p>
               </div>
             )}
             {filtered.map((lead) => {
               const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
               return (
-                <div key={lead.place_id} className="space-y-1">
+                <div key={lead.place_id} className='space-y-1'>
                   {sport && (
-                    <div className="flex">
-                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                    <div className='flex'>
+                      <span className='inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary'>
                         <span>{sport.emoji}</span>
                         <span>{sport.label}</span>
                       </span>
@@ -1042,14 +1050,24 @@ function Home() {
               );
             })}
             {filtered.length > 0 && (
-              <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
-                <Info className="h-3 w-3" aria-hidden />
-                <span title="Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos '—'. 'Atividade' é uma estimativa baseada na última modificação do sitemap.xml.">
+              <p className='flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground'>
+                <Info className='h-3 w-3' aria-hidden />
+                <span title='Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos "—". "Atividade" é uma estimativa baseada na última modificação do sitemap.xml.'>
                   Sobre a auditoria (passe o mouse)
                 </span>
               </p>
             )}
           </section>
+        ) : (
+          <div className='flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-8 duration-700'>
+            <div className='mb-6 grid h-20 w-20 place-items-center rounded-full bg-primary/10 ring-1 ring-primary/30'>
+              <Search className='h-10 w-10 text-primary/60' />
+            </div>
+            <h3 className='text-2xl font-black text-foreground'>Explore o Mercado</h3>
+            <p className='mt-3 max-w-sm text-base text-muted-foreground'>
+              Digite uma categoria e localização acima para começar a minerar oportunidades quentes.
+            </p>
+          </div>
         )}
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
