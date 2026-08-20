@@ -172,11 +172,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     } catch { /* ignore */ }
   };
 
-  const waLink = lead.audit?.whatsapp_link ?? (lead.phone
-    ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
+  const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, "") : "";
+  const isMobile = cleanPhone.length >= 11; // 2 DDD + 9 dígitos
+
+  const waLink = lead.audit?.whatsapp_link ?? (isMobile
+    ? `https://wa.me/${cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`}`
     : null);
-  // Fonte do WhatsApp: "site" = link real encontrado no HTML; "phone" = derivado do telefone (presunção).
-  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
+
+  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink ? "phone" : null);
   const waVerified = waSource === "site";
 
   const collectedAgo = relTime(lead.collected_at);
@@ -220,9 +223,16 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                   : null;
               const badges: ReactElement[] = [];
               if (realSite) {
+                const displayUrl = realSite.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
                 badges.push(
-                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
-                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
+                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title={`Site próprio: ${realSite}`}>
+                    <CheckCircle2 className="h-2.5 w-2.5" /> {displayUrl}
+                  </span>
+                );
+              } else if (!social) {
+                badges.push(
+                  <span key="no-site" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40">
+                    <Flame className="h-2.5 w-2.5" /> Sem Site Cadastrado
                   </span>
                 );
               }

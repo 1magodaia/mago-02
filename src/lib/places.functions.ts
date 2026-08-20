@@ -51,6 +51,7 @@ interface GPlace {
   location?: { latitude: number; longitude: number };
   internationalPhoneNumber?: string;
   nationalPhoneNumber?: string;
+  formattedPhoneNumber?: string;
   websiteUri?: string;
   rating?: number;
   userRatingCount?: number;
@@ -118,7 +119,7 @@ function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
     address: p.formattedAddress ?? "",
     lat: p.location?.latitude ?? null,
     lng: p.location?.longitude ?? null,
-    phone: p.internationalPhoneNumber ?? p.nationalPhoneNumber ?? null,
+    phone: p.formattedPhoneNumber ?? p.internationalPhoneNumber ?? p.nationalPhoneNumber ?? null,
     website: p.websiteUri ?? null,
     rating: p.rating ?? null,
     user_ratings_total: p.userRatingCount ?? null,
@@ -139,6 +140,7 @@ const PLACE_FIELDS = [
   "location",
   "internationalPhoneNumber",
   "nationalPhoneNumber",
+  "formattedPhoneNumber",
   "websiteUri",
   "rating",
   "userRatingCount",
