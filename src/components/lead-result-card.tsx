@@ -378,12 +378,12 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2">
         {hasRealSite && lead.website && (
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:shadow-primary/20 active:scale-95 disabled:opacity-60"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:shadow-primary/20 active:scale-95 disabled:opacity-60"
           >
             {auditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
             {lead.audit ? "Reauditar" : "Auditar"}
@@ -398,12 +398,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-xs font-bold text-foreground ring-1 transition-all hover:bg-white/5 active:scale-95 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
-            title={
-              linkInferred
-                ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
-                : linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"
-            }
+            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 transition-all hover:bg-white/5 active:scale-95 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
           >
             {linkKind === "instagram" ? (
               <><Instagram className="h-4 w-4" /> Instagram</>
@@ -419,30 +414,21 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-xs font-bold text-foreground ring-1 ring-border transition-all hover:bg-white/5 active:scale-95"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border transition-all hover:bg-white/5 active:scale-95"
           >
             <Phone className="h-4 w-4" /> Ligar
           </a>
         )}
         {waLink && (
-          <div className="flex items-center gap-1">
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              title={waVerified
-                ? "Link de WhatsApp encontrado no site oficial"
-                : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-              className={`flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all active:scale-95 ${waVerified ? "bg-primary text-primary-foreground shadow-lg hover:shadow-primary/20" : "bg-primary/20 text-primary ring-1 ring-primary/40 hover:bg-primary/30"}`}
-            >
-              <MessageCircle className="h-4 w-4" /> {waVerified ? "Whats" : "Whats?"}
-            </a>
-            <HelpTip
-              title={waVerified ? "WhatsApp confirmado" : "WhatsApp presumido"}
-              text="Quando vem do site do comércio, já testamos que é um link de WhatsApp real. Quando vem só do telefone, é uma suposição — pode não ter WhatsApp nesse número."
-            />
-          </div>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold transition-all active:scale-95 ${waVerified ? "bg-primary text-primary-foreground shadow-lg hover:shadow-primary/20" : "bg-primary/20 text-primary ring-1 ring-primary/40 hover:bg-primary/30"}`}
+          >
+            <MessageCircle className="h-4 w-4" /> {waVerified ? "Whats" : "Whats?"}
+          </a>
         )}
       </div>
 
