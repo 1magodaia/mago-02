@@ -238,7 +238,7 @@ export const searchPlaces = createServerFn({ method: "POST" })
         };
       }
       
-      console.log("[places] Sending payload to Google:", JSON.stringify(body, null, 2));
+      console.log("[places] DEBUG PAYLOAD:", JSON.stringify(body));
       const res = await callGateway("/places/v1/places:searchText", body, FIELD_MASK);
       if (res.status === 403) await handle403(res);
       if (!res.ok) {
