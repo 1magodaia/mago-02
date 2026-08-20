@@ -796,6 +796,7 @@ function Home() {
             placeholder="Categoria (padaria, pet shop, advogado...)"
             aria-label="Categoria de comércio"
             staticList={CATEGORY_SUGGESTIONS}
+            spellCheck={true}
             minChars={1}
             leading={<Filter className="h-5 w-5 text-primary/70" aria-hidden />}
             wrapperClassName="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-4 ring-1 ring-border bm-input-focus group/input"

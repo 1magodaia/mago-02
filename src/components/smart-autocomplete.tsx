@@ -291,7 +291,7 @@ export const SmartAutocomplete = forwardRef<HTMLInputElement, SmartAutocompleteP
               showList && highlight >= 0 ? `${listId}-opt-${highlight}` : undefined
             }
             autoComplete="off"
-            spellCheck={false}
+            spellCheck={true}
             className={className}
           />
         </label>
