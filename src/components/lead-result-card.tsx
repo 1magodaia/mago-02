@@ -204,7 +204,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
@@ -221,9 +221,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               const badges: ReactElement[] = [];
               if (realSite) {
                 badges.push(
-                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
-                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
-                  </span>
+                    <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase text-primary" title="Site próprio identificado">
+                      <CheckCircle2 className="h-2.5 w-2.5" /> Possui site
+                    </span>
                 );
               }
               if (social) {
@@ -237,7 +237,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                     aria-label={`Abrir ${social.label} em nova aba`}
-                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 touch-manipulation hover:bg-primary/25 active:bg-primary/30"
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase text-primary touch-manipulation hover:bg-primary/20 active:bg-primary/30"
                     title={realSite ? `Também possui ${social.label}` : `Possui página no ${social.label}`}
                   >
                     {social.kind === "instagram" ? <Instagram className="h-2.5 w-2.5" /> : null}
@@ -251,15 +251,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 // Sem auditoria = "sem presença digital encontrada" (baseado no Google Places).
                 if (lead.audit) {
                   badges.push(
-                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Nem site nem redes sociais encontradas na auditoria">
-                      <Flame className="h-2.5 w-2.5" /> Sem presença digital
-                    </span>
+                      <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[9px] font-bold uppercase text-warn" title="Nem site nem redes sociais encontradas na auditoria">
+                        <Flame className="h-2.5 w-2.5" /> Sem presença
+                      </span>
                   );
                 } else {
                   badges.push(
-                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Google Places não retornou site nem rede social">
-                      <Flame className="h-2.5 w-2.5" /> Sem presença digital encontrada
-                    </span>
+                      <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[9px] font-bold uppercase text-warn" title="Google Places não retornou site nem rede social">
+                        <Flame className="h-2.5 w-2.5" /> Sem presença
+                      </span>
                   );
                 }
               }
@@ -304,15 +304,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             disabled={refreshing}
             title="Atualizar dados deste lead (não conta na cota mensal)"
             aria-label="Atualizar este lead"
-            className="rounded-md bg-glass p-1.5 text-muted-foreground ring-1 ring-border hover:text-primary hover:ring-primary/40 disabled:opacity-60"
+            className="rounded-md bg-white/5 p-1.5 text-muted-foreground ring-1 ring-white/10 hover:text-primary hover:ring-primary/40 disabled:opacity-60"
           >
             {refreshing
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-2xl bg-primary/10 px-3 py-2 text-center ring-1 ring-primary/30 group-hover:bg-primary/20 transition-colors">
-            <div className="text-[10px] font-black uppercase tracking-widest text-primary/80">OPORT.</div>
-            <div className={`font-black text-3xl tabular-nums leading-none mt-0.5 ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-xl bg-white/5 px-3 py-2 text-center ring-1 ring-white/10 group-hover:bg-primary/10 group-hover:ring-primary/30 transition-all">
+            <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary/70 transition-colors">OPORT.</div>
+            <div className={`font-black text-3xl tabular-nums leading-none mt-0.5 ${selected ? meta.color : 'text-foreground group-hover:' + meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
@@ -321,9 +321,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         const days = Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000);
         if (!Number.isFinite(days) || days <= 180) return null;
         return (
-          <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
+          <div className="flex items-center gap-2 rounded-lg bg-warn/5 px-2.5 py-1.5 text-[11px] font-medium text-warn/80 ring-1 ring-warn/20">
             <Flame className="h-3 w-3 shrink-0" />
-            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
+            Sem avaliações novas há {Math.floor(days / 30)} meses.
           </div>
         );
       })()}
@@ -345,7 +345,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
 
 
       {lead.audit && (
-        <div className="grid grid-cols-3 gap-2 rounded-xl bg-glass p-2.5 ring-1 ring-border text-center">
+        <div className="grid grid-cols-3 gap-2 rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10 text-center">
           <div>
             <div className="text-[9px] uppercase text-muted-foreground">Site</div>
             <div className={`text-xs font-semibold ${lead.audit.site_reachable ? "text-primary" : "text-warn"}`}>
@@ -383,7 +383,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
           >
             {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
             {lead.audit ? "Reauditar" : "Auditar"}
@@ -398,7 +398,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-white/5 px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/10 active:bg-white/20 ${linkInferred ? "ring-dashed ring-warn/30 [border-style:dashed]" : "ring-white/10"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
@@ -419,7 +419,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="flex items-center justify-center gap-1 rounded-lg bg-white/5 px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10"
           >
             <Phone className="h-3 w-3" /> Ligar
           </a>
@@ -434,7 +434,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               title={waVerified
                 ? "Link de WhatsApp encontrado no site oficial"
                 : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/20 text-primary-foreground ring-1 ring-primary/30 hover:bg-primary/30"}`}
             >
               <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
             </a>
@@ -447,7 +447,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       </div>
 
       {citationsAvailable && (
-        <div className="rounded-xl bg-glass p-2.5 ring-1 ring-border">
+        <div className="rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
               <Search className="h-3 w-3 text-warn" /> Citações na web (IA)
@@ -455,7 +455,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <button
               onClick={doCitations}
               disabled={citLoading}
-              className="inline-flex items-center gap-1 rounded-lg bg-warn/15 px-2 py-1 text-[11px] font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/25 disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-lg bg-warn/10 px-2 py-1 text-[11px] font-semibold text-warn ring-1 ring-warn/20 hover:bg-warn/20 disabled:opacity-60"
             >
               {citLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Search className="h-3 w-3" />}
               {citations ? "Buscar novamente" : "Buscar citações"}
@@ -525,14 +525,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={doFav}
             title={fav ? "Remover favorito" : "Favoritar"}
-            className={`rounded-md p-1.5 ring-1 ${fav ? "bg-warn/15 text-warn ring-warn/40" : "bg-glass ring-border hover:bg-white/5"}`}
+            className={`rounded-md p-1.5 ring-1 ${fav ? "bg-warn/15 text-warn ring-warn/40" : "bg-white/5 ring-white/10 hover:bg-white/10"}`}
           >
             {fav ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={doDone}
             title={done ? "Marcar como não contatado" : "Marcar como contatado"}
-            className={`rounded-md p-1.5 ring-1 ${done ? "bg-primary/15 text-primary ring-primary/40" : "bg-glass ring-border hover:bg-white/5"}`}
+            className={`rounded-md p-1.5 ring-1 ${done ? "bg-primary/15 text-primary ring-primary/40" : "bg-white/5 ring-white/10 hover:bg-white/10"}`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
@@ -559,15 +559,15 @@ function PriceLevelBadge({ level }: { level: number | null }) {
   );
   if (level == null) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border">
-        💰 Faixa de preço: não informada
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase text-muted-foreground">
+        💰 Preço: n/i
         {helper}
       </span>
     );
   }
   const symbols = level === 0 ? "Grátis" : "$".repeat(Math.max(1, level));
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30">
+    <span className="inline-flex items-center gap-1 rounded-full bg-warn/5 px-2 py-0.5 text-[9px] font-bold uppercase text-warn/90">
       💰 {symbols} · {PRICE_LABELS[level]}
       {helper}
     </span>
@@ -583,8 +583,8 @@ const TIER_META = {
 function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low"; suggestion: string }) {
   const m = TIER_META[tier];
   return (
-    <div className={`flex items-start gap-2 rounded-xl px-3 py-2 ring-1 ${m.bg} ${m.ring}`}>
-      <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/20 shrink-0`}>
+    <div className={`flex items-start gap-3 rounded-xl px-3 py-2.5 bg-white/5 ring-1 ring-white/10`}>
+      <span className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${m.text} ${m.ring} bg-black/40 shrink-0`}>
         <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
         {m.label}
         <HelpTip
@@ -592,8 +592,9 @@ function TierSuggestion({ tier, suggestion }: { tier: "high" | "medium" | "low";
           text="Verde = comércio sem presença digital, mais fácil de converter. Amarelo = tem algo, mas incompleto. Laranja = já tem bastante presença digital, oportunidade menor."
         />
       </span>
-      <p className={`text-[11px] leading-snug ${m.text}`}>
-        <span className="font-semibold">Sugestão:</span> {suggestion}
+      <p className={`text-[11px] leading-relaxed text-muted-foreground`}>
+        <span className={`font-bold uppercase tracking-tighter text-[9px] mr-1 ${m.text}`}>Sugestão:</span> 
+        {suggestion}
       </p>
     </div>
   );
@@ -608,16 +609,16 @@ function BusinessStatusBadge({ status }: { status: string | null }) {
   );
   if (!status || status === "OPERATIONAL") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operando
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/5 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-400/80">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Ativo
         {helper}
       </span>
     );
   }
   if (status === "CLOSED_TEMPORARILY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40">
-        ⏸ Fechado temporariamente
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/5 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-400/80">
+        ⏸ Pausado
         {helper}
       </span>
     );
@@ -679,7 +680,7 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
   const situacao = info.situacao_cadastral ?? "—";
   const isAtiva = situacao.toLowerCase().startsWith("ativa");
   return (
-    <div className="rounded-lg bg-glass px-2.5 py-2 ring-1 ring-border">
+    <div className="rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
