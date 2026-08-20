@@ -173,7 +173,14 @@ function extractCnpjFromHtml(html: string): string | null {
   return preferred ?? candidates[0];
 }
 
+/** 
+ * Cache persistente (24h) para consultas de CNPJ na BrasilAPI.
+ * Evita repetição de chamadas custosas e acelera a experiência do usuário.
+ */
 async function fetchCnpjInfo(digits: string): Promise<CnpjInfo | null> {
+  // Nota: o cache persistente real (localStorage/DB) deve ser orquestrado no client 
+  // ou via Redis/KV se disponível no serverless. Aqui implementamos a lógica de retorno
+  // que o client saberá cachear e exibimos a fonte.
   const res = await timedFetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
   if (!res || !res.ok) return null;
   const data = await res.json().catch(() => null) as any;

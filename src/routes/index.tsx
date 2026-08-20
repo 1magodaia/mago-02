@@ -629,8 +629,10 @@ function Home() {
         : (l.audit?.whatsapp_source === "phone" || (!l.audit && l.phone)) ? "presumido do telefone" : "",
       "E-mail": l.audit?.email ?? "",
       "E-mail Fonte": l.audit?.email ? "extraído do site" : (l.audit ? "não localizado" : "site não auditado"),
+      "CNPJ": l.audit?.cnpj_info?.cnpj ?? "",
+      "Razão Social": l.audit?.cnpj_info?.razao_social ?? "",
+      "Situação Cadastral": l.audit?.cnpj_info?.situacao_cadastral ?? "",
       "Website": l.website ?? "",
-
       "Google Maps Link": l.google_maps_uri ?? (l.lat != null && l.lng != null ? `https://maps.google.com/?q=${l.lat},${l.lng}` : ""),
       "Instagram": l.audit?.instagram ?? "",
       "Facebook": l.audit?.facebook ?? "",
@@ -642,6 +644,7 @@ function Home() {
         : formatCategory(l.types),
       "Status Presença Digital": digitalStatus(l),
       "Score Oportunidade": opportunityScore10(l),
+      "Evidências": (l.reasons || []).join(" | "),
       "Data Coleta": today,
     }));
     exportToCsv(rows, `busca-magica-leads-${today}.csv`);

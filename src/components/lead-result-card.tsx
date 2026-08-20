@@ -85,6 +85,7 @@ import { classifyLink } from "@/lib/link-classify";
 export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
+  const [auditStatus, setAuditStatus] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshErr, setRefreshErr] = useState<string | null>(null);
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
@@ -124,11 +125,18 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     e.stopPropagation();
     if (!lead.website) return;
     setAuditing(true);
+    setAuditStatus("Lendo site...");
     try {
+      // Pequeno delay para percepção de progresso
+      await new Promise(r => setTimeout(r, 600));
+      setAuditStatus("Consultando Receita (BrasilAPI)...");
       const audit = await auditWebsite({ data: { website: lead.website, phone: lead.phone ?? undefined } });
       onUpdate?.(scoreLead(lead, audit));
+      setAuditStatus(null);
     } catch (err) {
       console.error(err);
+      setAuditStatus("Erro na auditoria.");
+      setTimeout(() => setAuditStatus(null), 3000);
     } finally {
       setAuditing(false);
     }
@@ -340,41 +348,49 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </ul>
       )}
 
-      {lead.audit && <CnpjBlock info={lead.audit.cnpj_info} />}
-      {lead.audit && <EmailBlock email={lead.audit.email} />}
-
-
       {lead.audit && (
-        <div className="grid grid-cols-3 gap-2 rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10 text-center">
-          <div>
-            <div className="text-[9px] uppercase text-muted-foreground">Site</div>
-            <div className={`text-xs font-semibold ${lead.audit.site_reachable ? "text-primary" : "text-warn"}`}>
-              {lead.audit.site_reachable ? "Online" : (lead.audit.site_status_code ?? "off")}
+        <div className="flex flex-col gap-2 rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10">
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <div className="text-[9px] uppercase text-muted-foreground">Site</div>
+              <div className={`text-xs font-semibold ${lead.audit.site_reachable ? "text-primary" : "text-warn"}`}>
+                {lead.audit.site_reachable ? "Online" : (lead.audit.site_status_code ?? "off")}
+              </div>
             </div>
-          </div>
-          <div title="Estimado via sitemap.xml">
-            <div className="text-[9px] uppercase text-muted-foreground">Atividade*</div>
-            <div className="text-xs font-semibold text-foreground">
-              {lead.audit.approx_stale_days == null ? "—" : `${lead.audit.approx_stale_days}d`}
+            <div title="Estimado via sitemap.xml">
+              <div className="text-[9px] uppercase text-muted-foreground">Atividade*</div>
+              <div className="text-xs font-semibold text-foreground">
+                {lead.audit.approx_stale_days == null ? "—" : `${lead.audit.approx_stale_days}d`}
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="text-[9px] uppercase text-muted-foreground">Social</div>
-            <div
-              className="flex items-center justify-center gap-1 text-xs"
-              title={
-                lead.audit!.instagram
-                  ? "Instagram detectado no site"
-                  : "Site auditado — nenhum link para Instagram encontrado na página"
-              }
-            >
-              {lead.audit!.instagram
-                ? <Instagram className="h-3 w-3 text-primary" />
-                : <span className="inline-flex items-center gap-0.5 text-muted-foreground"><Instagram className="h-3 w-3" /><HelpCircle className="h-2.5 w-2.5" /></span>}
-              {lead.audit!.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
+            <div>
+              <div className="text-[9px] uppercase text-muted-foreground">Social</div>
+              <div
+                className="flex items-center justify-center gap-1 text-xs"
+                title={
+                  lead.audit!.instagram
+                    ? "Instagram detectado no site"
+                    : "Site auditado — nenhum link para Instagram encontrado na página"
+                }
+              >
+                {lead.audit!.instagram
+                  ? <Instagram className="h-3 w-3 text-primary" />
+                  : <span className="inline-flex items-center gap-0.5 text-muted-foreground"><Instagram className="h-3 w-3" /><HelpCircle className="h-2.5 w-2.5" /></span>}
+                {lead.audit!.whatsapp_link && <MessageCircle className="h-3 w-3 text-primary" />}
+              </div>
             </div>
           </div>
 
+          <div className="border-t border-white/10 pt-2">
+            <CnpjBlock info={lead.audit.cnpj_info} />
+          </div>
+          <EmailBlock email={lead.audit.email} />
+          
+          {lead.audit.note && lead.audit.note !== "dados obtidos com sucesso" && (
+            <div className="text-[9px] text-muted-foreground/60 italic px-1">
+              Nota: {lead.audit.note}
+            </div>
+          )}
         </div>
       )}
 
@@ -383,10 +399,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
+            className="relative flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
           >
             {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-            {lead.audit ? "Reauditar" : "Auditar"}
+            {auditing ? (auditStatus || "Auditoria...") : (lead.audit ? "Reauditar" : "Auditar")}
           </button>
         )}
         {resolvedHref && (
