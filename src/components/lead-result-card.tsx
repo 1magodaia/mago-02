@@ -327,16 +327,33 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </div>
       </header>
 
-      {lead.latest_review_at && (() => {
-        const days = Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000);
-        if (!Number.isFinite(days) || days <= 180) return null;
+      {(() => {
+        const hasSite = !!lead.website;
+        const rating = lead.rating ?? 0;
+        const reviews = lead.user_ratings_total ?? 0;
+        const daysStale = lead.latest_review_at 
+          ? Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000)
+          : null;
+
+        let pitch = "";
+        if (!hasSite) {
+          pitch = "Identificamos que sua empresa ainda não possui um site profissional cadastrado no Google. Isso pode afastar clientes que buscam por segurança e autoridade online.";
+        } else if (rating < 4) {
+          pitch = `Seu site atual e a nota média de ${rating} indicam uma oportunidade de melhoria na sua reputação digital para atrair mais clientes qualificados.`;
+        } else if (daysStale && daysStale > 180) {
+          pitch = "Sua empresa tem uma boa base, mas a falta de avaliações recentes nos últimos 6 meses pode dar a impressão de inatividade para novos clientes.";
+        } else {
+          pitch = "Sua presença digital é sólida, mas sempre há espaço para otimização de conversão e SEO para dominar ainda mais o mercado local.";
+        }
+
         return (
-          <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
-            <Flame className="h-3 w-3 shrink-0" />
-            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-[11px] leading-relaxed text-foreground/90 italic shadow-inner">
+            <span className="font-bold text-primary not-italic block mb-1">Pitch sugerido:</span>
+            "{pitch}"
           </div>
         );
       })()}
+
       <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
 
 
