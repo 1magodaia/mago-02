@@ -722,8 +722,8 @@ function Home() {
                   {searchUsage && (
                     <div className="px-3 pb-2 text-[11px] text-primary">{searchUsage}</div>
                   )}
-                  <Link to="/leads" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Meus leads</Link>
-                  {isAdmin && <Link to="/novidades" className="block rounded-lg px-3 py-2 text-sm hover:bg-white/5">Novidades</Link>}
+                  <Link to="/leads" className="flex h-11 items-center rounded-lg px-3 text-sm hover:bg-white/5 active:scale-95">Meus leads</Link>
+                  {isAdmin && <Link to="/novidades" className="flex h-11 items-center rounded-lg px-3 text-sm hover:bg-white/5 active:scale-95">Novidades</Link>}
                   <button
                     onClick={() => { resetTutorial(); setTutorialOpen(true); }}
                     className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
