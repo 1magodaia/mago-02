@@ -940,15 +940,16 @@ function Home() {
 
         {/* BARRA DE RESUMO + EXPORT CSV EM DESTAQUE */}
         {(rawResults.length > 0 || loading) && (
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-extrabold tabular-nums text-foreground">{filtered.length}</span>
-              <span className="text-muted-foreground">leads</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary ring-2 ring-primary/30" />
-              <span className="font-bold text-primary">{hotCount}</span>
-              <span className="text-muted-foreground">quentes</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-border/40 pb-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black tabular-nums text-foreground">{filtered.length}</span>
+                <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Oportunidades</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 ring-1 ring-primary/30">
+                <Flame className="h-4 w-4 animate-pulse text-primary" />
+                <span className="text-xs font-black text-primary">{hotCount} QUENTES</span>
+              </div>
             </div>
             {remaining != null && !isPro && (
               <span className="text-muted-foreground">· {remaining} busca(s) restantes no mês</span>
@@ -957,10 +958,10 @@ function Home() {
               onClick={doExport}
               disabled={filtered.length === 0}
               title={!isPro ? "Exportação CSV é do plano Pro" : "Baixar todos os leads filtrados em CSV"}
-              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground shadow-elevated hover:brightness-110 disabled:opacity-40"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-black text-primary-foreground shadow-elevated transition-all hover:brightness-110 hover:neon-primary active:scale-95 disabled:opacity-40"
             >
-              <Download className="h-3.5 w-3.5" /> Baixar lista (CSV)
-              {!isPro && <span className="ml-1 rounded-full bg-warn/25 px-1.5 py-0.5 text-[9px] text-warn">Pro</span>}
+              <Download className="h-4 w-4" /> EXPORTAR CSV
+              {!isPro && <span className="ml-2 rounded-full bg-black/20 px-2 py-0.5 text-[10px] uppercase">Pro</span>}
             </button>
           </div>
         )}
@@ -1001,9 +1002,9 @@ function Home() {
         }`}
       >
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
-        {rawResults.length > 0 && (
+        {rawResults.length > 0 ? (
           <section
-            className={`space-y-3 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2`}
+            className={`space-y-4 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent`}
             aria-label="Resultados"
           >
             {loading && (
@@ -1013,8 +1014,14 @@ function Home() {
               </div>
             )}
             {!loading && filtered.length === 0 && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                Nenhum resultado com esses filtros. Amplie o raio ou remova filtros.
+              <div className="glass-panel flex flex-col items-center justify-center rounded-2xl py-20 text-center animate-in fade-in duration-500">
+                <div className="mb-6 grid h-20 w-20 place-items-center rounded-full bg-warn/10 ring-1 ring-warn/30">
+                  <AlertCircle className="h-10 w-10 text-warn/60" />
+                </div>
+                <h3 className="text-2xl font-black text-foreground">Nenhum lead encontrado</h3>
+                <p className="mt-3 max-w-sm px-6 text-base text-muted-foreground">
+                  Tente expandir o raio de busca ou utilizar termos mais genéricos para encontrar mais comércios.
+                </p>
               </div>
             )}
             {filtered.map((lead) => {
