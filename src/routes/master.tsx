@@ -1512,8 +1512,9 @@ function AiKeysPanel() {
   const activeCount = rows.filter((r) => r.status === "active").length;
 
   return (
-    <section className="mx-auto mt-6 max-w-7xl px-4 sm:px-6">
+    <section className="mt-6">
       <div className="glass-panel rounded-2xl p-4 sm:p-6">
+
         <header className="mb-4 flex flex-wrap items-center gap-2">
           <KeySquare className="h-5 w-5 text-primary" />
           <h2 className="text-base font-extrabold text-foreground inline-flex items-center gap-1.5">
