@@ -187,6 +187,7 @@ function Home() {
   const { user, profile, isPro, isMaster, isAdmin, signOut, loading: authLoading, refreshProfile } = useAuth();
 
   const [query, setQuery] = useState("");
+  const [didYouMean, setDidYouMean] = useState<string | null>(null);
   const [region, setRegion] = useState<string>(() => {
     if (typeof window === "undefined") return "São Paulo";
     try {
@@ -511,7 +512,18 @@ function Home() {
         if ((resp as { quotaExhausted?: boolean }).quotaExhausted) setQuotaBlocked(true);
         if (typeof resp.remaining === "number") setRemaining(resp.remaining);
         places = resp.results;
-        if (places.length) cacheSet(cacheKey, places);
+
+        // Se a busca real vier vazia e tivermos uma sugestão, forçamos a exibição
+        if (places.length === 0 && !didYouMean) {
+          const normalizedQ = q.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+          const bestMatch = CATEGORY_SUGGESTIONS.find(cat => {
+            const normCat = cat.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+            return normCat.includes(normalizedQ) || normalizedQ.includes(normCat);
+          });
+          if (bestMatch) setDidYouMean(bestMatch);
+        }
+
+        if (places.length && cacheKey) cacheSet(cacheKey, places);
         if (!servedFromCache) refreshProfile();
       }
       const scored = places.map((p) => scoreLead(p));
@@ -536,7 +548,21 @@ function Home() {
   };
 
   const runSearch = () => {
+    setDidYouMean(null);
     if (selectedSports.length > 0) return runSportsSearch();
+    
+    // Sugestão "Você quis dizer" baseada no dicionário estático se a query for curta/errada
+    const normalizedQ = query.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+    if (normalizedQ.length > 2) {
+      const bestMatch = CATEGORY_SUGGESTIONS.find(cat => {
+        const normCat = cat.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        return normCat !== normalizedQ && (normCat.includes(normalizedQ) || normalizedQ.includes(normCat));
+      });
+      if (bestMatch && bestMatch.toLowerCase() !== normalizedQ) {
+        setDidYouMean(bestMatch);
+      }
+    }
+
     return runSearchWith(query, region);
   };
 
@@ -824,6 +850,23 @@ function Home() {
             BUSCAR AGORA
           </button>
         </div>
+
+        {didYouMean && (
+          <div className="mt-3 px-2 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-1">
+            Você quis dizer:{" "}
+            <button
+              onClick={() => {
+                setQuery(didYouMean);
+                setDidYouMean(null);
+                runSearchWith(didYouMean, region);
+              }}
+              className="font-bold text-primary underline-offset-4 hover:underline"
+            >
+              {didYouMean}
+            </button>
+            ?
+          </div>
+        )}
 
         {/* AÇÕES RÁPIDAS */}
         <div className="mt-4 flex flex-wrap items-center gap-2">

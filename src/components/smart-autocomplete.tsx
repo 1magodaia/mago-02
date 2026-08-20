@@ -84,6 +84,15 @@ function fuzzyMatch(needle: string, haystack: string): number {
     j++;
   }
   if (i === n.length && skips <= 2) return 80 - skips;
+  
+  // Transposition tolerance (e.g. "deopsito" -> "deposito")
+  if (n.length > 3 && h.length > 3) {
+    for (let k = 0; k < n.length - 1; k++) {
+      const transposed = n.substring(0, k) + n[k + 1] + n[k] + n.substring(k + 2);
+      if (h.includes(transposed)) return 60;
+    }
+  }
+  
   return 0;
 }
 
