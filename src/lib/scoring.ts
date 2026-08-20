@@ -7,7 +7,6 @@ export type OpportunityTier = "high" | "medium" | "low";
 export interface ScoredLead extends PlaceResult {
   audit?: DigitalAudit;
   opportunity_score: number; // 0-100, maior = mais quente
-  closing_probability: number; // 0-100
   status: LeadStatus;
   tier: OpportunityTier;
   tier_suggestion: string;
@@ -67,27 +66,9 @@ export function scoreLead(place: PlaceResult, audit?: DigitalAudit): ScoredLead 
   }
 
   score = Math.max(0, Math.min(100, score));
-  
-  // Mapeia score para probabilidade de fechamento
-  // 90+ -> 95%, 80+ -> 90%, 60+ -> 80%, 40+ -> 60%, else -> 40%
-  let probability = 40;
-  if (score >= 90) probability = 95;
-  else if (score >= 80) probability = 90;
-  else if (score >= 60) probability = 80;
-  else if (score >= 40) probability = 60;
-
   const status: LeadStatus = score >= 60 ? "hot" : score >= 35 ? "warm" : "cold";
   const { tier, suggestion } = classifyOpportunity(place, audit);
-  return { 
-    ...place, 
-    audit, 
-    opportunity_score: score, 
-    closing_probability: probability,
-    status, 
-    tier, 
-    tier_suggestion: suggestion, 
-    reasons 
-  };
+  return { ...place, audit, opportunity_score: score, status, tier, tier_suggestion: suggestion, reasons };
 }
 
 /**

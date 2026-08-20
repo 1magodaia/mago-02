@@ -75,8 +75,8 @@ export const autocompleteRegion = createServerFn({ method: "POST" })
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        console.error(`[autocomplete] HTTP ${res.status}: ${text}`);
-        return { suggestions: [], error: `Google Autocomplete error (${res.status})` };
+        console.error(`[autocomplete] ${res.status} ${text}`);
+        return { suggestions: [], error: `http_${res.status}` };
       }
       const json = (await res.json()) as GAutocompleteResp;
       const suggestions: AutocompleteSuggestion[] = (json.suggestions ?? [])
@@ -126,13 +126,13 @@ export const resolvePlace = createServerFn({ method: "POST" })
           headers: {
             Authorization: `Bearer ${lovableKey}`,
             "X-Connection-Api-Key": apiKey,
-            "X-Goog-FieldMask": "id,formattedAddress,location,displayName,googleMapsUri",
+            "X-Goog-FieldMask": "id,formattedAddress,location,displayName",
           },
         });
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          console.error(`[resolvePlace] HTTP ${res.status}: ${text}`);
-          return { lat: null, lng: null, address: null, name: null, error: `Google Resolve error (${res.status})` };
+          console.error(`[resolvePlace] ${res.status} ${text}`);
+          return { lat: null, lng: null, address: null, name: null, error: `http_${res.status}` };
         }
         const p = (await res.json()) as GPlaceDetailsResp;
         return {

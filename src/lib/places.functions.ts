@@ -58,7 +58,7 @@ interface GPlace {
   types?: string[];
   googleMapsUri?: string;
   reviews?: GReview[];
-  priceLevel?: string;
+  priceLevel?: string; // "PRICE_LEVEL_FREE" | "_INEXPENSIVE" | "_MODERATE" | "_EXPENSIVE" | "_VERY_EXPENSIVE" | "_UNSPECIFIED"
 }
 
 function mapPriceLevel(v?: string): number | null {
@@ -118,10 +118,10 @@ function mapPlace(p: GPlace, collectedAt: string): PlaceResult {
     address: p.formattedAddress ?? "",
     lat: p.location?.latitude ?? null,
     lng: p.location?.longitude ?? null,
-    phone: p.nationalPhoneNumber || p.internationalPhoneNumber || null,
-    website: p.websiteUri || null,
-    rating: p.rating ?? 0,
-    user_ratings_total: p.userRatingCount ?? 0,
+    phone: p.internationalPhoneNumber ?? p.nationalPhoneNumber ?? null,
+    website: p.websiteUri ?? null,
+    rating: p.rating ?? null,
+    user_ratings_total: p.userRatingCount ?? null,
     business_status: p.businessStatus ?? null,
     types: p.types ?? [],
     google_maps_uri: p.googleMapsUri ?? null,
@@ -137,14 +137,14 @@ const PLACE_FIELDS = [
   "displayName",
   "formattedAddress",
   "location",
-  "nationalPhoneNumber",
   "internationalPhoneNumber",
+  "nationalPhoneNumber",
   "websiteUri",
   "rating",
   "userRatingCount",
-  "googleMapsUri",
   "businessStatus",
   "types",
+  "googleMapsUri",
   "reviews",
   "priceLevel",
 ];
@@ -176,36 +176,30 @@ export const searchPlaces = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string; quotaExhausted?: boolean }> => {
     try {
       // Security check: Master bypasses quota.
-      const { data: isMaster, error: masterErr } = await context.supabase.rpc("is_master", { _user_id: context.userId });
+      const { data: isMaster } = await context.supabase.rpc("is_master" as any, { _user_id: context.userId });
       
-      if (masterErr) {
-        console.error("[places] is_master RPC failed:", masterErr.message);
-      }
-
       let quota: any;
       if (isMaster) {
         quota = { allowed: true, remaining: 999999, plan: "master" };
       } else {
         // Quota check via SECURITY DEFINER RPC (atomic increment; blocks 'blocked' users).
+        // Free = 1 busca vitalícia (regra v5.7.3). Pro/master seguem inalterados.
         const { data: quotaRows, error: quotaErr } = await context.supabase.rpc("consume_search_quota", {
           _user_id: context.userId,
           _free_limit: FREE_LIFETIME_SEARCH_LIMIT,
         });
-        
         if (quotaErr) {
-          console.error("[places] quota error:", quotaErr.message, "Code:", quotaErr.code);
-          return { results: [], error: `Falha ao validar cota: ${quotaErr.message}` };
+          console.error("[places] quota error", quotaErr.message);
+          return { results: [], error: "Falha ao validar cota de buscas." };
         }
-        
         quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
       }
-
-      if (!quota || !quota.allowed) {
+      if (!quota?.allowed) {
         return {
           results: [],
           error: quota?.plan === "free"
             ? "Você já usou sua busca gratuita. Fale com a gente para liberar acesso completo."
-            : "Conta bloqueada ou cota esgotada. Fale com o suporte.",
+            : "Conta bloqueada. Fale com o suporte.",
           remaining: 0,
           plan: quota?.plan,
           quotaExhausted: quota?.plan === "free",
@@ -213,39 +207,25 @@ export const searchPlaces = createServerFn({ method: "POST" })
       }
 
       const body: Record<string, unknown> = {
-        textQuery: data.regionText && data.regionText.trim() ? `${data.query} em ${data.regionText}` : data.query,
+        textQuery: data.regionText ? `${data.query} em ${data.regionText}` : data.query,
         pageSize: 20,
         languageCode: "pt-BR",
         regionCode: "BR",
       };
-
-      // Se houver regionText (ex: "Vespasiano, MG"), o Google searchText v1 prefere que NÃO enviemos locationBias 
-      // para evitar conflitos de "ambiguidade de localização" que geram erro 400.
-      if (!data.regionText || !data.regionText.trim()) {
-        if (
-          data.lat != null && 
-          data.lng != null && 
-          !isNaN(data.lat) && 
-          !isNaN(data.lng) &&
-          data.lat >= -90 && data.lat <= 90 &&
-          data.lng >= -180 && data.lng <= 180
-        ) {
-          body.locationBias = {
-            circle: {
-              center: { latitude: Number(data.lat), longitude: Number(data.lng) },
-              radius: Math.min(Number(data.radiusKm) * 1000, 50000),
-            },
-          };
-        }
+      if (data.lat != null && data.lng != null) {
+        body.locationBias = {
+          circle: {
+            center: { latitude: data.lat, longitude: data.lng },
+            radius: Math.min(data.radiusKm * 1000, 50000),
+          },
+        };
       }
-      
-      console.log("[places] DEBUG PAYLOAD:", JSON.stringify(body));
       const res = await callGateway("/places/v1/places:searchText", body, FIELD_MASK);
       if (res.status === 403) await handle403(res);
       if (!res.ok) {
         const text = await res.text();
         console.error(`[places] ${res.status} ${text}`);
-        return { results: [], error: `Google Places API Error (${res.status}): ${text}` };
+        return { results: [], error: `Google Places: ${res.status}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
       const collectedAt = new Date().toISOString();

@@ -172,15 +172,11 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     } catch { /* ignore */ }
   };
 
-  const phone = lead?.phone || null;
-  const cleanPhone = phone ? phone.replace(/\D/g, "") : "";
-  const isMobile = cleanPhone.length >= 11; // 2 DDD + 9 dígitos
-
-  const waLink = lead.audit?.whatsapp_link ?? (isMobile
-    ? `https://wa.me/${cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`}`
+  const waLink = lead.audit?.whatsapp_link ?? (lead.phone
+    ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
     : null);
-
-  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink ? "phone" : null);
+  // Fonte do WhatsApp: "site" = link real encontrado no HTML; "phone" = derivado do telefone (presunção).
+  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
   const waVerified = waSource === "site";
 
   const collectedAgo = relTime(lead.collected_at);
@@ -189,10 +185,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   // Instagram, Facebook, ou vir embrulhada em redirecionador/tracking.
   // O módulo devolve o destino já normalizado (sem utm/redirects), o tipo
   // e a confiança (confirmed = URL direta; inferred = precisou desembrulhar).
-  const website = lead?.website || null;
-  const classified = classifyLink(website);
+  const classified = classifyLink(lead.website);
   const linkKind = classified.kind;
-  const resolvedHref = classified.url ?? website ?? null;
+  const resolvedHref = classified.url ?? lead.website ?? null;
   const linkInferred = classified.confidence === "inferred";
   const hasRealSite = linkKind === "site";
   // IG detectado: prioriza o link do audit; se não, aceita o próprio "website" quando for IG.
@@ -204,13 +199,13 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
   return (
     <article
       onClick={onSelect}
-      className={`glass-panel group relative flex cursor-pointer flex-col gap-4 rounded-2xl p-5 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/60 ring-2 ring-primary/40 bg-primary/5 shadow-glow-primary scale-[1.01]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
+      className={`glass-panel group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-2 hover:border-primary/40 hover:shadow-glow-primary ${selected ? "border-primary/70 ring-2 ring-primary/40 bg-primary/10 shadow-glow-primary scale-[1.02]" : ""} ${permanentlyClosed ? "opacity-60 grayscale" : ""}`}
     >
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot} shadow-[0_0_8px_currentColor]`} />
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
             {(() => {
@@ -225,16 +220,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                   : null;
               const badges: ReactElement[] = [];
               if (realSite) {
-                const displayUrl = realSite.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
                 badges.push(
-                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title={`Site próprio: ${realSite}`}>
-                    <CheckCircle2 className="h-2.5 w-2.5" /> {displayUrl}
-                  </span>
-                );
-              } else if (!social) {
-                badges.push(
-                  <span key="no-site" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40">
-                    <Flame className="h-2.5 w-2.5" /> Sem Site Cadastrado
+                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
+                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
                   </span>
                 );
               }
@@ -296,7 +284,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <PriceLevelBadge level={lead.price_level ?? null} />
             <BusinessStatusBadge status={lead.business_status ?? null} />
           </div>
-          <h3 className="mt-2 truncate text-lg font-black tracking-tight text-foreground">
+          <h3 className="mt-1.5 truncate text-base font-bold text-foreground">
             <Highlight text={lead.name} terms={highlight ?? []} />
           </h3>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -325,75 +313,21 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <div className="rounded-xl bg-glass px-2.5 py-1.5 text-center ring-1 ring-border">
             <div className="text-[9px] uppercase tracking-wider text-muted-foreground">Oport.</div>
             <div className={`font-extrabold text-2xl tabular-nums ${meta.color}`}>{lead.opportunity_score}</div>
-            <div className="text-[9px] font-bold text-muted-foreground mt-0.5">{lead.closing_probability}% Prob.</div>
           </div>
         </div>
       </header>
 
-      {(() => {
-        const hasSite = !!lead.website;
-        const rating = lead.rating ?? 0;
-        const reviews = lead.user_ratings_total ?? 0;
-        const daysStale = lead.latest_review_at 
-          ? Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000)
-          : null;
-
-        let pitch = "";
-        if (!hasSite) {
-          pitch = "Identificamos que sua empresa ainda não possui um site profissional cadastrado no Google. Isso pode afastar clientes que buscam por segurança e autoridade online.";
-        } else if (rating < 4) {
-          pitch = `Seu site atual e a nota média de ${rating} indicam uma oportunidade de melhoria na sua reputação digital para atrair mais clientes qualificados.`;
-        } else if (daysStale && daysStale > 180) {
-          pitch = "Sua empresa tem uma boa base, mas a falta de avaliações recentes nos últimos 6 meses pode dar a impressão de inatividade para novos clientes.";
-        } else {
-          pitch = "Sua presença digital é sólida, mas sempre há espaço para otimização de conversão e SEO para dominar ainda mais o mercado local.";
-        }
-
+      {lead.latest_review_at && (() => {
+        const days = Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000);
+        if (!Number.isFinite(days) || days <= 180) return null;
         return (
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-[11px] leading-relaxed text-foreground/90 italic shadow-inner">
-            <span className="font-bold text-primary not-italic block mb-1">Pitch sugerido:</span>
-            "{pitch}"
+          <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
+            <Flame className="h-3 w-3 shrink-0" />
+            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
           </div>
         );
       })()}
-
       <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
-
-      {waLink && (
-        <div className="rounded-xl border border-[#25D366]/20 bg-[#25D366]/5 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold uppercase text-[#25D366]">Scripts de Venda (IA)</span>
-            <HelpTip 
-              title="Scripts de Abordagem" 
-              text="Textos prontos baseados na análise do lead para facilitar seu contato inicial via WhatsApp."
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const text = `Olá! Vi que o ${lead.name} ${lead.website ? 'já tem um site' : 'ainda não tem um site'} no Google e gostaria de conversar sobre como podemos aumentar seus clientes locais.`;
-                copy("wa", text);
-              }}
-              className="flex items-center justify-center gap-1.5 rounded-lg bg-glass px-2 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border hover:bg-white/5"
-            >
-              {copied === "wa" ? <CheckCircle2 className="h-3 w-3 text-[#25D366]" /> : <MessageCircle className="h-3 w-3 text-[#25D366]" />}
-              Script Pitch
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const text = `Bom dia! Sou especialista em presença digital e notei que o ${lead.name} tem uma ótima nota (${lead.rating}), mas poderíamos melhorar a captação. Podemos falar?`;
-                copy("wa", text);
-              }}
-              className="flex items-center justify-center gap-1.5 rounded-lg bg-glass px-2 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border hover:bg-white/5"
-            >
-              {copied === "wa" ? <CheckCircle2 className="h-3 w-3 text-[#25D366]" /> : <Zap className="h-3 w-3 text-[#25D366]" />}
-              Intro Rápida
-            </button>
-          </div>
-        </div>
-      )}
 
 
       {lead.reasons.length > 0 && (
@@ -444,14 +378,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {hasRealSite && lead.website && (
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground shadow-lg transition-all hover:scale-[1.02] hover:shadow-primary/20 active:scale-95 disabled:opacity-60"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
           >
-            {auditing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+            {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
             {lead.audit ? "Reauditar" : "Auditar"}
           </button>
         )}
@@ -464,42 +398,50 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 transition-all hover:bg-white/5 active:scale-95 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            title={
+              linkInferred
+                ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
+                : linkKind === "instagram" ? "Abrir Instagram" : linkKind === "facebook" ? "Abrir Facebook" : "Abrir site"
+            }
           >
             {linkKind === "instagram" ? (
-              <><Instagram className="h-4 w-4" /> Instagram</>
+              <><Instagram className="h-3 w-3" /> Instagram</>
             ) : linkKind === "facebook" ? (
-              <><Globe className="h-4 w-4" /> Facebook</>
+              <><Globe className="h-3 w-3" /> Facebook</>
             ) : (
-              <><Globe className="h-4 w-4" /> Site</>
+              <><Globe className="h-3 w-3" /> Site</>
             )}
             {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
         )}
-        
-        {waLink ? (
+        {lead.phone && (
           <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-[11px] font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-[#25D366]/20 active:scale-95"
+            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
           >
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
+            <Phone className="h-3 w-3" /> Ligar
           </a>
-        ) : lead.phone ? (
-          <a
-            href={`tel:${cleanPhone}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border shadow-lg transition-all hover:scale-[1.02] active:scale-95"
-          >
-            <Phone className="h-4 w-4 text-primary" />
-            {lead.phone}
-          </a>
-        ) : (
-          <div className="flex min-h-[44px] items-center justify-center rounded-xl bg-muted/50 px-3 py-2 text-[10px] font-medium text-muted-foreground ring-1 ring-border italic">
-            Sem telefone
+        )}
+        {waLink && (
+          <div className="flex items-center gap-0.5">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              title={waVerified
+                ? "Link de WhatsApp encontrado no site oficial"
+                : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+            >
+              <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
+            </a>
+            <HelpTip
+              title={waVerified ? "WhatsApp confirmado" : "WhatsApp presumido"}
+              text="Quando vem do site do comércio, já testamos que é um link de WhatsApp real. Quando vem só do telefone, é uma suposição — pode não ter WhatsApp nesse número."
+            />
           </div>
         )}
       </div>
@@ -730,7 +672,7 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
     return (
       <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-muted-foreground ring-1 ring-border" title="Nenhum CNPJ localizado no site do comércio. Não estimamos esse valor a partir do nome.">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-        CNPJ: não localizado (Dados Ocultos)
+        CNPJ: não localizado
       </div>
     );
   }
