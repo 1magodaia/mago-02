@@ -1130,7 +1130,8 @@ function MasterPanel() {
 
 
       {/* CITAÇÕES WEB — Kill switch + limite diário + custo */}
-      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+      <section className="glass-panel mt-6 rounded-2xl p-5">
+
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-xl bg-warn/15 ring-1 ring-warn/40">
