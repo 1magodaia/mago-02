@@ -680,7 +680,7 @@ function CnpjBlock({ info }: { info: import("@/lib/audit.functions").CnpjInfo | 
   const situacao = info.situacao_cadastral ?? "—";
   const isAtiva = situacao.toLowerCase().startsWith("ativa");
   return (
-    <div className="rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
+    <div data-testid="cnpj-block" className="rounded-lg bg-white/5 px-2.5 py-2 ring-1 ring-white/10">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
         <span className="font-mono font-bold text-foreground">{info.cnpj}</span>
         {info.razao_social && <span className="truncate text-muted-foreground">{info.razao_social}</span>}
