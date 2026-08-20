@@ -726,7 +726,7 @@ function Home() {
                   {isAdmin && <Link to="/novidades" className="flex h-11 items-center rounded-lg px-3 text-sm hover:bg-white/5 active:scale-95">Novidades</Link>}
                   <button
                     onClick={() => { resetTutorial(); setTutorialOpen(true); }}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-white/5"
+                    className="flex h-11 w-full items-center rounded-lg px-3 text-left text-sm hover:bg-white/5 active:scale-95"
                   >
                     Ver tutorial novamente
                   </button>
