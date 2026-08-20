@@ -512,7 +512,18 @@ function Home() {
         if ((resp as { quotaExhausted?: boolean }).quotaExhausted) setQuotaBlocked(true);
         if (typeof resp.remaining === "number") setRemaining(resp.remaining);
         places = resp.results;
-        if (places.length) cacheSet(cacheKey, places);
+
+        // Se a busca real vier vazia e tivermos uma sugestão, forçamos a exibição
+        if (places.length === 0 && !didYouMean) {
+          const normalizedQ = q.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+          const bestMatch = CATEGORY_SUGGESTIONS.find(cat => {
+            const normCat = cat.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+            return normCat.includes(normalizedQ) || normalizedQ.includes(normCat);
+          });
+          if (bestMatch) setDidYouMean(bestMatch);
+        }
+
+        if (places.length && cacheKey) cacheSet(cacheKey, places);
         if (!servedFromCache) refreshProfile();
       }
       const scored = places.map((p) => scoreLead(p));

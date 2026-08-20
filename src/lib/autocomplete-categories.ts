@@ -19,6 +19,7 @@ export const CATEGORY_SUGGESTIONS: string[] = [
   "Pub",
   "Choperia",
   "Depósito de Bebidas",
+  "Depósito de Bebidas e Conveniência",
   "Distribuidora de Bebidas",
   "Adega",
   "Mercado",
