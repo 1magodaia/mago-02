@@ -126,7 +126,7 @@ export const resolvePlace = createServerFn({ method: "POST" })
           headers: {
             Authorization: `Bearer ${lovableKey}`,
             "X-Connection-Api-Key": apiKey,
-            "X-Goog-FieldMask": "id,formattedAddress,location,displayName",
+            "X-Goog-FieldMask": "id,formattedAddress,location,displayName,googleMapsUri",
           },
         });
         if (!res.ok) {
