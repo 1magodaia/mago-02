@@ -159,7 +159,7 @@ function FreeQuotaBlock({ supportWa, onClose }: { supportWa: string | null; onCl
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 text-sm font-bold text-white transition-all hover:brightness-110"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:brightness-110"
           >
             <MessageCircle className="h-4 w-4" />
             Ativar minha conta no WhatsApp

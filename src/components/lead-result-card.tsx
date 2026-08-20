@@ -383,7 +383,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/15 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/30 hover:bg-primary/25 disabled:opacity-60"
+            className="flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
           >
             {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
             {lead.audit ? "Reauditar" : "Auditar"}
@@ -434,7 +434,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               title={waVerified
                 ? "Link de WhatsApp encontrado no site oficial"
                 : "Presumido a partir do telefone do Google — pode não ser WhatsApp"}
-              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/30 text-primary-foreground ring-1 ring-warn/40 hover:bg-primary/40"}`}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold ${waVerified ? "bg-primary text-primary-foreground hover:brightness-110" : "bg-primary/20 text-primary-foreground ring-1 ring-primary/30 hover:bg-primary/30"}`}
             >
               <MessageCircle className="h-3 w-3" /> {waVerified ? "Whats" : "Whats?"}
             </a>
@@ -455,7 +455,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             <button
               onClick={doCitations}
               disabled={citLoading}
-              className="inline-flex items-center gap-1 rounded-lg bg-warn/15 px-2 py-1 text-[11px] font-semibold text-warn ring-1 ring-warn/40 hover:bg-warn/25 disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-lg bg-warn/10 px-2 py-1 text-[11px] font-semibold text-warn ring-1 ring-warn/20 hover:bg-warn/20 disabled:opacity-60"
             >
               {citLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Search className="h-3 w-3" />}
               {citations ? "Buscar novamente" : "Buscar citações"}
