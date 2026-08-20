@@ -685,7 +685,8 @@ function MasterPanel() {
       )}
 
       {/* SUPORTE / CONTATO — WhatsApp global do app */}
-      <section className="glass-panel mx-auto mt-6 max-w-7xl rounded-2xl p-5">
+      <section className="glass-panel mt-6 rounded-2xl p-5">
+
         <div className="flex items-start gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#25D366]/15 ring-1 ring-[#25D366]/40">
             <MessageCircle className="h-4 w-4 text-[#25D366]" />
