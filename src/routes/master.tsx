@@ -1284,7 +1284,7 @@ function MasterPanel() {
 
 
 
-      <div className="glass-panel mx-auto mt-6 max-w-7xl overflow-x-auto rounded-2xl">
+      <div className="glass-panel mt-6 overflow-x-auto rounded-2xl">
         <table className="w-full text-left text-sm">
           <thead className="bg-white/[0.02] text-xs uppercase text-muted-foreground">
             <tr>
