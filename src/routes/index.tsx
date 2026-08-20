@@ -697,10 +697,10 @@ function Home() {
               <Link
                 to="/master"
                 aria-label={isMaster ? "Abrir painel Master" : "Abrir painel Admin"}
-                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary/15 px-5 text-sm font-bold text-primary ring-1 ring-primary/40 hover:bg-primary/25 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
+                className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-primary/20 px-5 text-sm font-black text-primary ring-1 ring-primary/50 hover:bg-primary/30 hover:shadow-glow-primary active:scale-95 transition-all sm:min-w-0 sm:h-10 sm:px-4"
               >
-                <Shield className="h-5 w-5 sm:h-3.5 sm:w-3.5" />
-                <span>{isMaster ? "Master" : "Admin"}</span>
+                <Shield className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span>{isMaster ? "MASTER" : "ADMIN"}</span>
               </Link>
             )}
             {authLoading ? (
@@ -710,10 +710,10 @@ function Home() {
             ) : user ? (
               <div className="group relative">
                 <button
-                  className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-glass px-4 text-sm font-bold text-foreground ring-1 ring-border hover:bg-white/5 active:scale-95 sm:min-w-0 sm:h-9 sm:px-3 sm:text-xs"
+                  className="inline-flex h-11 min-w-[110px] items-center justify-center gap-2 rounded-full bg-white/5 px-4 text-sm font-black text-foreground ring-1 ring-border/50 hover:bg-white/10 hover:ring-primary/40 active:scale-95 transition-all sm:min-w-0 sm:h-10 sm:px-4"
                   aria-label="Menu da conta"
                 >
-                  <UserIcon className="h-5 w-5 text-primary sm:h-3.5 sm:w-3.5" />
+                  <UserIcon className="h-5 w-5 text-primary sm:h-4 sm:w-4" />
                   <span className="max-w-[120px] truncate sm:inline">{profile?.full_name || user.email}</span>
                 </button>
                 <div className="invisible absolute right-0 top-full z-20 mt-1 w-56 rounded-xl bg-popover p-2 opacity-0 shadow-2xl ring-1 ring-border transition group-hover:visible group-hover:opacity-100 focus-within:visible focus-within:opacity-100">
@@ -785,7 +785,7 @@ function Home() {
 
 
         {/* BLOCO PRINCIPAL DE BUSCA */}
-        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary">
+        <div className="glass-panel relative z-50 mt-6 grid gap-4 rounded-3xl p-6 shadow-elevated md:grid-cols-[1.2fr_1.4fr_auto] transition-all duration-500 hover:shadow-glow-primary hover:border-primary/30">
           <SmartAutocomplete
             value={query}
             onChange={setQuery}
@@ -794,7 +794,8 @@ function Home() {
             aria-label="Categoria de comércio"
             staticList={CATEGORY_SUGGESTIONS}
             minChars={1}
-            leading={<Filter className="h-4 w-4 text-muted-foreground" aria-hidden />}
+            leading={<Filter className="h-5 w-5 text-primary/70" aria-hidden />}
+            wrapperClassName="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-4 ring-1 ring-border bm-input-focus group/input"
           />
           <SmartAutocomplete
             value={region}
@@ -805,20 +806,18 @@ function Home() {
             aria-label="Região"
             asyncSource={regionSource}
             disabled={usingGps}
-            wrapperClassName={`flex items-center gap-2 rounded-xl bg-glass px-4 py-3 ring-1 focus-within:ring-2 focus-within:ring-primary/70 ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
-            className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
-            leading={<MapPin className="h-4 w-4 text-primary" aria-hidden />}
+            wrapperClassName={`flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-4 ring-1 focus-within:ring-2 focus-within:ring-primary/70 group/input ${usingGps ? "opacity-50 ring-border" : "ring-border"}`}
+            className="w-full bg-transparent text-base font-semibold outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            leading={<MapPin className="h-5 w-5 text-primary" aria-hidden />}
           />
-
-
 
           <button
             onClick={runSearch}
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:brightness-110 hover:neon-primary disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-black text-primary-foreground shadow-glow-primary transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 disabled:opacity-60"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Buscar
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+            BUSCAR AGORA
           </button>
         </div>
 

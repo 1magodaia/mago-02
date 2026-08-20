@@ -86,8 +86,9 @@
   body {
     min-height: 100vh;
     background-image:
-      radial-gradient(circle at 15% 0%, color-mix(in oklch, var(--primary) 10%, transparent), transparent 45%),
-      radial-gradient(circle at 90% 10%, color-mix(in oklch, var(--warn) 6%, transparent), transparent 40%);
+      radial-gradient(circle at 15% 0%, color-mix(in oklch, var(--primary) 15%, transparent), transparent 45%),
+      radial-gradient(circle at 90% 10%, color-mix(in oklch, var(--warn) 8%, transparent), transparent 40%),
+      radial-gradient(circle at 50% 100%, color-mix(in oklch, var(--primary) 5%, transparent), transparent 50%);
     background-attachment: fixed;
   }
 }
