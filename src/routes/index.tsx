@@ -8,6 +8,7 @@ import {
   Crosshair,
   Download,
   Filter,
+  Flame,
   GitBranch,
   Info,
   List,
