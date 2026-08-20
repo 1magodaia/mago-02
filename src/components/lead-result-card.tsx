@@ -420,25 +420,31 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
         )}
-        {lead.phone && (
-          <a
-            href={`tel:${lead.phone}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border transition-all hover:bg-white/5 active:scale-95"
-          >
-            <Phone className="h-4 w-4" /> Ligar
-          </a>
-        )}
-        {waLink && (
+        
+        {waLink ? (
           <a
             href={waLink}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold transition-all active:scale-95 ${waVerified ? "bg-primary text-primary-foreground shadow-lg hover:shadow-primary/20" : "bg-primary/20 text-primary ring-1 ring-primary/40 hover:bg-primary/30"}`}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-[11px] font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-[#25D366]/20 active:scale-95"
           >
-            <MessageCircle className="h-4 w-4" /> {waVerified ? "Whats" : "Whats?"}
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
           </a>
+        ) : lead.phone ? (
+          <a
+            href={`tel:${cleanPhone}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border shadow-lg transition-all hover:scale-[1.02] active:scale-95"
+          >
+            <Phone className="h-4 w-4 text-primary" />
+            {lead.phone}
+          </a>
+        ) : (
+          <div className="flex min-h-[44px] items-center justify-center rounded-xl bg-muted/50 px-3 py-2 text-[10px] font-medium text-muted-foreground ring-1 ring-border italic">
+            Sem telefone
+          </div>
         )}
       </div>
 
