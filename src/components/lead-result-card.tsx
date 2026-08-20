@@ -382,6 +382,20 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             </div>
           </div>
 
+          {lead.audit.security_issues.length > 0 && (
+            <div className="border-t border-white/10 pt-2 pb-1">
+              <div className="text-[9px] uppercase text-muted-foreground mb-1">Vulnerabilidades*</div>
+              <ul className="space-y-1">
+                {lead.audit.security_issues.map((issue, idx) => (
+                  <li key={idx} className="flex items-center gap-1.5 text-[10px] text-red-300">
+                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                    <span>{issue}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="border-t border-white/10 pt-2">
             <CnpjBlock info={lead.audit.cnpj_info} />
           </div>
