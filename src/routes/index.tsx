@@ -128,15 +128,19 @@ function Home() {
       const resp = await searchPlacesFn({ data: searchParams });
       
       if (resp.error) {
+        console.error("[runSearch] searchPlacesFn returned error:", resp.error);
         setSearchError(resp.error);
+        setRawResults([]);
+        return;
       }
       
-      const scored = (resp.results || []).map((p) => scoreLead(p));
+      const results = resp.results || [];
+      const scored = results.map((p) => scoreLead(p));
       setRawResults(scored);
       refreshProfile();
     } catch (err) {
-      console.error("[runSearch] search failed:", err);
-      setSearchError("Erro ao buscar leads. Verifique o console ou tente novamente.");
+      console.error("[runSearch] exception:", err);
+      setSearchError("Erro inesperado ao buscar leads. Tente novamente.");
     } finally {
       setLoading(false);
     }
