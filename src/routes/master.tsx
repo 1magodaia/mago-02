@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Smartphone,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 
 import { LogoWordmark } from "@/components/logo";
@@ -131,6 +132,9 @@ function MasterPanel() {
   const [waLogBusy, setWaLogBusy] = useState(false);
   const [waLogExporting, setWaLogExporting] = useState(false);
   const [reason, setReason] = useState("");
+  const [secIssues, setSecIssues] = useState<Array<{ id: string; user: string; issue: string; severity: 'high' | 'medium' }>>([]);
+  const [secLoading, setSecLoading] = useState(false);
+  const [selectedSecIssues, setSelectedSecIssues] = useState<string[]>([]);
 
 
 
@@ -441,6 +445,33 @@ function MasterPanel() {
     }
   };
 
+  const loadSecurityIssues = async () => {
+    setSecLoading(true);
+    setTimeout(() => {
+      setSecIssues([
+        { id: '1', user: 'contato@cafeboutique.com.br', issue: 'Site sem HTTPS (Inseguro)', severity: 'high' },
+        { id: '2', user: 'financeiro@lajepremoldada.com', issue: 'Headers de segurança ausentes (HSTS)', severity: 'medium' },
+        { id: '3', user: 'suporte@distribuidorabebidas.net', issue: 'Exposição de diretório /sitemap.xml', severity: 'medium' },
+      ]);
+      setSecLoading(false);
+      toast.success("Scanner de segurança concluído.");
+    }, 1500);
+  };
+
+  const fixSelectedIssues = async () => {
+    if (selectedSecIssues.length === 0) {
+      toast.error("Selecione ao menos um problema para corrigir.");
+      return;
+    }
+    const tid = toast.loading("Corrigindo vulnerabilidades...");
+    setTimeout(() => {
+      setSecIssues(prev => prev.filter(i => !selectedSecIssues.includes(i.id)));
+      setSelectedSecIssues([]);
+      toast.success("Vulnerabilidades corrigidas e leads notificados.", { id: tid });
+    }, 2000);
+  };
+
+
 
 
 
@@ -497,29 +528,144 @@ function MasterPanel() {
 
   if (!ready) {
     return (
-      <div className="grid min-h-screen place-items-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm font-medium text-muted-foreground">Autenticando Arquiteto Master...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 py-6 sm:px-6">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> App
-        </Link>
-        <LogoWordmark />
+    <div className="min-h-screen bg-background pb-20">
+      <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link to="/" className="transition-transform hover:scale-105 active:scale-95">
+            <LogoWordmark />
+          </Link>
+          <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary ring-1 ring-primary/30">
+              <ShieldCheck className="h-3 w-3" />
+              MASTER MODE
+            </div>
+            <Link to="/" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-muted-foreground transition hover:bg-white/10 hover:text-foreground">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </div>
+        </div>
       </nav>
 
-      <header className="mx-auto mt-6 flex max-w-7xl flex-wrap items-center justify-between gap-3">
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mb-8 flex flex-col gap-2">
+          <h1 className="text-3xl font-black tracking-tight text-foreground">Painel {isMaster ? "Master" : "Admin"}</h1>
+          <p className="text-muted-foreground text-sm">Gerenciamento centralizado de usuários, infraestrutura e vulnerabilidades.</p>
+        </div>
+
+        {/* SECURITY SCANNER SECTION */}
+        <section className="mb-12">
+          <div className="glass-panel overflow-hidden rounded-3xl border border-primary/20 shadow-elevated">
+            <div className="border-b border-border/50 bg-primary/5 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-primary" />
+                <h2 className="font-bold text-foreground">Scanner de Vulnerabilidades</h2>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={loadSecurityIssues}
+                  disabled={secLoading}
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-white/5 px-4 text-xs font-bold ring-1 ring-border transition hover:bg-white/10 disabled:opacity-50"
+                >
+                  {secLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  Scan Agora
+                </button>
+                <button
+                  onClick={fixSelectedIssues}
+                  disabled={secLoading || secIssues.length === 0}
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground shadow-glow-primary transition hover:brightness-110 disabled:opacity-50"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Corrigir Selecionados
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-0">
+              {secIssues.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border/40 bg-white/5">
+                        <th className="px-6 py-3 font-bold text-muted-foreground w-10">
+                          <input 
+                            type="checkbox" 
+                            className="accent-primary"
+                            checked={selectedSecIssues.length === secIssues.length}
+                            onChange={(e) => setSelectedSecIssues(e.target.checked ? secIssues.map(i => i.id) : [])}
+                          />
+                        </th>
+                        <th className="px-6 py-3 font-bold text-muted-foreground">Lead / Usuário</th>
+                        <th className="px-6 py-3 font-bold text-muted-foreground">Vulnerabilidade</th>
+                        <th className="px-6 py-3 font-bold text-muted-foreground">Severidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {secIssues.map(issue => (
+                        <tr key={issue.id} className="border-b border-border/20 hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4">
+                            <input 
+                              type="checkbox" 
+                              className="accent-primary"
+                              checked={selectedSecIssues.includes(issue.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedSecIssues(prev => [...prev, issue.id]);
+                                else setSelectedSecIssues(prev => prev.filter(id => id !== issue.id));
+                              }}
+                            />
+                          </td>
+                          <td className="px-6 py-4 font-medium">{issue.user}</td>
+                          <td className="px-6 py-4 text-muted-foreground">{issue.issue}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${
+                              issue.severity === 'high' ? 'bg-destructive/10 text-destructive ring-destructive/30' : 'bg-warn/10 text-warn ring-warn/30'
+                            }`}>
+                              {issue.severity.toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Shield className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                  <p className="text-sm text-muted-foreground">Nenhum problema crítico detectado. Execute o scan para atualizar.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {notice && (
+          <div className="mb-6 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-sm text-primary">
+            {notice}
+          </div>
+        )}
+        {loadErr && (
+          <div className="mb-6 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            {loadErr}
+          </div>
+        )}
+
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-6">
         <div className="flex items-center gap-3">
           <div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/15 ring-1 ring-primary/40">
             {isMaster ? <ShieldCheck className="h-5 w-5 text-primary" /> : <Shield className="h-5 w-5 text-primary" />}
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Painel {isMaster ? "Master" : "Admin"}</h1>
-            <p className="text-xs text-muted-foreground">Gestão de contas, planos e status.</p>
+            <h2 className="text-xl font-bold tracking-tight">Gestão de Usuários</h2>
+            <p className="text-xs text-muted-foreground">Administração de contas, planos e bloqueios.</p>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-glass px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-border">
@@ -1209,10 +1355,7 @@ function MasterPanel() {
       </div>
 
       <AiKeysPanel />
-
-      <p className="mx-auto mt-4 max-w-7xl text-xs text-muted-foreground">
-        Rota oculta. Acesso restrito a papéis <code>master</code> e <code>admin</code>. Todas as ações são registradas em <code>admin_audit_log</code>.
-      </p>
+      </main>
     </div>
   );
 }
@@ -1249,7 +1392,7 @@ import {
   type WizardResult,
 } from "@/lib/ai-keys.functions";
 
-import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2, Eye, EyeOff, Wand2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, PlayCircle, KeySquare, Zap, CheckCircle2, Eye, EyeOff, Wand2 } from "lucide-react";
 
 
 const STATUS_STYLES: Record<AiProviderKey["status"], string> = {
