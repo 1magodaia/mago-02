@@ -1004,22 +1004,22 @@ function Home() {
         {/* Lista de resultados — só renderiza quando há dados. Nunca mais um bloco solto de texto. */}
         {rawResults.length > 0 ? (
           <section
-            className={`space-y-4 ${mobileTab === "list" ? "block" : "hidden"} lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-3 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent`}
-            aria-label="Resultados"
+            className={}
+            aria-label='Resultados'
           >
             {loading && (
-              <div className="glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground">
-                <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-                <p className="mt-2">Consultando Google Places...</p>
+              <div className='glass-panel rounded-2xl p-6 text-center text-sm text-muted-foreground'>
+                <Loader2 className='mx-auto h-5 w-5 animate-spin text-primary' />
+                <p className='mt-2'>Consultando Google Places...</p>
               </div>
             )}
             {!loading && filtered.length === 0 && (
-              <div className="glass-panel flex flex-col items-center justify-center rounded-2xl py-20 text-center animate-in fade-in duration-500">
-                <div className="mb-6 grid h-20 w-20 place-items-center rounded-full bg-warn/10 ring-1 ring-warn/30">
-                  <AlertCircle className="h-10 w-10 text-warn/60" />
+              <div className='glass-panel flex flex-col items-center justify-center rounded-2xl py-20 text-center animate-in fade-in duration-500'>
+                <div className='mb-6 grid h-20 w-20 place-items-center rounded-full bg-warn/10 ring-1 ring-warn/30'>
+                  <AlertCircle className='h-10 w-10 text-warn/60' />
                 </div>
-                <h3 className="text-2xl font-black text-foreground">Nenhum lead encontrado</h3>
-                <p className="mt-3 max-w-sm px-6 text-base text-muted-foreground">
+                <h3 className='text-2xl font-black text-foreground'>Nenhum lead encontrado</h3>
+                <p className='mt-3 max-w-sm px-6 text-base text-muted-foreground'>
                   Tente expandir o raio de busca ou utilizar termos mais genéricos para encontrar mais comércios.
                 </p>
               </div>
@@ -1027,10 +1027,10 @@ function Home() {
             {filtered.map((lead) => {
               const sport = sportsMap[lead.place_id] ? SPORT_BY_ID[sportsMap[lead.place_id]] : null;
               return (
-                <div key={lead.place_id} className="space-y-1">
+                <div key={lead.place_id} className='space-y-1'>
                   {sport && (
-                    <div className="flex">
-                      <span className="inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary">
+                    <div className='flex'>
+                      <span className='inline-flex items-center gap-1 rounded-t-lg bg-warn/90 px-2.5 py-1 text-[11px] font-bold text-primary'>
                         <span>{sport.emoji}</span>
                         <span>{sport.label}</span>
                       </span>
@@ -1049,14 +1049,24 @@ function Home() {
               );
             })}
             {filtered.length > 0 && (
-              <p className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
-                <Info className="h-3 w-3" aria-hidden />
-                <span title="Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos '—'. 'Atividade' é uma estimativa baseada na última modificação do sitemap.xml.">
+              <p className='flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground'>
+                <Info className='h-3 w-3' aria-hidden />
+                <span title='Dados de site/social são obtidos por leitura pública. Nem todo domínio expõe WHOIS/RDAP público — nesse caso exibimos "—". "Atividade" é uma estimativa baseada na última modificação do sitemap.xml.'>
                   Sobre a auditoria (passe o mouse)
                 </span>
               </p>
             )}
           </section>
+        ) : (
+          <div className='flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-8 duration-700'>
+            <div className='mb-6 grid h-20 w-20 place-items-center rounded-full bg-primary/10 ring-1 ring-primary/30'>
+              <Search className='h-10 w-10 text-primary/60' />
+            </div>
+            <h3 className='text-2xl font-black text-foreground'>Explore o Mercado</h3>
+            <p className='mt-3 max-w-sm text-base text-muted-foreground'>
+              Digite uma categoria e localização acima para começar a minerar oportunidades quentes.
+            </p>
+          </div>
         )}
 
         {/* Mapa — SEMPRE visível. Ocupa 100% da largura quando não há resultados. */}
