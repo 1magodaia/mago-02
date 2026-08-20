@@ -85,6 +85,7 @@ import { classifyLink } from "@/lib/link-classify";
 export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAvailable, highlight }: Props) {
   const meta = STATUS_META[lead.status];
   const [auditing, setAuditing] = useState(false);
+  const [auditStatus, setAuditStatus] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshErr, setRefreshErr] = useState<string | null>(null);
   const [fav, setFav] = useState(() => chkFav(lead.place_id));
@@ -124,11 +125,18 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     e.stopPropagation();
     if (!lead.website) return;
     setAuditing(true);
+    setAuditStatus("Lendo site...");
     try {
+      // Pequeno delay para percepção de progresso
+      await new Promise(r => setTimeout(r, 600));
+      setAuditStatus("Consultando Receita (BrasilAPI)...");
       const audit = await auditWebsite({ data: { website: lead.website, phone: lead.phone ?? undefined } });
       onUpdate?.(scoreLead(lead, audit));
+      setAuditStatus(null);
     } catch (err) {
       console.error(err);
+      setAuditStatus("Erro na auditoria.");
+      setTimeout(() => setAuditStatus(null), 3000);
     } finally {
       setAuditing(false);
     }
@@ -383,10 +391,10 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={runAudit}
             disabled={auditing}
-            className="flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
+            className="relative flex items-center justify-center gap-1 rounded-lg bg-primary/10 px-2 py-1.5 text-[11px] font-semibold text-primary ring-1 ring-primary/20 hover:bg-primary/20 disabled:opacity-60"
           >
             {auditing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-            {lead.audit ? "Reauditar" : "Auditar"}
+            {auditing ? (auditStatus || "Auditoria...") : (lead.audit ? "Reauditar" : "Auditar")}
           </button>
         )}
         {resolvedHref && (
