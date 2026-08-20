@@ -26,7 +26,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
 
   return (
     <section
-      className="relative isolate overflow-hidden rounded-3xl bg-background ring-1 ring-border shadow-elevated"
+      className="relative isolate overflow-hidden rounded-3xl bg-[#060606] ring-1 ring-border/40 shadow-elevated"
       style={{
         ["--hero-h-mobile" as string]: `calc(${heightMobile}px + 2rem)`,
         ["--hero-h-desktop" as string]: `calc(${heightDesktop}px + 4rem)`,
@@ -57,7 +57,7 @@ function HeroBannerBase({ url, fit, heightMobile, heightDesktop }: Props) {
             <img
               src={url}
               alt="Busca Mágica"
-              className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-500 drop-shadow-[0_0_30px_rgba(107,70,224,0.3)]"
+              className="bm-hero-img absolute inset-0 h-full w-full transition-opacity duration-700 drop-shadow-[0_0_40px_rgba(107,70,224,0.4)]"
               style={{
                 objectPosition: "center",
                 opacity: ready ? 1 : 0,

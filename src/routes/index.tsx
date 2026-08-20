@@ -823,18 +823,18 @@ function Home() {
         </div>
 
         {/* AÇÕES RÁPIDAS */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             onClick={useGps}
             disabled={locating}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-60 ${
+            className={`flex h-10 items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300 disabled:opacity-60 ${
               usingGps && !pinned
-                ? "border-primary bg-primary/15 text-primary"
-                : "border-primary/60 text-primary hover:bg-primary/10"
+                ? "border-primary bg-primary/20 text-primary neon-primary"
+                : "border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60"
             }`}
           >
-            <Crosshair className={`h-3.5 w-3.5 ${locating ? "animate-spin" : ""}`} />
-            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ativo" : "Usar minha localização"}
+            <Crosshair className={`h-4 w-4 ${locating ? "animate-spin" : ""}`} />
+            {locating ? "Localizando..." : usingGps && !pinned ? "GPS ATIVO" : "USAR MINHA LOCALIZAÇÃO"}
           </button>
           {usingGps && pinned && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
@@ -858,10 +858,10 @@ function Home() {
             onClick={() => setShowAdvanced((s) => !s)}
             aria-expanded={showAdvanced}
             aria-controls="filtros-avancados"
-            className="ml-auto flex items-center gap-1.5 rounded-full bg-glass px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="ml-auto flex h-10 items-center gap-2 rounded-full bg-glass px-4 py-2 text-xs font-bold text-foreground ring-1 ring-border/60 transition-all hover:bg-white/10 hover:ring-primary/40"
           >
-            <Filter className="h-3.5 w-3.5" /> Filtros avançados
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+            <Filter className="h-4 w-4" /> FILTROS AVANÇADOS
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showAdvanced ? "rotate-180" : ""}`} />
           </button>
         </div>
 
