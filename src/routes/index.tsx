@@ -732,9 +732,9 @@ function Home() {
                   </button>
                   <button
                     onClick={() => signOut().then(() => nav({ to: "/" }))}
-                    className="mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10"
+                    className="mt-1 flex h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm text-destructive hover:bg-destructive/10 active:scale-95"
                   >
-                    <LogOut className="h-3.5 w-3.5" /> Sair
+                    <LogOut className="h-4 w-4" /> Sair
                   </button>
                 </div>
               </div>
