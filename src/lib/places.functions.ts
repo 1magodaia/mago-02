@@ -176,12 +176,9 @@ export const searchPlaces = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => searchSchema.parse(input))
   .handler(async ({ data, context }): Promise<{ results: PlaceResult[]; error?: string; remaining?: number; plan?: string; quotaExhausted?: boolean }> => {
-    console.log("[places.functions] searchPlaces starting with data:", JSON.stringify(data));
     try {
       // Security check: Master bypasses quota.
-      const { data: isMaster, error: masterErr } = await context.supabase.rpc("is_master" as any, { _user_id: context.userId });
-      if (masterErr) console.error("[places.functions] is_master check failed:", masterErr);
-      console.log("[places.functions] isMaster check result:", isMaster);
+      const { data: isMaster } = await context.supabase.rpc("is_master" as any, { _user_id: context.userId });
 
       
       let quota: any;
