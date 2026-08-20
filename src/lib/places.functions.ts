@@ -234,8 +234,8 @@ export const searchPlaces = createServerFn({ method: "POST" })
         ) {
           body.locationBias = {
             circle: {
-              center: { latitude: data.lat, longitude: data.lng },
-              radius: Math.min(data.radiusKm * 1000, 50000),
+              center: { latitude: Number(data.lat), longitude: Number(data.lng) },
+              radius: Math.min(Number(data.radiusKm) * 1000, 50000),
             },
           };
         }
@@ -247,7 +247,7 @@ export const searchPlaces = createServerFn({ method: "POST" })
       if (!res.ok) {
         const text = await res.text();
         console.error(`[places] ${res.status} ${text}`);
-        return { results: [], error: `Google Places: ${res.status}` };
+        return { results: [], error: `Google Places API Error (${res.status}): ${text}` };
       }
       const json = (await res.json()) as { places?: GPlace[] };
       const collectedAt = new Date().toISOString();
