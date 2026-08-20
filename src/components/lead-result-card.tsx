@@ -304,7 +304,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             disabled={refreshing}
             title="Atualizar dados deste lead (não conta na cota mensal)"
             aria-label="Atualizar este lead"
-            className="rounded-md bg-glass p-1.5 text-muted-foreground ring-1 ring-border hover:text-primary hover:ring-primary/40 disabled:opacity-60"
+            className="rounded-md bg-white/5 p-1.5 text-muted-foreground ring-1 ring-white/10 hover:text-primary hover:ring-primary/40 disabled:opacity-60"
           >
             {refreshing
               ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -398,7 +398,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             aria-label={`Abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"} em nova aba`}
-            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-glass px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/5 active:bg-white/10 ${linkInferred ? "ring-dashed ring-warn/50 [border-style:dashed]" : "ring-border"}`}
+            className={`flex min-h-11 items-center justify-center gap-1 rounded-lg bg-white/5 px-2 py-2 text-[11px] font-semibold text-foreground ring-1 touch-manipulation hover:bg-white/10 active:bg-white/20 ${linkInferred ? "ring-dashed ring-warn/30 [border-style:dashed]" : "ring-white/10"}`}
             title={
               linkInferred
                 ? `Destino inferido a partir de um redirecionador — abrir ${linkKind === "instagram" ? "Instagram" : linkKind === "facebook" ? "Facebook" : "site"}`
@@ -419,7 +419,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1 rounded-lg bg-glass px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-border hover:bg-white/5"
+            className="flex items-center justify-center gap-1 rounded-lg bg-white/5 px-2 py-1.5 text-[11px] font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10"
           >
             <Phone className="h-3 w-3" /> Ligar
           </a>
@@ -525,14 +525,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
           <button
             onClick={doFav}
             title={fav ? "Remover favorito" : "Favoritar"}
-            className={`rounded-md p-1.5 ring-1 ${fav ? "bg-warn/15 text-warn ring-warn/40" : "bg-glass ring-border hover:bg-white/5"}`}
+            className={`rounded-md p-1.5 ring-1 ${fav ? "bg-warn/15 text-warn ring-warn/40" : "bg-white/5 ring-white/10 hover:bg-white/10"}`}
           >
             {fav ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={doDone}
             title={done ? "Marcar como não contatado" : "Marcar como contatado"}
-            className={`rounded-md p-1.5 ring-1 ${done ? "bg-primary/15 text-primary ring-primary/40" : "bg-glass ring-border hover:bg-white/5"}`}
+            className={`rounded-md p-1.5 ring-1 ${done ? "bg-primary/15 text-primary ring-primary/40" : "bg-white/5 ring-white/10 hover:bg-white/10"}`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
           </button>
