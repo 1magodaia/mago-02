@@ -118,12 +118,18 @@ function Home() {
     setSearchError(null);
     try {
       const resp = await searchPlacesFn({ data: { query, regionText: usingGps ? undefined : region, lat: usingGps ? center.lat : undefined, lng: usingGps ? center.lng : undefined, radiusKm } });
-      if (resp.error) setSearchError(resp.error);
-      const scored = resp.results.map((p) => scoreLead(p));
+      console.log("[runSearch] API response:", resp);
+      
+      if (resp.error) {
+        setSearchError(resp.error);
+      }
+      
+      const scored = (resp.results || []).map((p) => scoreLead(p));
       setRawResults(scored);
       refreshProfile();
     } catch (err) {
-      setSearchError("Erro ao buscar leads.");
+      console.error("[runSearch] search failed:", err);
+      setSearchError("Erro ao buscar leads. Verifique o console ou tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -245,10 +251,33 @@ function Home() {
 
           {/* Lista de Leads com scroll independente */}
           <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#1E293B] scrollbar-track-transparent">
-            {loading && rawResults.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin mb-2" />
-                <p className="text-xs">Minerando oportunidades...</p>
+            {loading ? (
+              <div className="p-4 space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="animate-pulse rounded-2xl bg-[#1E293B]/30 p-5 ring-1 ring-[#1E293B]">
+                    <div className="h-4 w-24 rounded-full bg-[#1E293B] mb-3" />
+                    <div className="h-6 w-48 rounded bg-[#1E293B] mb-2" />
+                    <div className="h-3 w-64 rounded bg-[#1E293B] mb-4" />
+                    <div className="flex gap-2">
+                      <div className="h-8 flex-1 rounded-xl bg-[#1E293B]" />
+                      <div className="h-8 flex-1 rounded-xl bg-[#1E293B]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : searchError ? (
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center text-red-400">
+                <AlertCircle className="h-10 w-10 mb-4 opacity-50" />
+                <h3 className="text-sm font-bold mb-1">Ops! Ocorreu um erro</h3>
+                <p className="text-[11px] leading-relaxed opacity-70">
+                  {searchError}
+                </p>
+                <button 
+                  onClick={runSearch}
+                  className="mt-4 px-4 py-2 rounded-lg bg-red-400/10 text-[11px] font-bold hover:bg-red-400/20 transition-colors"
+                >
+                  TENTAR NOVAMENTE
+                </button>
               </div>
             ) : filtered.length > 0 ? (
               <div className="p-4 space-y-3">
@@ -260,6 +289,14 @@ function Home() {
                     onSelect={() => setSelected(lead.place_id)}
                   />
                 ))}
+              </div>
+            ) : rawResults.length > 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
+                <Filter className="h-10 w-10 mb-4 opacity-20" />
+                <h3 className="text-sm font-bold text-foreground mb-1">Nenhum resultado</h3>
+                <p className="text-[11px] leading-relaxed">
+                  Tente ajustar seus filtros para encontrar o que procura.
+                </p>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center text-muted-foreground">
