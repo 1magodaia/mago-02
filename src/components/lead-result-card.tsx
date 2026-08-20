@@ -172,11 +172,14 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
     } catch { /* ignore */ }
   };
 
-  const waLink = lead.audit?.whatsapp_link ?? (lead.phone
-    ? `https://wa.me/${(lead.phone.startsWith("+") ? lead.phone : `55${lead.phone}`).replace(/\D/g, "")}`
+  const cleanPhone = lead.phone ? lead.phone.replace(/\D/g, "") : "";
+  const isMobile = cleanPhone.length >= 11; // 2 DDD + 9 dígitos
+
+  const waLink = lead.audit?.whatsapp_link ?? (isMobile
+    ? `https://wa.me/${cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`}`
     : null);
-  // Fonte do WhatsApp: "site" = link real encontrado no HTML; "phone" = derivado do telefone (presunção).
-  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink && lead.phone ? "phone" : null);
+
+  const waSource: "site" | "phone" | null = lead.audit?.whatsapp_source ?? (waLink ? "phone" : null);
   const waVerified = waSource === "site";
 
   const collectedAgo = relTime(lead.collected_at);
@@ -220,9 +223,16 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                   : null;
               const badges: ReactElement[] = [];
               if (realSite) {
+                const displayUrl = realSite.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
                 badges.push(
-                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
-                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
+                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title={`Site próprio: ${realSite}`}>
+                    <CheckCircle2 className="h-2.5 w-2.5" /> {displayUrl}
+                  </span>
+                );
+              } else if (!social) {
+                badges.push(
+                  <span key="no-site" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40">
+                    <Flame className="h-2.5 w-2.5" /> Sem Site Cadastrado
                   </span>
                 );
               }
@@ -317,16 +327,33 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         </div>
       </header>
 
-      {lead.latest_review_at && (() => {
-        const days = Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000);
-        if (!Number.isFinite(days) || days <= 180) return null;
+      {(() => {
+        const hasSite = !!lead.website;
+        const rating = lead.rating ?? 0;
+        const reviews = lead.user_ratings_total ?? 0;
+        const daysStale = lead.latest_review_at 
+          ? Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000)
+          : null;
+
+        let pitch = "";
+        if (!hasSite) {
+          pitch = "Identificamos que sua empresa ainda não possui um site profissional cadastrado no Google. Isso pode afastar clientes que buscam por segurança e autoridade online.";
+        } else if (rating < 4) {
+          pitch = `Seu site atual e a nota média de ${rating} indicam uma oportunidade de melhoria na sua reputação digital para atrair mais clientes qualificados.`;
+        } else if (daysStale && daysStale > 180) {
+          pitch = "Sua empresa tem uma boa base, mas a falta de avaliações recentes nos últimos 6 meses pode dar a impressão de inatividade para novos clientes.";
+        } else {
+          pitch = "Sua presença digital é sólida, mas sempre há espaço para otimização de conversão e SEO para dominar ainda mais o mercado local.";
+        }
+
         return (
-          <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
-            <Flame className="h-3 w-3 shrink-0" />
-            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-[11px] leading-relaxed text-foreground/90 italic shadow-inner">
+            <span className="font-bold text-primary not-italic block mb-1">Pitch sugerido:</span>
+            "{pitch}"
           </div>
         );
       })()}
+
       <TierSuggestion tier={lead.tier} suggestion={lead.tier_suggestion} />
 
 
@@ -410,25 +437,31 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
             {linkInferred && <span aria-hidden className="text-warn">·?</span>}
           </a>
         )}
-        {lead.phone && (
-          <a
-            href={`tel:${lead.phone}`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border transition-all hover:bg-white/5 active:scale-95"
-          >
-            <Phone className="h-4 w-4" /> Ligar
-          </a>
-        )}
-        {waLink && (
+        
+        {waLink ? (
           <a
             href={waLink}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold transition-all active:scale-95 ${waVerified ? "bg-primary text-primary-foreground shadow-lg hover:shadow-primary/20" : "bg-primary/20 text-primary ring-1 ring-primary/40 hover:bg-primary/30"}`}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2 text-[11px] font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-[#25D366]/20 active:scale-95"
           >
-            <MessageCircle className="h-4 w-4" /> {waVerified ? "Whats" : "Whats?"}
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
           </a>
+        ) : lead.phone ? (
+          <a
+            href={`tel:${cleanPhone}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-glass px-3 py-2 text-[11px] font-bold text-foreground ring-1 ring-border shadow-lg transition-all hover:scale-[1.02] active:scale-95"
+          >
+            <Phone className="h-4 w-4 text-primary" />
+            {lead.phone}
+          </a>
+        ) : (
+          <div className="flex min-h-[44px] items-center justify-center rounded-xl bg-muted/50 px-3 py-2 text-[10px] font-medium text-muted-foreground ring-1 ring-border italic">
+            Sem telefone
+          </div>
         )}
       </div>
 
