@@ -179,6 +179,7 @@ export const searchPlaces = createServerFn({ method: "POST" })
     try {
       // Security check: Master bypasses quota.
       const { data: isMaster } = await context.supabase.rpc("is_master" as any, { _user_id: context.userId });
+
       
       let quota: any;
       if (isMaster) {

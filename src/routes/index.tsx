@@ -125,9 +125,7 @@ function Home() {
         lng: center.lng, 
         radiusKm 
       };
-      console.log("[runSearch] Triggering search with params:", searchParams);
       const resp = await searchPlacesFn({ data: searchParams });
-      console.log("[runSearch] API response received:", resp);
       
       if (resp.error) {
         setSearchError(resp.error);
