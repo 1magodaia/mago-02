@@ -204,7 +204,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ${meta.bg} ${meta.color} ${meta.ring}`}>
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
               {meta.label}
             </span>
@@ -221,9 +221,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               const badges: ReactElement[] = [];
               if (realSite) {
                 badges.push(
-                  <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/30" title="Site próprio identificado">
-                    <CheckCircle2 className="h-2.5 w-2.5" /> Possui site próprio
-                  </span>
+                    <span key="site" className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase text-primary" title="Site próprio identificado">
+                      <CheckCircle2 className="h-2.5 w-2.5" /> Possui site
+                    </span>
                 );
               }
               if (social) {
@@ -237,7 +237,7 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                     aria-label={`Abrir ${social.label} em nova aba`}
-                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase text-primary ring-1 ring-primary/40 touch-manipulation hover:bg-primary/25 active:bg-primary/30"
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase text-primary touch-manipulation hover:bg-primary/20 active:bg-primary/30"
                     title={realSite ? `Também possui ${social.label}` : `Possui página no ${social.label}`}
                   >
                     {social.kind === "instagram" ? <Instagram className="h-2.5 w-2.5" /> : null}
@@ -251,15 +251,15 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
                 // Sem auditoria = "sem presença digital encontrada" (baseado no Google Places).
                 if (lead.audit) {
                   badges.push(
-                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Nem site nem redes sociais encontradas na auditoria">
-                      <Flame className="h-2.5 w-2.5" /> Sem presença digital
-                    </span>
+                      <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[9px] font-bold uppercase text-warn" title="Nem site nem redes sociais encontradas na auditoria">
+                        <Flame className="h-2.5 w-2.5" /> Sem presença
+                      </span>
                   );
                 } else {
                   badges.push(
-                    <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/40" title="Google Places não retornou site nem rede social">
-                      <Flame className="h-2.5 w-2.5" /> Sem presença digital encontrada
-                    </span>
+                      <span key="none" className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[9px] font-bold uppercase text-warn" title="Google Places não retornou site nem rede social">
+                        <Flame className="h-2.5 w-2.5" /> Sem presença
+                      </span>
                   );
                 }
               }
