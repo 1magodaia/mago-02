@@ -118,11 +118,14 @@ function Home() {
     setSearchError(null);
     try {
       const searchRegion = region?.trim() ? region : undefined;
+      
+      // Se tivermos regionText, o Google lida com a localização via query.
+      // Passamos lat/lng apenas se searchRegion NÃO estiver presente, para evitar conflitos no locationBias v1.
       const searchParams = { 
         query, 
-        regionText: usingGps ? undefined : searchRegion, 
-        lat: center.lat, 
-        lng: center.lng, 
+        regionText: searchRegion, 
+        lat: searchRegion ? undefined : center.lat, 
+        lng: searchRegion ? undefined : center.lng, 
         radiusKm 
       };
       const resp = await searchPlacesFn({ data: searchParams });
