@@ -67,10 +67,10 @@
   --emerald-foreground: oklch(0.1 0.02 275);
   --warn: oklch(0.82 0.16 85);                   /* brighter magic gold */
   --warn-foreground: oklch(0.1 0.02 275);
-  --border: oklch(1 0 0 / 0.08);
-  --input: oklch(1 0 0 / 0.06);
-  --ring: oklch(0.62 0.22 285 / 0.5);
-  --glass: oklch(1 0 0 / 0.03);
+  --border: oklch(1 0 0 / 0.05);
+  --input: oklch(1 0 0 / 0.04);
+  --ring: oklch(0.62 0.22 285 / 0.3);
+  --glass: oklch(1 0 0 / 0.02);
 }
 
 @layer base {
@@ -101,10 +101,10 @@
 
 
 @utility glass-panel {
-  background: color-mix(in oklch, var(--background) 40%, transparent);
-  backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-inner-glass);
+  background: color-mix(in oklch, var(--background) 30%, transparent);
+  backdrop-filter: blur(40px) saturate(120%);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.02);
 }
 
 @utility neon-primary {
