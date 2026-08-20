@@ -221,7 +221,15 @@ export const searchPlaces = createServerFn({ method: "POST" })
         regionCode: "BR",
       };
 
-      if (data.lat != null && data.lng != null && !isNaN(data.lat) && !isNaN(data.lng)) {
+      // Validar lat/lng para evitar 400 se forem inválidos ou fora do alcance
+      if (
+        data.lat != null && 
+        data.lng != null && 
+        !isNaN(data.lat) && 
+        !isNaN(data.lng) &&
+        data.lat >= -90 && data.lat <= 90 &&
+        data.lng >= -180 && data.lng <= 180
+      ) {
         body.locationBias = {
           circle: {
             center: { latitude: data.lat, longitude: data.lng },
