@@ -310,9 +310,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
               ? <Loader2 className="h-3 w-3 animate-spin" />
               : <RefreshCw className="h-3 w-3" />}
           </button>
-          <div className="rounded-2xl bg-primary/10 px-3 py-2 text-center ring-1 ring-primary/30 group-hover:bg-primary/20 transition-colors">
-            <div className="text-[10px] font-black uppercase tracking-widest text-primary/80">OPORT.</div>
-            <div className={`font-black text-3xl tabular-nums leading-none mt-0.5 ${meta.color}`}>{lead.opportunity_score}</div>
+          <div className="rounded-xl bg-white/5 px-3 py-2 text-center ring-1 ring-white/10 group-hover:bg-primary/10 group-hover:ring-primary/30 transition-all">
+            <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary/70 transition-colors">OPORT.</div>
+            <div className={`font-black text-3xl tabular-nums leading-none mt-0.5 ${selected ? meta.color : 'text-foreground group-hover:' + meta.color}`}>{lead.opportunity_score}</div>
           </div>
         </div>
       </header>
@@ -321,9 +321,9 @@ export function LeadResultCard({ lead, selected, onSelect, onUpdate, citationsAv
         const days = Math.floor((Date.now() - Date.parse(lead.latest_review_at)) / 86400000);
         if (!Number.isFinite(days) || days <= 180) return null;
         return (
-          <div className="flex items-center gap-2 rounded-lg border border-warn/40 bg-warn/10 px-2.5 py-1.5 text-[11px] font-semibold text-warn">
+          <div className="flex items-center gap-2 rounded-lg bg-warn/5 px-2.5 py-1.5 text-[11px] font-medium text-warn/80 ring-1 ring-warn/20">
             <Flame className="h-3 w-3 shrink-0" />
-            Sem avaliações novas há mais de {Math.floor(days / 30)} meses — sinal de baixa atividade.
+            Sem avaliações novas há {Math.floor(days / 30)} meses.
           </div>
         );
       })()}
@@ -559,15 +559,15 @@ function PriceLevelBadge({ level }: { level: number | null }) {
   );
   if (level == null) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground ring-1 ring-border">
-        💰 Faixa de preço: não informada
+      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[9px] font-semibold uppercase text-muted-foreground">
+        💰 Preço: n/i
         {helper}
       </span>
     );
   }
   const symbols = level === 0 ? "Grátis" : "$".repeat(Math.max(1, level));
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[10px] font-bold uppercase text-warn ring-1 ring-warn/30">
+    <span className="inline-flex items-center gap-1 rounded-full bg-warn/5 px-2 py-0.5 text-[9px] font-bold uppercase text-warn/90">
       💰 {symbols} · {PRICE_LABELS[level]}
       {helper}
     </span>
@@ -608,16 +608,16 @@ function BusinessStatusBadge({ status }: { status: string | null }) {
   );
   if (!status || status === "OPERATIONAL") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-300 ring-1 ring-emerald-400/30">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operando
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/5 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-400/80">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Ativo
         {helper}
       </span>
     );
   }
   if (status === "CLOSED_TEMPORARILY") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-200 ring-1 ring-amber-400/40">
-        ⏸ Fechado temporariamente
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/5 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-400/80">
+        ⏸ Pausado
         {helper}
       </span>
     );
