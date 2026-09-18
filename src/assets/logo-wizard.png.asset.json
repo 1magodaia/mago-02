@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "49019354-1302-48dd-a624-28c43a5527c0",
-  "project_id": "b4b2ef39-9226-4669-9d99-5e0cedb8a3c0",
-  "url": "/__l5e/assets-v1/49019354-1302-48dd-a624-28c43a5527c0/logo-wizard.png",
-  "r2_key": "a/v1/b4b2ef39-9226-4669-9d99-5e0cedb8a3c0/49019354-1302-48dd-a624-28c43a5527c0/logo-wizard.png",
-  "original_filename": "logo-wizard.png",
-  "size": 1470715,
   "content_type": "image/png",
-  "created_at": "2026-08-06T07:37:40Z"
+  "created_at": "2026-08-06T07:37:40Z",
+  "original_filename": "logo-wizard.png",
+  "project_id": "c597ac24-dd32-4912-b7ed-27d41d88dcab",
+  "r2_key": "a/v1/c597ac24-dd32-4912-b7ed-27d41d88dcab/49019354-1302-48dd-a624-28c43a5527c0/logo-wizard.png",
+  "size": 1470715,
+  "url": "/__l5e/assets-v1/49019354-1302-48dd-a624-28c43a5527c0/logo-wizard.png",
+  "version": 1
 }

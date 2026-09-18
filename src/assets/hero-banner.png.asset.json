@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "f5bdf7fd-d564-4863-9e66-4026ccda983f",
-  "project_id": "b4b2ef39-9226-4669-9d99-5e0cedb8a3c0",
-  "url": "/__l5e/assets-v1/f5bdf7fd-d564-4863-9e66-4026ccda983f/hero-banner.png",
-  "r2_key": "a/v1/b4b2ef39-9226-4669-9d99-5e0cedb8a3c0/f5bdf7fd-d564-4863-9e66-4026ccda983f/hero-banner.png",
-  "original_filename": "hero-banner.png",
-  "size": 1114235,
   "content_type": "image/png",
-  "created_at": "2026-07-24T05:08:25Z"
+  "created_at": "2026-07-24T05:08:25Z",
+  "original_filename": "hero-banner.png",
+  "project_id": "c597ac24-dd32-4912-b7ed-27d41d88dcab",
+  "r2_key": "a/v1/c597ac24-dd32-4912-b7ed-27d41d88dcab/f5bdf7fd-d564-4863-9e66-4026ccda983f/hero-banner.png",
+  "size": 1114235,
+  "url": "/__l5e/assets-v1/f5bdf7fd-d564-4863-9e66-4026ccda983f/hero-banner.png",
+  "version": 1
 }

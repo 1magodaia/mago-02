@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "01694834-acd9-47a3-94eb-8ca3e3a1e771",
-  "project_id": "b4b2ef39-9226-4669-9d99-5e0cedb8a3c0",
-  "url": "/__l5e/assets-v1/01694834-acd9-47a3-94eb-8ca3e3a1e771/logo-full.png",
-  "r2_key": "a/v1/b4b2ef39-9226-4669-9d99-5e0cedb8a3c0/01694834-acd9-47a3-94eb-8ca3e3a1e771/logo-full.png",
-  "original_filename": "logo-full.png",
-  "size": 749093,
   "content_type": "image/png",
-  "created_at": "2026-07-23T23:29:20Z"
+  "created_at": "2026-07-23T23:29:20Z",
+  "original_filename": "logo-full.png",
+  "project_id": "c597ac24-dd32-4912-b7ed-27d41d88dcab",
+  "r2_key": "a/v1/c597ac24-dd32-4912-b7ed-27d41d88dcab/01694834-acd9-47a3-94eb-8ca3e3a1e771/logo-full.png",
+  "size": 749093,
+  "url": "/__l5e/assets-v1/01694834-acd9-47a3-94eb-8ca3e3a1e771/logo-full.png",
+  "version": 1
 }
